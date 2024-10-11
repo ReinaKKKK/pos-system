@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      args:
+        ENV: development
+    # restart: always
+    volumes:
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./web:/var/www/html/
+    working_dir: /var/www/html/
+    ports:
+      - ${WEB_PORT}:80

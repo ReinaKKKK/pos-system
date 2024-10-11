@@ -1,0 +1,27 @@
+{
+    "phpcs.autoConfigSearch": false,
+    "phpcs.standard": "settings/phpcs/CUSTOM/ruleset.xml",
+    "phpcs.ignorePatterns": [
+    ],
+    "phpcs.executablePath": "./settings/docker-phpcs.sh",
+    "phpcs.lintOnType": false,
+    "phpcs.lintOnlyOpened": false,
+
+    "phpmd.rules": "settings/phpmd/ruleset.xml",
+    "phpmd.unsafeCommand": "bash ./settings/docker-phpmd.sh",
+
+    "eslint.runtime": "node/bin/node",
+    "eslint.nodePath": "node/node_modules",
+    "eslint.options": { "overrideConfigFile": "node/.eslintrc.json" },
+
+    "phpstan.binPath": "./settings/docker-larastan.sh",
+    "phpstan.configFile": "./settings/phpstan.neon",
+
+    // Laravelのプロジェクトにおいて正しいコードであってもintelephenseがエラーを出すので無効化します
+    "intelephense.diagnostics.undefinedClassConstants": false,
+    "intelephense.diagnostics.undefinedConstants": false,
+    "intelephense.diagnostics.undefinedFunctions": false,
+    "intelephense.diagnostics.undefinedMethods": false,
+    "intelephense.diagnostics.undefinedProperties": false,
+    "intelephense.diagnostics.undefinedTypes": false,
+}
