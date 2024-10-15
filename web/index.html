@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>パスワード生成</title> 
+    <link rel="stylesheet" href="styles.css"> <!-- 外部CSSファイルをリンク -->
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー部分 -->
+        <div class="site-header">
+          <h1>パスワード生成</h1>
+          <p>ワンクリックでランダムパスワードを生成</p>
+        </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <!-- オプションセクション -->
+        <div class="options">
+            <div class="length-options">
+                <label>Select password length:</label><br>
+                <input type="radio" id="length8" name="passLength" value="8">
+                <label for="length8">8</label>
+                <input type="radio" id="length12" name="passLength" value="12" checked>
+                <label for="length12">12</label>
+                <input type="radio" id="length16" name="passLength" value="16">
+                <label for="length16">16</label>
+                <input type="radio" id="length32" name="passLength" value="32">
+                <label for="length32">32</label>
+                <input type="radio" id="length50" name="passLength" value="50">
+                <label for="length50">50</label>
+                <input type="number" id="customLength" value="50" max="50" disabled>
+                <span>(Maximum 50 characters)</span>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" id="includeLowercase" checked>
+                    <span class="checkbox-label">小文字</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="includeUppercase" checked>
+                    <span class="checkbox-label">大文字</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="includeNumbers" checked>
+                    <span class="checkbox-label">数字</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="includeHyphen" checked>
+                    <span class="checkbox-label">- (ハイフン)</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="includeUnderscore" checked>
+                    <span class="checkbox-label">_ (アンダーバー)</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="includeSymbols" checked>
+                    <span class="checkbox-label">記号(IJl1Oo0)</span>
+                </label>
+            </div>
+            <button id="btn">生成</button>
+        </div>
+
+            <!-- パスワード表示エリア -->
+            <div class="passwords">
+                <div class="password-column">
+                    <div class="password-box" id="password1"></div>
+                    <div class="password-box" id="password2"></div>
+                    <div class="password-box" id="password3"></div>
+                    <div class="password-box" id="password4"></div>
+                    <div class="password-box" id="password5"></div>
+                    <div class="password-box" id="password6"></div>
+                    <div class="password-box" id="password7"></div>
+                    <div class="password-box" id="password8"></div>
+                    <div class="password-box" id="password9"></div>
+                    <div class="password-box" id="password10"></div>
+                    <div class="password-box" id="password11"></div>
+                    <div class="password-box" id="password12"></div>
+                    <div class="password-box" id="password13"></div>
+                    <div class="password-box" id="password14"></div>
+                    <div class="password-box" id="password15"></div>
+                    <div class="password-box" id="password16"></div>
+                    <div class="password-box" id="password17"></div>
+                    <div class="password-box" id="password18"></div>
+                    <div class="password-box" id="password19"></div>
+                    <div class="password-box" id="password20"></div>
+                    <div class="password-box" id="password21"></div>
+                    <div class="password-box" id="password22"></div>
+                    <div class="password-box" id="password23"></div>
+                    <div class="password-box" id="password24"></div>
+                    <div class="password-box" id="password25"></div>
+                    <div class="password-box" id="password26"></div>
+                    <div class="password-box" id="password27"></div>
+                    <div class="password-box" id="password28"></div>
+                    <div class="password-box" id="password29"></div>
+                    <div class="password-box" id="password30"></div>
+                    <div class="password-box" id="password31"></div>
+                    <div class="password-box" id="password32"></div>
+                    <div class="password-box" id="password33"></div>
+                    <div class="password-box" id="password34"></div>
+                    <div class="password-box" id="password35"></div>
+                    <div class="password-box" id="password36"></div>
+                    <div class="password-box" id="password37"></div>
+                    <div class="password-box" id="password38"></div>
+                    <div class="password-box" id="password39"></div>
+                    <div class="password-box" id="password40"></div>
+                    <div class="password-box" id="password41"></div>
+                    <div class="password-box" id="password42"></div>
+                    <div class="password-box" id="password43"></div>
+                    <div class="password-box" id="password44"></div>
+                    <div class="password-box" id="password45"></div>
+                    <div class="password-box" id="password46"></div>
+                    <div class="password-box" id="password47"></div>
+                    <div class="password-box" id="password48"></div>
+                    <div class="password-box" id="password49"></div>
+                    <div class="password-box" id="password50"></div>
+                </div>
+                <div class="password-column">
+                    <div class="password-box" id="password51"></div>
+                    <div class="password-box" id="password52"></div>
+                    <div class="password-box" id="password53"></div>
+                    <div class="password-box" id="password54"></div>
+                    <div class="password-box" id="password55"></div>
+                    <div class="password-box" id="password56"></div>
+                    <div class="password-box" id="password57"></div>
+                    <div class="password-box" id="password58"></div>
+                    <div class="password-box" id="password59"></div>
+                    <div class="password-box" id="password60"></div>
+                    <div class="password-box" id="password61"></div>
+                    <div class="password-box" id="password62"></div>
+                    <div class="password-box" id="password63"></div>
+                    <div class="password-box" id="password64"></div>
+                    <div class="password-box" id="password65"></div>
+                    <div class="password-box" id="password66"></div>
+                    <div class="password-box" id="password67"></div>
+                    <div class="password-box" id="password68"></div>
+                    <div class="password-box" id="password69"></div>
+                    <div class="password-box" id="password70"></div>
+                    <div class="password-box" id="password71"></div>
+                    <div class="password-box" id="password72"></div>
+                    <div class="password-box" id="password73"></div>
+                    <div class="password-box" id="password74"></div>
+                    <div class="password-box" id="password75"></div>
+                    <div class="password-box" id="password76"></div>
+                    <div class="password-box" id="password77"></div>
+                    <div class="password-box" id="password78"></div>
+                    <div class="password-box" id="password79"></div>
+                    <div class="password-box" id="password80"></div>
+                    <div class="password-box" id="password81"></div>
+                    <div class="password-box" id="password82"></div>
+                    <div class="password-box" id="password83"></div>
+                    <div class="password-box" id="password84"></div>
+                    <div class="password-box" id="password85"></div>
+                    <div class="password-box" id="password86"></div>
+                    <div class="password-box" id="password87"></div>
+                    <div class="password-box" id="password88"></div>
+                    <div class="password-box" id="password89"></div>
+                    <div class="password-box" id="password90"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script> <!-- 外部JavaScriptファイルをリンク -->
+</body>
+</html>
