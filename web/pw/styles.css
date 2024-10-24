@@ -47,6 +47,13 @@ body {
   height: 300px; /* 縦幅を300pxに固定 */
 }
 
+.overflow-div {
+  width: 300px;
+  height: 300px;
+  border: solid 1px;
+  overflow: scroll;
+}
+
 /* 各ラベルやオプション */
 .length-options, .checkbox-label, #btn {
   margin-bottom: 15px;
@@ -60,6 +67,8 @@ body {
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
+  width: 80%; /* 親要素の幅に合わせて長方形 */
+  box-sizing: border-box; /* パディングを含めたサイズに */
 }
 
 /* 生成されたパスワードエリア */
@@ -67,17 +76,55 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; /* 上から下に詰める */
+  overflow: auto; /* スクロールバーを表示 */
+  max-height: 300px; /* 最大の高さを設定してスクロールを発生させる */
+   }
+
+
+  passwords-column {
+    display: flex;
+    flex-direction: column; /* 縦に並べる */
+    justify-content: flex-start; /* 上から下に詰める */
+    overflow-y: auto; /* 縦スクロールバーを表示 */
+    max-height: 300px; /* 最大の高さを設定してスクロールを発生させる */
+    width: 48%; /* 各列の幅を設定（全体の幅の48%） */
+    border: 1px solid #ccc; /* 目印として枠を追加 */
+    padding: 10px; /* 内側の余白を追加 */
+  }
+  
+  .password-box {
+    margin-bottom: 10px; /* 各パスワード間のスペース */
+  }
+
+  
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em; /* アイコンのサイズ調整 */
+  margin-left: 10px; /* アイコンとテキストの間のスペース */
+  color: #333; /* アイコンの色 */
 }
 
-/* 各パスワードボックス */
-.password-box {
-  flex: 1; /* 残りのスペースを均等に分配 */
-  margin: 5px 0;
+/* アイコンのホバー時のエフェクト */
+.copy-btn:hover {
+  color: #007bff; /* ホバー時の色 */
+}
+
+
+#column1, #column2 {
+  max-height: 400px;  /* 高さを必要に応じて調整 */
+  overflow-y: auto;   /* 縦方向にスクロール可能にする */
+  border: 1px solid #ccc;  /* 視覚的に区切るための境界線 */
   padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  font-size: 1em;
-  border-radius: 8px;
-  text-align: center;
-  word-break: break-all;
+}
+
+.can-scroll {
+  width: max-content;
+  height: 200px;
+  background-color: rgb(248, 247, 244);
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: auto;
 }

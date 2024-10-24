@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
@@ -19,55 +19,67 @@
         <!-- オプションセクション -->
         <div class="options">
             <div class="length-options">
-                <label>Select password length:</label><br>
+                <label>文字数</label><br>
                 <input type="radio" id="length8" name="passLength" value="8">
                 <label for="length8">8</label>
                 <input type="radio" id="length12" name="passLength" value="12" checked>
                 <label for="length12">12</label>
                 <input type="radio" id="length16" name="passLength" value="16">
                 <label for="length16">16</label>
-                <input type="radio" id="length32" name="passLength" value="32">
-                <label for="length32">32</label>
-                <input type="radio" id="length50" name="passLength" value="50">
-                <label for="length50">50</label>
-                <input type="number" id="customLength" value="50" max="50" disabled>
+                <!-- カスタムオプション -->
+                <input type="radio" id="lengthCustom" name="passLength" value="custom">
+                <label for="lengthCustom">Custom</label>
+                <input type="number" id="lengthCustom" min="1" max="50" value="4" disabled>
                 <span>(最大50文字)</span>
-            </div>
-            <div>
-                <label>
-                    <input type="checkbox" id="includeLowercase" checked>
-                    <span class="checkbox-label">小文字</span>
-                </label>
-                <label>
-                    <input type="checkbox" id="includeUppercase" checked>
-                    <span class="checkbox-label">大文字</span>
-                </label>
-                <label>
-                    <input type="checkbox" id="includeNumbers" checked>
-                    <span class="checkbox-label">数字</span>
-                </label>
-                <label>
-                    <input type="checkbox" id="includeHyphen" checked>
-                    <span class="checkbox-label">- (ハイフン)</span>
-                </label>
-                <label>
-                    <input type="checkbox" id="includeUnderscore" checked>
-                    <span class="checkbox-label">_ (アンダーバー)</span>
-                </label>
-                <label>
-                    <input type="checkbox" id="includeSymbols" checked>
-                    <span class="checkbox-label">記号(IJl1Oo0)</span>
-                </label>
-            </div>
+                <div>
+                    <label>パスワードに含む文字:</label><br>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="includeLowercase" checked>
+                            <span class="checkbox-label">小文字</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="includeUppercase" checked>
+                            <span class="checkbox-label">大文字</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="includeNumbers" checked>
+                            <span class="checkbox-label">数字</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="includeHyphen">
+                            <span class="checkbox-label">- (ハイフン)</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="includeUnderscore">
+                            <span class="checkbox-label">_ (アンダーバー)</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="includeSymbols">
+                            <span class="checkbox-label">記号(IJl1Oo0)</span>
+                        </label>
+                    </div>
+                </div>
+                
             <div class="quantity-options">
-                <label>Select number of passwords:</label><br>
+                <label>パスワードの数:</label><br>
                 <input type="radio" id="quantity10" name="passQuantity" value="10" checked>
                 <label for="quantity10">10</label>
                 <input type="radio" id="quantity50" name="passQuantity" value="50">
                 <label for="quantity50">50</label>
                 <input type="radio" id="quantityOther" name="passQuantity" value="other">
-                <label for="quantityOther">Other</label>
-                <input type="number" id="customQuantity" min="1" max="100" value="50" disabled>
+                <label for="quantityOther">その他</label>
+                <input type="number" id="quantityOther" min="1" max="100" value="8" disabled>
                 <span>(最大 100)</span>
             </div>
             <button id="btn">生成</button>
@@ -79,8 +91,6 @@
         <div class="password-column" id="column2"></div>
     </div>
 </div>
-</div>
-
 <script src="script.js"></script>
 </body>
 </html>

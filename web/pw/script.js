@@ -1,49 +1,48 @@
-document.getElementById('btn').addEventListener('click', generatePasswords);
+document.addEventListener('DOMContentLoaded', () => {
+    // イベントリスナーを初期化
+    document.getElementById('btn').addEventListener('click', generatePasswords);
 
-// 数量オプションの変更イベントにリスナーを追加
-const quantityOptions = document.getElementsByName('passQuantity');
-quantityOptions.forEach(option => {
-    option.addEventListener('change', function () {
-        const customQuantityInput = document.getElementById('customQuantity');
-        if (this.value === 'other') {
-            customQuantityInput.disabled = false; // 有効化
-        } else {
-            customQuantityInput.disabled = true; // 無効化
-            customQuantityInput.value = this.value; // 選択された数量で入力値を更新
-        }
+    // カスタム長さのフィールドの有効化/無効化
+    document.querySelectorAll('input[name="passLength"]').forEach((elem) => {
+        elem.addEventListener('change', function() {
+            const lengthCustomInput = document.getElementById('lengthCustomInput');
+            if (this.value === 'custom') {
+                lengthCustomInput.disabled = false;  // カスタム選択で入力フィールドを有効化
+            } else {
+                lengthCustomInput.disabled = true;   // その他の選択で無効化
+                lengthCustomInput.value = 4; // デフォルト値
+            }
+        });
     });
-});
 
-// 長さオプションの変更イベントにリスナーを追加
-const lengthOptions = document.getElementsByName('passLength');
-lengthOptions.forEach(option => {
-    option.addEventListener('change', function () {
-        const customLengthInput = document.getElementById('customLength');
-        if (this.value === 'other') {
-            customLengthInput.disabled = false; // 有効化
-            customLengthInput.value = ''; // 入力値をリセット
-        } else {
-            customLengthInput.disabled = true; // 無効化
-            customLengthInput.value = this.value; // 選択された長さで入力値を更新
-        }
+    // カスタム生成数のフィールドの有効化/無効化
+    document.querySelectorAll('input[name="passQuantity"]').forEach((elem) => {
+        elem.addEventListener('change', function() {
+            const otherQuantityInput = document.getElementById('quantityOtherInput');
+            if (this.value === 'other') {
+                otherQuantityInput.disabled = false;  // カスタム選択で入力フィールドを有効化
+            } else {
+                otherQuantityInput.disabled = true;   // その他の選択で無効化
+            }
+        });
     });
 });
 
 function generatePasswords() {
-    // パスワードの長さを取得
+    // 長さを取得
     const lengthOptions = document.getElementsByName('passLength');
-    let length = 12; // デフォルトの長さ
+    let length = 12;  // デフォルト長
     for (const option of lengthOptions) {
         if (option.checked) {
-            if (option.value === 'other') {
-                length = parseInt(document.getElementById('customLength').value) || 12;
+            if (option.value === 'custom') {
+                length = parseInt(document.getElementById('lengthCustomInput').value) || 8;
             } else {
                 length = parseInt(option.value);
             }
         }
     }
 
-    // パスワードの文字セットを構築
+    // オプションのチェックボックス状態を取得
     const includeLowercase = document.getElementById('includeLowercase').checked;
     const includeUppercase = document.getElementById('includeUppercase').checked;
     const includeNumbers = document.getElementById('includeNumbers').checked;
@@ -51,6 +50,7 @@ function generatePasswords() {
     const includeUnderscore = document.getElementById('includeUnderscore').checked;
     const includeSymbols = document.getElementById('includeSymbols').checked;
 
+    // 使用する文字セットを構築
     const charset = [
         ...(includeLowercase ? 'abcdefghijklmnopqrstuvwxyz'.split('') : []),
         ...(includeUppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') : []),
@@ -59,32 +59,32 @@ function generatePasswords() {
         ...(includeUnderscore ? '_'.split('') : []),
         ...(includeSymbols ? '!#$%&()*+,-./:;<=>?@[\\]^_`{|}~'.split('') : []),
     ];
-    
-    // パスワードの数を取得
+
+    // 生成するパスワード数を取得
     const quantityOptions = document.getElementsByName('passQuantity');
-    let passwordCount = 10; // デフォルトは10
+    let passwordCount = 10;  // デフォルトは10個
     for (const option of quantityOptions) {
         if (option.checked) {
             if (option.value === 'other') {
-                passwordCount = parseInt(document.getElementById('customQuantity').value) || 10;
+                passwordCount = parseInt(document.getElementById('quantityOtherInput').value) || 8;
             } else {
                 passwordCount = parseInt(option.value);
             }
         }
     }
 
-    // 前の結果をクリア
-    document.getElementById('column1').innerHTML = ''; 
+    // パスワード生成結果を表示するためにカラムをクリア
+    document.getElementById('column1').innerHTML = '';
     document.getElementById('column2').innerHTML = '';
 
-    // パスワードを生成して表示
+    // パスワード生成ループ
     for (let i = 0; i < passwordCount; i++) {
         const password = generatePassword(charset, length);
         const passwordDiv = document.createElement('div');
-        passwordDiv.classList.add('password-box'); // スタイルを適用
+        passwordDiv.classList.add('password-box');
         passwordDiv.textContent = password;
 
-        // カラムに追加
+        // 偶数番目と奇数番目でカラムに追加
         if (i % 2 === 0) {
             document.getElementById('column1').appendChild(passwordDiv);
         } else {
@@ -93,6 +93,7 @@ function generatePasswords() {
     }
 }
 
+// パスワード生成ロジック
 function generatePassword(charset, length) {
     let password = '';
     for (let i = 0; i < length; i++) {
@@ -100,4 +101,16 @@ function generatePassword(charset, length) {
         password += charset[randomIndex];
     }
     return password;
+}
+
+// パスワードをクリップボードにコピーする機能
+function copyToClipboard(password) {
+    const textarea = document.createElement('textarea');
+    textarea.value = password;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    alert('パスワードがコピーされました: ' + password);
 }
