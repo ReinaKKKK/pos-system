@@ -9,28 +9,30 @@
 <body>
     <div class="container">
         <!-- ヘッダー部分 -->
-        <div class="site-header">
-          <h1>パスワード生成</h1>
-          <p>ワンクリックでランダムパスワードを生成</p>
-        </div>
+        <header class="site-header">
+            <h1>パスワード生成</h1>
+            <p>ワンクリックでランダムパスワードを生成</p>
+        </header>
 
-    <!-- メインコンテンツ -->
-    <div class="main-content">
-        <!-- オプションセクション -->
-        <div class="options">
-            <div class="length-options">
-                <label>文字数</label><br>
-                <input type="radio" id="length8" name="passLength" value="8">
-                <label for="length8">8</label>
-                <input type="radio" id="length12" name="passLength" value="12" checked>
-                <label for="length12">12</label>
-                <input type="radio" id="length16" name="passLength" value="16">
-                <label for="length16">16</label>
-                <!-- カスタムオプション -->
-                <input type="radio" id="lengthCustom" name="passLength" value="custom">
-                <label for="lengthCustom">Custom</label>
-                <input type="number" id="lengthCustom" min="1" max="50" value="4" disabled>
-                <span>(最大50文字)</span>
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <!-- オプションセクション -->
+            <section class="options">
+                <div class="length-options">
+                    <label>文字数</label><br>
+                    <input type="radio" id="length8" name="passLength" value="8">
+                    <label for="length8">8</label>
+                    <input type="radio" id="length12" name="passLength" value="12" checked>
+                    <label for="length12">12</label>
+                    <input type="radio" id="length16" name="passLength" value="16">
+                    <label for="length16">16</label>
+                    <!-- カスタムオプション -->
+                    <input type="radio" id="lengthCustom" name="passLength" value="custom">
+                    <label for="lengthCustom">Custom</label>
+                    <input type="number" id="lengthCustomInput" min="1" max="50" value="4" disabled>
+                    <span>(最大50文字)</span>
+                </div>
+                
                 <div>
                     <label>パスワードに含む文字:</label><br>
                     <div>
@@ -71,26 +73,32 @@
                     </div>
                 </div>
                 
-            <div class="quantity-options">
-                <label>パスワードの数:</label><br>
-                <input type="radio" id="quantity10" name="passQuantity" value="10" checked>
-                <label for="quantity10">10</label>
-                <input type="radio" id="quantity50" name="passQuantity" value="50">
-                <label for="quantity50">50</label>
-                <input type="radio" id="quantityOther" name="passQuantity" value="other">
-                <label for="quantityOther">その他</label>
-                <input type="number" id="quantityOther" min="1" max="100" value="8" disabled>
-                <span>(最大 100)</span>
-            </div>
-            <button id="btn">生成</button>
-        </div>
-    </div>
+                <div class="quantity-options">
+                    <label>パスワードの数:</label><br>
+                    <input type="radio" id="quantity10" name="passQuantity" value="10" checked>
+                    <label for="quantity10">10</label>
+                    <input type="radio" id="quantity50" name="passQuantity" value="50">
+                    <label for="quantity50">50</label>
+                    <input type="radio" id="quantityOther" name="passQuantity" value="other">
+                    <label for="quantityOther">その他</label>
+                    <input type="number" id="quantityOtherInput" min="1" max="100" value="8" disabled>
+                    <span>(最大 100)</span>
+                </div>
 
-    <div class="passwords">
-        <div class="password-column" id="column1"></div>
-        <div class="password-column" id="column2"></div>
+                <!-- パスワード生成ボタン -->
+                <button id="btn">生成</button>
+            </section>
+
+            <!-- パスワード表示エリア -->
+            <section class="passwords" id="password-column">
+                <!-- 生成されたパスワードがここに表示される -->
+                <h2>生成されたパスワード</h2>
+                <button class="copy-btn" onclick="copyPassword()">📋</button>
+                <div id="password-column"></div>
+            </section>
+        </main>
     </div>
-</div>
-<script src="script.js"></script>
+    
+    <script src="script.js"></script>
 </body>
 </html>

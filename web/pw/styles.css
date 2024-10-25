@@ -29,7 +29,7 @@ body {
 .main-content {
   display: flex;
   justify-content: center; /* 中央に揃える */
-  align-items: flex-start;
+  align-items: center;
   gap: 2%; /* 四角の間のスペース */
   width: 100%; /* 幅を100%に設定 */
   height: 50%; /* 高さを50%に設定 */
@@ -47,12 +47,23 @@ body {
   height: 300px; /* 縦幅を300pxに固定 */
 }
 
-.overflow-div {
-  width: 300px;
-  height: 300px;
-  border: solid 1px;
-  overflow: scroll;
+.password-box {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 5px 0;
 }
+
+.password-box span {
+  align-self: center;
+}
+
+span {
+  cursor: pointer;
+}
+
 
 /* 各ラベルやオプション */
 .length-options, .checkbox-label, #btn {
@@ -76,27 +87,24 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; /* 上から下に詰める */
-  overflow: auto; /* スクロールバーを表示 */
+  overflow-y: auto; /* スクロールバーを表示 */
   max-height: 300px; /* 最大の高さを設定してスクロールを発生させる */
-   }
+}
 
+/* パスワードの列 */
+#column1, #column2 {
+  max-height: 300px; /* 高さを必要に応じて調整 */
+  overflow-y: auto;  /* 縦方向にスクロール可能にする */
+  border: 1px solid #ccc; /* 視覚的に区切るための境界線 */
+  padding: 10px;
+  width: 48%; /* 各列の幅を設定（全体の幅の48%） */
+}
 
-  passwords-column {
-    display: flex;
-    flex-direction: column; /* 縦に並べる */
-    justify-content: flex-start; /* 上から下に詰める */
-    overflow-y: auto; /* 縦スクロールバーを表示 */
-    max-height: 300px; /* 最大の高さを設定してスクロールを発生させる */
-    width: 48%; /* 各列の幅を設定（全体の幅の48%） */
-    border: 1px solid #ccc; /* 目印として枠を追加 */
-    padding: 10px; /* 内側の余白を追加 */
-  }
-  
-  .password-box {
-    margin-bottom: 10px; /* 各パスワード間のスペース */
-  }
+.password-box {
+  margin-bottom: 10px; /* 各パスワード間のスペース */
+}
 
-  
+/* コピーボタン */
 .copy-btn {
   background: none;
   border: none;
@@ -111,14 +119,15 @@ body {
   color: #007bff; /* ホバー時の色 */
 }
 
-
-#column1, #column2 {
-  max-height: 400px;  /* 高さを必要に応じて調整 */
-  overflow-y: auto;   /* 縦方向にスクロール可能にする */
-  border: 1px solid #ccc;  /* 視覚的に区切るための境界線 */
-  padding: 10px;
+/* スクロールのスタイル */
+.overflow-div {
+  width: 300px;
+  height: 300px;
+  border: solid 1px;
+  overflow: scroll;
 }
 
+/* その他のスタイル */
 .can-scroll {
   width: max-content;
   height: 200px;

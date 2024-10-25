@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 otherQuantityInput.disabled = false;  // カスタム選択で入力フィールドを有効化
             } else {
                 otherQuantityInput.disabled = true;   // その他の選択で無効化
+                otherQuantityInput.value = 8; // デフォルト値
             }
         });
     });
@@ -74,43 +75,30 @@ function generatePasswords() {
     }
 
     // パスワード生成結果を表示するためにカラムをクリア
-    document.getElementById('column1').innerHTML = '';
-    document.getElementById('column2').innerHTML = '';
+    const passwordColumn = document.getElementById('password-column');
+    passwordColumn.innerHTML = ''; 
 
-    // パスワード生成ループ
+    // パスワードを生成する関数
     for (let i = 0; i < passwordCount; i++) {
-        const password = generatePassword(charset, length);
-        const passwordDiv = document.createElement('div');
-        passwordDiv.classList.add('password-box');
-        passwordDiv.textContent = password;
-
-        // 偶数番目と奇数番目でカラムに追加
-        if (i % 2 === 0) {
-            document.getElementById('column1').appendChild(passwordDiv);
-        } else {
-            document.getElementById('column2').appendChild(passwordDiv);
+        let password = '';
+        for (let j = 0; j < length; j++) {
+            const randomIndex = Math.floor(Math.random() * charset.length);
+            password += charset[randomIndex];
         }
+        const passwordBox = document.createElement('div');
+        passwordBox.classList.add('password-box');
+        passwordBox.innerHTML = `<span>${password}</span>`;
+        passwordColumn.appendChild(passwordBox);
     }
 }
 
-// パスワード生成ロジック
-function generatePassword(charset, length) {
-    let password = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * charset.length);
-        password += charset[randomIndex];
-    }
-    return password;
-}
-
-// パスワードをクリップボードにコピーする機能
-function copyToClipboard(password) {
-    const textarea = document.createElement('textarea');
-    textarea.value = password;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-
-    alert('パスワードがコピーされました: ' + password);
+// パスワードをクリップボードにコピーする関数
+function copyPassword() {
+    const passwordColumn = document.getElementById('password-column');
+    const passwordText = passwordColumn.innerText;
+    navigator.clipboard.writeText(passwordText).then(() => {
+        alert('パスワードがクリップボードにコピーされました。');
+    }).catch(err => {
+        console.error('クリップボードへのコピーに失敗しました: ', err);
+    });
 }
