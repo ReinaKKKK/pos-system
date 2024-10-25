@@ -19,6 +19,7 @@
             <!-- オプションセクション -->
             <section class="options">
                 <div class="length-options">
+                    <h2>パスワードの条件を選択</h2>
                     <label>文字数</label><br>
                     <input type="radio" id="length8" name="passLength" value="8">
                     <label for="length8">8</label>
@@ -29,7 +30,7 @@
                     <!-- カスタムオプション -->
                     <input type="radio" id="lengthCustom" name="passLength" value="custom">
                     <label for="lengthCustom">Custom</label>
-                    <input type="number" id="lengthCustomInput" min="1" max="50" value="4" disabled>
+                    <input type="number" id="lengthCustomInput" min="1" max="50" value="6" disabled>
                     <span>(最大50文字)</span>
                 </div>
                 
@@ -68,8 +69,9 @@
                     <div>
                         <label>
                             <input type="checkbox" id="includeSymbols">
-                            <span class="checkbox-label">記号(IJl1Oo0)</span>
+                            <span class="checkbox-label">記号(編集可)</span>
                         </label>
+                        <input type="text" id="customSymbols" value="!#$%&()*+,-./:;<=>?@[\]^_`{|}~" />
                     </div>
                 </div>
                 
@@ -92,8 +94,6 @@
             <!-- パスワード表示エリア -->
             <section class="passwords" id="password-column">
                 <!-- 生成されたパスワードがここに表示される -->
-                <h2>生成されたパスワード</h2>
-                <button class="copy-btn" onclick="copyPassword()">📋</button>
                 <div id="password-column"></div>
             </section>
         </main>

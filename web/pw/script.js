@@ -76,27 +76,56 @@ function generatePasswords() {
 
     // パスワード生成結果を表示するためにカラムをクリア
     const passwordColumn = document.getElementById('password-column');
-    passwordColumn.innerHTML = ''; 
+    passwordColumn.innerHTML = ''; // 生成前にクリア
 
     // パスワードを生成する関数
     for (let i = 0; i < passwordCount; i++) {
         let password = '';
-        for (let j = 0; j < length; j++) {
+
+        // 必須文字を追加
+        if (includeLowercase) {
+            password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+        }
+        if (includeUppercase) {
+            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+        }
+        if (includeNumbers) {
+            password += '0123456789'[Math.floor(Math.random() * 10)];
+        }
+        if (includeHyphen) {
+            password += '-';
+        }
+        if (includeUnderscore) {
+            password += '_';
+        }
+        // カスタム記号を取得
+    const customSymbols = document.getElementById('customSymbols').value;
+    if (includeSymbols && customSymbols) {
+        password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
+    }
+        // 残りの文字を生成
+        for (let j = password.length; j < length; j++) {
             const randomIndex = Math.floor(Math.random() * charset.length);
             password += charset[randomIndex];
         }
+
+        // シャッフルする（任意）
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+        // パスワードを表示
         const passwordBox = document.createElement('div');
         passwordBox.classList.add('password-box');
-        passwordBox.innerHTML = `<span>${password}</span>`;
+        passwordBox.innerHTML = `
+            <span>${password}</span>
+            <button class="copy-btn" onclick="copyPassword('${password}')">📋</button>
+        `;
         passwordColumn.appendChild(passwordBox);
     }
 }
 
 // パスワードをクリップボードにコピーする関数
-function copyPassword() {
-    const passwordColumn = document.getElementById('password-column');
-    const passwordText = passwordColumn.innerText;
-    navigator.clipboard.writeText(passwordText).then(() => {
+function copyPassword(password) {
+    navigator.clipboard.writeText(password).then(() => {
         alert('パスワードがクリップボードにコピーされました。');
     }).catch(err => {
         console.error('クリップボードへのコピーに失敗しました: ', err);
