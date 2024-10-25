@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 初回ロード時にデフォルトのパスワードを生成・表示
+    generatePasswords();
+
     // イベントリスナーを初期化
     document.getElementById('btn').addEventListener('click', generatePasswords);
 
@@ -76,7 +79,7 @@ function generatePasswords() {
 
     // パスワード生成結果を表示するためにカラムをクリア
     const passwordColumn = document.getElementById('password-column');
-    passwordColumn.innerHTML = ''; // 生成前にクリア
+    passwordColumn.innerHTML = ''; // 必要に応じてここでクリア
 
     // パスワードを生成する関数
     for (let i = 0; i < passwordCount; i++) {
@@ -99,10 +102,11 @@ function generatePasswords() {
             password += '_';
         }
         // カスタム記号を取得
-    const customSymbols = document.getElementById('customSymbols').value;
-    if (includeSymbols && customSymbols) {
-        password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
-    }
+        const customSymbols = document.getElementById('customSymbols').value;
+        if (includeSymbols && customSymbols) {
+            password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
+        }
+        
         // 残りの文字を生成
         for (let j = password.length; j < length; j++) {
             const randomIndex = Math.floor(Math.random() * charset.length);
