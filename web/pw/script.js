@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+    
 
 function generatePasswords() {
     // 長さを取得
@@ -44,8 +45,8 @@ function generatePasswords() {
                 length = parseInt(option.value);
             }
         }
-    }
-
+    } 
+    
     // オプションのチェックボックス状態を取得
     const includeLowercase = document.getElementById('includeLowercase').checked;
     const includeUppercase = document.getElementById('includeUppercase').checked;
@@ -53,6 +54,7 @@ function generatePasswords() {
     const includeHyphen = document.getElementById('includeHyphen').checked;
     const includeUnderscore = document.getElementById('includeUnderscore').checked;
     const includeSymbols = document.getElementById('includeSymbols').checked;
+   
 
     // 使用する文字セットを構築
     const charset = [
@@ -61,21 +63,35 @@ function generatePasswords() {
         ...(includeNumbers ? '0123456789'.split('') : []),
         ...(includeHyphen ? '-'.split('') : []),
         ...(includeUnderscore ? '_'.split('') : []),
-        ...(includeSymbols ? '!#$%&()*+,-./:;<=>?@[\\]^_`{|}~'.split('') : []),
+        ...(includeSymbols ? document.getElementById('customSymbols').value.split('') : []),
     ];
 
-    // 生成するパスワード数を取得
-    const quantityOptions = document.getElementsByName('passQuantity');
-    let passwordCount = 10;  // デフォルトは10個
-    for (const option of quantityOptions) {
-        if (option.checked) {
-            if (option.value === 'other') {
-                passwordCount = parseInt(document.getElementById('quantityOtherInput').value) || 8;
-            } else {
-                passwordCount = parseInt(option.value);
+
+
+     // charsetが空の場合のエラーハンドリング
+     if (charset.length === 0) {
+        alert('少なくとも1つのオプションを選択してください。');
+        return;
+    }
+     // デバッグ用のconsole.log（generatePasswords関数内で）
+     console.log('カスタム記号:', document.getElementById('customSymbols').value);
+     console.log('使用する文字セット:', charset);
+     console.log('生成されるパスワードの長さ:', length);
+
+
+        // 生成するパスワード数を取得
+        const quantityOptions = document.getElementsByName('passQuantity');
+        let passwordCount = 10;  // デフォルトは10個
+        for (const option of quantityOptions) {
+            if (option.checked) {
+                if (option.value === 'other') {
+                    passwordCount = parseInt(document.getElementById('quantityOtherInput').value) || 8;
+                } else {
+                    passwordCount = parseInt(option.value);
+                }
             }
         }
-    }
+        
 
     // パスワード生成結果を表示するためにカラムをクリア
     const passwordColumn = document.getElementById('password-column');
@@ -108,7 +124,7 @@ function generatePasswords() {
         }
         
         // 残りの文字を生成
-        for (let j = password.length; j < length; j++) {
+        while (password.length < length) {
             const randomIndex = Math.floor(Math.random() * charset.length);
             password += charset[randomIndex];
         }
@@ -119,10 +135,20 @@ function generatePasswords() {
         // パスワードを表示
         const passwordBox = document.createElement('div');
         passwordBox.classList.add('password-box');
-        passwordBox.innerHTML = `
-            <span>${password}</span>
-            <button class="copy-btn" onclick="copyPassword('${password}')">📋</button>
-            `;
+
+        // パスワード表示用の <span>
+        const passwordSpan = document.createElement('span');
+        passwordSpan.textContent = password;  // textContentを使用
+        passwordBox.appendChild(passwordSpan);
+
+        // コピー用ボタン
+        const copyButton = document.createElement('button');
+        copyButton.classList.add('copy-btn');
+        copyButton.innerHTML = '📋';
+        copyButton.onclick = () => copyPassword(password);  // パスワードをコピー
+        passwordBox.appendChild(copyButton);
+
+        // パスワード列に追加
         passwordColumn.appendChild(passwordBox);
     }
 }
@@ -135,3 +161,4 @@ function copyPassword(password) {
         console.error('クリップボードへのコピーに失敗しました: ', err);
     });
 }
+
