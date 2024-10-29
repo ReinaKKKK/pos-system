@@ -122,7 +122,7 @@ function generatePasswords() {
         passwordBox.innerHTML = `
             <span>${password}</span>
             <button class="copy-btn" onclick="copyPassword('${password}')">📋</button>
-        `;
+            `;
         passwordColumn.appendChild(passwordBox);
     }
 }
