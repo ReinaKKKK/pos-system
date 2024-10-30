@@ -73,10 +73,7 @@ function generatePasswords() {
         alert('少なくとも1つのオプションを選択してください。');
         return;
     }
-     // デバッグ用のconsole.log（generatePasswords関数内で）
-     console.log('カスタム記号:', document.getElementById('customSymbols').value);
-     console.log('使用する文字セット:', charset);
-     console.log('生成されるパスワードの長さ:', length);
+ 
 
 
         // 生成するパスワード数を取得
@@ -123,6 +120,7 @@ function generatePasswords() {
             password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
         }
         
+
         // 残りの文字を生成
         while (password.length < length) {
             const randomIndex = Math.floor(Math.random() * charset.length);
@@ -137,6 +135,7 @@ function generatePasswords() {
         passwordBox.classList.add('password-box');
 
         // パスワード表示用の <span>
+        const overflowDiv = document.querySelector('.overflow-div');
         const passwordSpan = document.createElement('span');
         passwordSpan.textContent = password;  // textContentを使用
         passwordBox.appendChild(passwordSpan);
@@ -150,6 +149,12 @@ function generatePasswords() {
 
         // パスワード列に追加
         passwordColumn.appendChild(passwordBox);
+        
+
+        // スクロールのデバッグ情報をログ出力
+        console.log('生成されたパスワード数:', passwordCount);
+        console.log('パスワード列の高さ:', passwordColumn.scrollHeight);
+        console.log('パスワード列の表示高さ:', passwordColumn.clientHeight);
     }
 }
 
