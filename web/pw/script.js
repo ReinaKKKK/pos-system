@@ -125,6 +125,7 @@ function generatePasswords() {
         // パスワードを表示
         const passwordBox = document.createElement('div');
         passwordBox.classList.add('password-box');
+        
 
         // パスワード表示用の <span>
         const overflowDiv = document.querySelector('.overflow-div');
