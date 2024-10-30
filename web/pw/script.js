@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lengthCustomInput.disabled = false;  // カスタム選択で入力フィールドを有効化
             } else {
                 lengthCustomInput.disabled = true;   // その他の選択で無効化
-                lengthCustomInput.value = 6; // デフォルト値
+                lengthCustomInput.value = 4; // デフォルト値
             }
         });
     });
@@ -123,26 +123,26 @@ function generatePasswords() {
         passwordBox.classList.add('password-box');
 
 
-        // パスワードテキストを含む <span>を追加
+        // パスワード表示用の <span>
         const overflowDiv = document.querySelector('.overflow-div');
         const passwordSpan = document.createElement('span');
         passwordSpan.textContent = password;  // textContentを使用
         passwordBox.appendChild(passwordSpan);
 
-        // コピー用ボタンを作成
+        // コピー用ボタン
         const copyButton = document.createElement('button');
         copyButton.classList.add('copy-btn');
         copyButton.innerHTML = '📋';
         copyButton.onclick = () => copyPassword(password);  // パスワードをコピー
         passwordBox.appendChild(copyButton);
 
-        // パスワードボックスを表示領域に追加
+        // パスワード列に追加
         passwordColumn.appendChild(passwordBox);
         
         // スクロールのデバッグ情報をログ出力
-        //console.log('生成されたパスワード数:', passwordCount);
-        //console.log('パスワード列の高さ:', passwordColumn.scrollHeight);
-        //console.log('パスワード列の表示高さ:', passwordColumn.clientHeight);
+        console.log('生成されたパスワード数:', passwordCount);
+        console.log('パスワード列の高さ:', passwordColumn.scrollHeight);
+        console.log('パスワード列の表示高さ:', passwordColumn.clientHeight);
     }
 }
 
