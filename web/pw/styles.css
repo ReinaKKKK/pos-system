@@ -90,7 +90,7 @@ span {
   background-color: black; /* ボタンの背景色を黒に設定 */
   color: white; /* ボタンのテキスト色を白に設定 */
   border: none; /* 境界線なし */
-  padding: 10px; /* 内側の余白を設定 */
+  padding: 20px; /* 内側の余白を設定 */
   border-radius: 5px; /* 角を丸める */
   cursor: pointer; /* カーソルをポインターに変更 */
   width: 100%; /* 親要素の幅に合わせる */
@@ -107,8 +107,6 @@ span {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
   overflow-y: auto; /* 縦のスクロールを許可 */
   overflow-x: auto; /* 横のスクロールを許可 */
-  max-height: 400px; /* 最大高さを設定 */
-  
 }
 
 /* コピーボタン */

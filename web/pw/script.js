@@ -1,8 +1,9 @@
+// HTML文書の読み込みが完了した後に実行
 document.addEventListener('DOMContentLoaded', () => {
     // 初回ロード時にデフォルトのパスワードを生成・表示
     generatePasswords();
 
-    // イベントリスナーを初期化
+    // ボタンがクリックされたときにパスワードを生成するイベントリスナーを追加
     document.getElementById('btn').addEventListener('click', generatePasswords);
 
     // カスタム長さのフィールドの有効化/無効化
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lengthCustomInput.disabled = false;  // カスタム選択で入力フィールドを有効化
             } else {
                 lengthCustomInput.disabled = true;   // その他の選択で無効化
-                lengthCustomInput.value = 4; // デフォルト値
+                lengthCustomInput.value = 6; // デフォルト値
             }
         });
     });
@@ -31,11 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-    
+
+// パスワードを生成する関数  
 function generatePasswords() {
-    // 長さを取得
+    // 選択された長さを取得
     const lengthOptions = document.getElementsByName('passLength');
-    let length = 12;  // デフォルト長
+    let length = 12;  // デフォルト長さ
     for (const option of lengthOptions) {
         if (option.checked) {
             if (option.value === 'custom') {
@@ -46,7 +48,7 @@ function generatePasswords() {
         }
     } 
     
-    // オプションのチェックボックス状態を取得
+    // 各オプションのチェック状態を取得
     const includeLowercase = document.getElementById('includeLowercase').checked;
     const includeUppercase = document.getElementById('includeUppercase').checked;
     const includeNumbers = document.getElementById('includeNumbers').checked;
@@ -54,7 +56,7 @@ function generatePasswords() {
     const includeUnderscore = document.getElementById('includeUnderscore').checked;
     const includeSymbols = document.getElementById('includeSymbols').checked;
    
-    // 使用する文字セットを構築
+    // 文字セットを設定
     const charset = [
         ...(includeLowercase ? 'abcdefghijklmnopqrstuvwxyz'.split('') : []),
         ...(includeUppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') : []),
@@ -63,12 +65,6 @@ function generatePasswords() {
         ...(includeUnderscore ? '_'.split('') : []),
         ...(includeSymbols ? document.getElementById('customSymbols').value.split('') : []),
     ];
-
-    // charsetが空の場合のエラーハンドリング
-    if (charset.length === 0) {
-        alert('少なくとも1つのオプションを選択してください。');
-        return;
-    }
 
     // 生成するパスワード数を取得
     const quantityOptions = document.getElementsByName('passQuantity');
@@ -87,11 +83,11 @@ function generatePasswords() {
     const passwordColumn = document.getElementById('password-column');
     passwordColumn.innerHTML = ''; // 必要に応じてここでクリア
 
-    // パスワードを生成する関数
+    // パスワードを生成する関数各パスワードを生成
     for (let i = 0; i < passwordCount; i++) {
         let password = '';
 
-        // 必須文字を追加
+        /// 必須文字（各カテゴリーから少なくとも1文字）を追加
         if (includeLowercase) {
             password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
         }
@@ -113,34 +109,34 @@ function generatePasswords() {
             password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
         }
         
-        // 残りの文字を生成
+        // 残りの文字をランダムに追加
         while (password.length < length) {
             const randomIndex = Math.floor(Math.random() * charset.length);
             password += charset[randomIndex];
         }
 
-        // シャッフルする（任意）
+        // パスワードをシャッフル
         password = password.split('').sort(() => Math.random() - 0.5).join('');
 
-        // パスワードを表示
+        // 表示用のパスワードボックスを生成
         const passwordBox = document.createElement('div');
         passwordBox.classList.add('password-box');
-        
 
-        // パスワード表示用の <span>
+
+        // パスワードテキストを含む <span>を追加
         const overflowDiv = document.querySelector('.overflow-div');
         const passwordSpan = document.createElement('span');
         passwordSpan.textContent = password;  // textContentを使用
         passwordBox.appendChild(passwordSpan);
 
-        // コピー用ボタン
+        // コピー用ボタンを作成
         const copyButton = document.createElement('button');
         copyButton.classList.add('copy-btn');
         copyButton.innerHTML = '📋';
         copyButton.onclick = () => copyPassword(password);  // パスワードをコピー
         passwordBox.appendChild(copyButton);
 
-        // パスワード列に追加
+        // パスワードボックスを表示領域に追加
         passwordColumn.appendChild(passwordBox);
         
         // スクロールのデバッグ情報をログ出力
