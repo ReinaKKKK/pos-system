@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
     
-
 function generatePasswords() {
     // 長さを取得
     const lengthOptions = document.getElementsByName('passLength');
@@ -55,7 +54,6 @@ function generatePasswords() {
     const includeUnderscore = document.getElementById('includeUnderscore').checked;
     const includeSymbols = document.getElementById('includeSymbols').checked;
    
-
     // 使用する文字セットを構築
     const charset = [
         ...(includeLowercase ? 'abcdefghijklmnopqrstuvwxyz'.split('') : []),
@@ -66,18 +64,14 @@ function generatePasswords() {
         ...(includeSymbols ? document.getElementById('customSymbols').value.split('') : []),
     ];
 
-
-
-     // charsetが空の場合のエラーハンドリング
-     if (charset.length === 0) {
+    // charsetが空の場合のエラーハンドリング
+    if (charset.length === 0) {
         alert('少なくとも1つのオプションを選択してください。');
         return;
     }
- 
 
-
-        // 生成するパスワード数を取得
-        const quantityOptions = document.getElementsByName('passQuantity');
+    // 生成するパスワード数を取得
+    const quantityOptions = document.getElementsByName('passQuantity');
         let passwordCount = 10;  // デフォルトは10個
         for (const option of quantityOptions) {
             if (option.checked) {
@@ -85,10 +79,9 @@ function generatePasswords() {
                     passwordCount = parseInt(document.getElementById('quantityOtherInput').value) || 8;
                 } else {
                     passwordCount = parseInt(option.value);
-                }
             }
         }
-        
+    }
 
     // パスワード生成結果を表示するためにカラムをクリア
     const passwordColumn = document.getElementById('password-column');
@@ -120,7 +113,6 @@ function generatePasswords() {
             password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
         }
         
-
         // 残りの文字を生成
         while (password.length < length) {
             const randomIndex = Math.floor(Math.random() * charset.length);
@@ -150,11 +142,10 @@ function generatePasswords() {
         // パスワード列に追加
         passwordColumn.appendChild(passwordBox);
         
-
         // スクロールのデバッグ情報をログ出力
-        console.log('生成されたパスワード数:', passwordCount);
-        console.log('パスワード列の高さ:', passwordColumn.scrollHeight);
-        console.log('パスワード列の表示高さ:', passwordColumn.clientHeight);
+        //console.log('生成されたパスワード数:', passwordCount);
+        //console.log('パスワード列の高さ:', passwordColumn.scrollHeight);
+        //console.log('パスワード列の表示高さ:', passwordColumn.clientHeight);
     }
 }
 
