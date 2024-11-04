@@ -40,7 +40,6 @@ body {
   
 }
 
-
 /* メインコンテンツエリア */
 .main-content {
   display: flex; /* フレックスボックスを使用して要素を配置 */
@@ -110,6 +109,7 @@ span {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
   overflow-y: auto; /* 縦のスクロールを許可 */
   overflow-x: auto; /* 横のスクロールを許可 */
+  max-height: 450px;
 }
 
 /* コピーボタン */
