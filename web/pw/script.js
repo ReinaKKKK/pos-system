@@ -1,4 +1,3 @@
-// 定数を定義
 const DEFAULT_PASSWORD_COUNT = 10; // デフォルトのパスワード数
 const DEFAULT_OTHER_QUANTITY = 8;   // カスタム入力のデフォルト値
 const DEFAULT_LENGTH = 12;           // デフォルトのパスワード長
@@ -25,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 lengthCustomInput.disabled = true;   // その他の選択で無効化
                 lengthCustomInput.value = 4; // デフォルト値
+
             }
         });
     });
@@ -123,7 +123,7 @@ function generatePasswords() {
         if (includeSymbols && customSymbols) {
             password += customSymbols[Math.floor(Math.random() * customSymbols.length)];
         }
-        
+
         // 残りの文字をランダムに追加
         while (password.length < length) {
             const randomIndex = Math.floor(Math.random() * charset.length);
@@ -132,6 +132,7 @@ function generatePasswords() {
 
         // パスワードをシャッフル
         password = password.split('').sort(() => Math.random() - 0.5).join('');
+        
 
         // 表示用のパスワードボックスを生成
         const passwordBox = document.createElement('div');
@@ -151,7 +152,7 @@ function generatePasswords() {
 
         // パスワード列に追加
         passwordColumn.appendChild(passwordBox);
-        
+
         // スクロールのデバッグ情報をログ出力
         console.log('生成されたパスワード数:', passwordCount);
         console.log('パスワード列の高さ:', passwordColumn.scrollHeight);
@@ -166,4 +167,4 @@ function copyPassword(password) {
     }).catch(err => {
         console.error('クリップボードへのコピーに失敗しました: ', err);
     });
-}
+}                
