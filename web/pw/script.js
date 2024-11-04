@@ -1,3 +1,13 @@
+// 定数を定義
+const DEFAULT_PASSWORD_COUNT = 10; // デフォルトのパスワード数
+const DEFAULT_OTHER_QUANTITY = 8;   // カスタム入力のデフォルト値
+const DEFAULT_LENGTH = 12;           // デフォルトのパスワード長
+const LOWERCASE_CHARS = 'abcdefghijklmnopqrstuvwxyz';
+const UPPERCASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const NUMERIC_CHARS = '0123456789';
+const HYPHEN_CHAR = '-';
+const UNDERSCORE_CHAR = '_';
+
 // HTML文書の読み込みが完了した後に実行
 document.addEventListener('DOMContentLoaded', () => {
     // 初回ロード時にデフォルトのパスワードを生成・表示
@@ -27,27 +37,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 otherQuantityInput.disabled = false;  // カスタム選択で入力フィールドを有効化
             } else {
                 otherQuantityInput.disabled = true;   // その他の選択で無効化
-                otherQuantityInput.value = 8; // デフォルト値
+                otherQuantityInput.value = DEFAULT_OTHER_QUANTITY; // デフォルト値を定数に設定
             }
         });
     });
 });
 
-// パスワードを生成する関数  
+// パスワードを生成する関数
 function generatePasswords() {
-    // 選択された長さを取得
     const lengthOptions = document.getElementsByName('passLength');
-    let length = 12;  // デフォルト長さ
+    let length = DEFAULT_LENGTH;  // デフォルト長さを定数に設定
+
+    // 選択された長さを取得
     for (const option of lengthOptions) {
         if (option.checked) {
             if (option.value === 'custom') {
-                length = parseInt(document.getElementById('lengthCustomInput').value) || 8;
+                length = parseInt(document.getElementById('lengthCustomInput').value) || DEFAULT_LENGTH;
             } else {
                 length = parseInt(option.value);
             }
         }
-    } 
-    
+    }
+
     // 各オプションのチェック状態を取得
     const includeLowercase = document.getElementById('includeLowercase').checked;
     const includeUppercase = document.getElementById('includeUppercase').checked;
@@ -55,26 +66,29 @@ function generatePasswords() {
     const includeHyphen = document.getElementById('includeHyphen').checked;
     const includeUnderscore = document.getElementById('includeUnderscore').checked;
     const includeSymbols = document.getElementById('includeSymbols').checked;
-   
+
     // 文字セットを設定
     const charset = [
-        ...(includeLowercase ? 'abcdefghijklmnopqrstuvwxyz'.split('') : []),
-        ...(includeUppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') : []),
-        ...(includeNumbers ? '0123456789'.split('') : []),
-        ...(includeHyphen ? '-'.split('') : []),
-        ...(includeUnderscore ? '_'.split('') : []),
+        ...(includeLowercase ? LOWERCASE_CHARS.split('') : []),
+        ...(includeUppercase ? UPPERCASE_CHARS.split('') : []),
+        ...(includeNumbers ? NUMERIC_CHARS.split('') : []),
+        ...(includeHyphen ? HYPHEN_CHAR.split('') : []),
+        ...(includeUnderscore ? UNDERSCORE_CHAR.split('') : []),
         ...(includeSymbols ? document.getElementById('customSymbols').value.split('') : []),
     ];
 
-    // 生成するパスワード数を取得
+    // パスワード数の設定
     const quantityOptions = document.getElementsByName('passQuantity');
-        let passwordCount = 10;  // デフォルトは10個
-        for (const option of quantityOptions) {
-            if (option.checked) {
-                if (option.value === 'other') {
-                    passwordCount = parseInt(document.getElementById('quantityOtherInput').value) || 8;
-                } else {
-                    passwordCount = parseInt(option.value);
+    let passwordCount = DEFAULT_PASSWORD_COUNT; // デフォルトは定数に設定
+
+    for (const option of quantityOptions) {
+        if (option.checked) {
+            if (option.value === 'other') {
+                // 'quantityOtherInput'の値を取得し、デフォルトは定数に設定
+                passwordCount = parseInt(document.getElementById('quantityOtherInput').value) || DEFAULT_OTHER_QUANTITY;
+            } else {
+                // 他のオプションが選択された場合、その値を使用
+                passwordCount = parseInt(option.value);
             }
         }
     }
@@ -87,22 +101,23 @@ function generatePasswords() {
     for (let i = 0; i < passwordCount; i++) {
         let password = '';
 
-        /// 必須文字（各カテゴリーから少なくとも1文字）を追加
+        // 必須文字（各カテゴリーから少なくとも1文字）を追加
         if (includeLowercase) {
-            password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+            password += LOWERCASE_CHARS[Math.floor(Math.random() * LOWERCASE_CHARS.length)];
         }
         if (includeUppercase) {
-            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+            password += UPPERCASE_CHARS[Math.floor(Math.random() * UPPERCASE_CHARS.length)];
         }
         if (includeNumbers) {
-            password += '0123456789'[Math.floor(Math.random() * 10)];
+            password += NUMERIC_CHARS[Math.floor(Math.random() * NUMERIC_CHARS.length)];
         }
         if (includeHyphen) {
-            password += '-';
+            password += HYPHEN_CHAR;
         }
         if (includeUnderscore) {
-            password += '_';
+            password += UNDERSCORE_CHAR;
         }
+
         // カスタム記号を取得
         const customSymbols = document.getElementById('customSymbols').value;
         if (includeSymbols && customSymbols) {
@@ -122,9 +137,7 @@ function generatePasswords() {
         const passwordBox = document.createElement('div');
         passwordBox.classList.add('password-box');
 
-
         // パスワード表示用の <span>
-        const overflowDiv = document.querySelector('.overflow-div');
         const passwordSpan = document.createElement('span');
         passwordSpan.textContent = password;  // textContentを使用
         passwordBox.appendChild(passwordSpan);
@@ -154,4 +167,3 @@ function copyPassword(password) {
         console.error('クリップボードへのコピーに失敗しました: ', err);
     });
 }
-
