@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title> パスワード生成 | ランダムパスワードを一括生成 | すぐに使える便利なWEBツール | Pass-Unlimited</title> 
+    <link rel="stylesheet" href="styles.css"> <!-- 外部CSSファイルをリンク -->
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー部分 -->
+        <header class="site-header">
+            <h1>パスワード生成</h1>
+            <p>ワンクリックでランダムパスワードを生成</p>
+        </header>
+
+        <div class="main-container">
+            <main class="main-content">
+            <!-- オプションセクション -->
+                <section class="options">
+                    <div class="length-options">
+                        <h2>パスワードの条件を選択</h2>
+                        <label>文字数:</label><br>
+                        <input type="radio" id="length8" name="passLength" value="8">
+                        <label for="length8">8</label>
+                        <input type="radio" id="length12" name="passLength" value="12" checked>
+                        <label for="length12">12</label>
+                        <input type="radio" id="length16" name="passLength" value="16">
+                        <label for="length16">16</label>
+                        <!-- カスタムオプション -->
+                        <input type="radio" id="lengthCustom" name="passLength" value="custom">
+                        <label for="lengthCustom">その他</label>
+                        <input type="number" id="lengthCustomInput" min="1" max="50" value="6" disabled>
+                        <span>(最大50文字)</span>
+                    </div>
+
+                    <div>
+                        <label>パスワードに含む文字:</label><br>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="includeLowercase" checked>
+                                <span class="checkbox-label">小文字</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="includeUppercase" checked>
+                                <span class="checkbox-label">大文字</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="includeNumbers" checked>
+                                <span class="checkbox-label">数字</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="includeHyphen">
+                                <span class="checkbox-label">- (ハイフン)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="includeUnderscore">
+                                <span class="checkbox-label">_ (アンダーバー)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                <input type="checkbox" id="includeSymbols">
+                                <span class="checkbox-label">記号(編集可)</span>
+                            </label>
+                            <input type="text" id="customSymbols" value="!#$%&amp;()*+,-./:;&lt;=&gt;?@[\]^_`{|}~" />
+                        </div>
+                    </div>
+
+                    <div class="quantity-options">
+                        <label>パスワードの数:</label><br>
+                        <input type="radio" id="quantity10" name="passQuantity" value="10" checked>
+                        <label for="quantity10">10</label>
+                        <input type="radio" id="quantity50" name="passQuantity" value="50">
+                        <label for="quantity50">50</label>
+                        <input type="radio" id="quantityOther" name="passQuantity" value="other">
+                        <label for="quantityOther">その他</label>
+                        <input type="number" id="quantityOtherInput" min="1" max="100" value="8" disabled>
+                        <span>(最大 100)</span>
+                    </div>
+                    <!-- パスワード生成ボタン -->
+                    <button id="btn">生成</button>
+                </section>
+
+                <!-- パスワード表示エリア -->
+                <section class="passwords" id="password-column">
+                    <!-- 生成されたパスワードがここに表示される -->
+                    <div id="password-column"></div>
+
+                </section>    
+            </main>  
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

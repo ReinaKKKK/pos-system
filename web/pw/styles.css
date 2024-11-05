@@ -1,0 +1,147 @@
+/* 全体のスタイル */
+body {
+  display: flex; /* フレックスボックスを使用して要素を配置 */
+  justify-content: center; /* 横方向に中央に配置 */
+  align-items: center; /* 縦方向に中央に配置 */
+  height: 100vh; /* ビューポートの高さを100%に設定 */
+  margin: 0; /* デフォルトのマージンをリセット */
+  font-family: Arial, sans-serif; /* フォントファミリーを設定 */
+  background-color: #e0e0da; /* 背景色を設定 */
+}
+
+/* コンテナ全体 */
+.container {
+  display: flex; /* フレックスボックスを使用して要素を配置 */
+  flex-direction: column; /* 縦方向に要素を配置 */
+  align-items: center; /* 中央揃え */
+  padding: 20px; /* 内側の余白を設定 */
+  width: 65%; /* 全体の幅を60%に設定 */
+  max-width: 1200px; /* 最大幅を設定 */
+}
+
+/* ヘッダー */
+.site-header {
+  text-align: left; /* タイトルを左揃え */
+  align-items: flex-start; /* 上に揃える */
+  margin-bottom: 10px; /* 下の余白を設定 */
+  width: 100%; /* 左側の枠に合わせるため幅を100%に設定 */
+  padding: 5px; /* ヘッダー全体の余白 */
+  border-bottom: 1px solid #cccccc; /* ヘッダー下にグレーの境界線 */
+}
+
+/* メインコンテナ全体のスタイル */
+.main-container {
+  display: flex; /* フレックスボックスを使用して要素を配置 */
+  justify-content: center; /* 横方向に中央に配置 */
+  align-items: center; /* 縦方向に中央に配置 */
+  width: 100%; /* 幅を100%に設定 */
+  padding: 20px; /* 内側の余白を設定 */
+  overflow-y: auto; 
+
+}
+
+/* メインコンテンツエリア */
+.main-content {
+  display: flex; /* フレックスボックスを使用して要素を配置 */
+  gap: 2%; /* 要素間の隙間を設定 */
+  width: 100%; /* 幅を100%に設定 */
+  max-width: 1200px; /* 最大幅を設定 */
+  padding: 10px; /* 内側の余白を設定 */
+  border: 1px solid #cccccc; /* 境界線を設定 */
+  border-radius: 5px; /* 角を丸める */
+  background-color: #f9f9f9; /* 背景色を設定 */
+  box-sizing: border-box; /* パディングを含めたサイズを設定 */
+  max-height: 800px;
+}
+
+/* オプションセクション */
+.options {
+  flex: 1; /* 他の要素と相対的に成長を許可 */
+  background: white; /* 背景色を白に設定 */
+  padding: 20px; /* 内側の余白を設定 */
+  border-radius: 5px; /* 角を丸める */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
+}
+
+.password-box {
+  display: flex; /* フレックスボックスを使用して要素を配置 */
+  justify-content: space-between; /* 要素間のスペースを均等に配置 */
+  padding: 5px; /* 内側の余白を設定 */
+  border: 1px solid #ccc; /* 境界線を設定 */
+  border-radius: 4px; /* 角を丸める */
+  overflow-x: auto; /* 横方向のスクロールを許可 */
+  overflow-y: hidden; /* 縦方向のスクロールを隠す */
+  margin: 5px 0; /* 上下の余白を設定 */
+}
+
+.password-box span {
+  align-self: center; /* 垂直方向に中央に揃える */
+}
+
+span {
+  cursor: pointer; /* カーソルをポインターに変更 */
+}
+
+/* 各ラベルやオプション */
+.length-options, .checkbox-label, #btn {
+  margin-bottom: 15px; /* 下の余白を設定 */
+}
+
+/* パスワード生成ボタン */
+#btn {
+  background-color: black; /* ボタンの背景色を黒に設定 */
+  color: white; /* ボタンのテキスト色を白に設定 */
+  border: none; /* 境界線なし */
+  padding: 20px; /* 内側の余白を設定 */
+  border-radius: 5px; /* 角を丸める */
+  cursor: pointer; /* カーソルをポインターに変更 */
+  width: 100%; /* 親要素の幅に合わせる */
+  box-sizing: border-box; /* パディングを含めたサイズに */
+  margin: 10px 0; /* 上下の余白を設定 */
+}
+
+/* 生成されたパスワードエリア */
+.passwords {
+  flex: 1; /* 成長を許可 */
+  background: white; /* 背景色を白に設定 */
+  padding: 20px; /* 内側の余白を設定 */
+  border-radius: 5px; /* 角を丸める */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 影を追加 */
+  overflow-y: auto; /* 縦のスクロールを許可 */
+  overflow-x: auto; /* 横のスクロールを許可 */
+  max-height: 450px;
+}
+
+/* コピーボタン */
+.copy-btn {
+  background: none; /* 背景なし */
+  border: none; /* 境界線なし */
+  cursor: pointer; /* カーソルをポインターに変更 */
+  font-size: 1.2em; /* アイコンのサイズ調整 */
+  margin-left: 10px; /* アイコンとテキストの間のスペース */
+  color: #333; /* アイコンの色 */
+}
+
+/* アイコンのホバー時のエフェクト */
+.copy-btn:hover {
+  color: #007bff; /* ホバー時の色 */
+}
+
+/* スクロールのスタイル */
+.overflow-div {
+  width: 300px; /* 幅を300pxに設定 */
+  height: 300px; /* 高さを300pxに設定 */
+  border: solid 1px; /* 境界線を設定 */
+  overflow: scroll; /* スクロールを許可 */
+}
+
+/* その他のスタイル */
+.can-scroll {
+  width: max-content; /* 内容の幅に合わせる */
+  height: 200px; /* 高さを200pxに設定 */
+  background-color: rgb(248, 247, 244); /* 背景色を設定 */
+  position: absolute; /* 絶対位置に設定 */
+  top: 0; /* 上からの位置を0に設定 */
+  left: 0; /* 左からの位置を0に設定 */
+  overflow: auto; /* スクロールを許可 */
+}
