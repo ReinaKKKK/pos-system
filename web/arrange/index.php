@@ -1,8 +1,8 @@
 <?php
 // MySQL接続情報
-$servername = "127.0.0.1"; // ソケットの問題を避けるために localhost の代わりに IP を使用
+$servername = "127.0.0.1"; 
 $username = "root";
-$password = "";  // パスワードがない場合
+$password = "";  // パスワードがない
 $dbname = "arrange";
 $port = 3306; // MySQLのポートを3306に設定
 
@@ -63,32 +63,64 @@ if ($events->rowCount() > 0) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>イベント作成</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
 </head>
 <body>
 
 <h1>イベント作成</h1>
 
-<!-- フォーム -->
 <form action="index.php" method="POST">
     <label for="title">イベントタイトル:</label>
     <input type="text" id="title" name="title" required><br><br>
     
-    <label for="memo">メモ:</label>
+    <label for="memo">詳細:</label>
     <textarea id="memo" name="memo" required></textarea><br><br>
+
+    <!-- 開始時間選択 -->
+    <label for="start-time-of-day">時間帯:</label>
+    <select id="start-time-of-day">
+        <option value="AM">午前</option>
+        <option value="PM">午後</option>
+    </select><br><br>
     
-    <label for="datetime">日にちと時間:</label>
-    <input type="datetime-local" id="datetime" name="datetime" required><br><br>
-    
+    <label for="startHour">開始時間:</label>
+    <select id="startHour"></select>
+    <select id="startMinute"></select><br><br>
+
+    <!-- 終了時間帯選択 -->
+    <label for="end-time-of-day">時間帯:</label>
+    <select id="end-time-of-day">
+        <option value="AM">午前</option>
+        <option value="PM">午後</option>
+    </select><br><br>
+
+    <!-- 終了時間選択 -->
+    <label for="endHour">終了時間:</label>
+    <select id="endHour"></select>
+    <select id="endMinute"></select><br><br>
+
+    <!-- 追加ボタン -->
+    <button id="btn">追加</button>
+
+    <!-- 選択した候補日エリア -->
+    <section class="available" id="available-column">
+        <!-- 選択された候補日がここに表示される -->
+        <div id="available-column"></div>
+    </section>
+
     <label for="organizer_password">主催者パスワード:</label>
     <input type="password" id="organizer_password" name="organizer_password" required><br><br>
     
-    <button type="submit">イベントを作成</button>
+    <button type="submit">イベントを作成</button>                 
+
 </form>
 
 </body>
