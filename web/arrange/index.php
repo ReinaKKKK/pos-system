@@ -17,12 +17,21 @@ try {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = $_POST['title'];
     $memo = $_POST['memo'];
-    $datetime = $_POST['datetime'];
     $organizer_password = $_POST['organizer_password'];
+    $date = $_POST['date'];
+    $start_time = $_POST['startHour'] . ':' . $_POST['startMinute'];
+    $end_time = $_POST['endHour'] . ':' . $_POST['endMinute'];
+
+    var_dump($_POST);
+    //exit;
+
+    // 候補日リストの受け取り
+    $candidates = isset($_POST['candidates']) ? json_decode($_POST['candidates'], true) : [];
 
     // イベント作成のためのSQLクエリ
-    $sql = "INSERT INTO events (name, detail, created_at, updated_at) 
-            VALUES (:title, :memo, NOW(), NOW())";
+    $sql = "INSERT INTO events (name, detail, date, start_time, end_time, created_at, updated_at) 
+    VALUES (:title, :memo, :date, :start_time, :end_time, NOW(), NOW())";
+
 
     // PDOを使用して実行
     $stmt = $db->prepare($sql);
@@ -30,21 +39,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // プレースホルダと変数をバインド
     $stmt->bindParam(':title', $title);
     $stmt->bindParam(':memo', $memo);
+    $stmt->bindParam(':date', $date);
+    $stmt->bindParam(':start_time', $start_time);
+    $stmt->bindParam(':end_time', $end_time);
+    
+   // SQL実行
+   if ($stmt->execute()) {
+    // イベント作成後にイベントIDを取得
+    $event_id = $db->lastInsertId();
 
-    // SQL実行
-    if ($stmt->execute()) {
-        // イベント作成後にイベントIDを取得
-        $event_id = $db->lastInsertId();
+    // 参加者用URLを作成
+    $event_url = "event_url.php?event_id=" . $event_id;
 
-        // 参加者用URLを作成
-        $event_url = "event_url.php?event_id=" . $event_id;
-
-        // イベント作成後にURLを表示するページにリダイレクト
-        header("Location: event_url.php?event_id=$event_id");
-        exit();  // リダイレクト後に処理を終了
-    } else {
-        echo "イベントの作成に失敗しました。";
-    }
+    // イベント作成後にURLを表示するページにリダイレクト
+    header("Location: $event_url");
+    exit();  // リダイレクト後に処理を終了
+} else {
+    // エラー時に詳細を表示
+    $errorInfo = $stmt->errorInfo();
+    echo "イベントの作成に失敗しました。エラー情報: " . print_r($errorInfo, true);
+}
 }
 
 // データの取得
@@ -84,7 +98,14 @@ if ($events->rowCount() > 0) {
     <label for="memo">詳細:</label>
     <textarea id="memo" name="memo" required></textarea><br><br>
 
-    <!-- 開始時間選択 -->
+    <label>
+        日付を選択してください
+        <input type='date' id="inputDate" name="date" oninput='dateResult.textContent = this.value'>
+    </label>
+    <p>
+        選択された日付: <span id='dateResult'></span>
+    </p>
+
     <label for="start-time-of-day">時間帯:</label>
     <select id="start-time-of-day">
         <option value="AM">午前</option>
@@ -92,35 +113,35 @@ if ($events->rowCount() > 0) {
     </select><br><br>
     
     <label for="startHour">開始時間:</label>
-    <select id="startHour"></select>
-    <select id="startMinute"></select><br><br>
+    <select id="startHour" name="startHour"></select>
+    <select id="startMinute" name="startMinute"></select>
+    <br><br>
 
-    <!-- 終了時間帯選択 -->
     <label for="end-time-of-day">時間帯:</label>
     <select id="end-time-of-day">
         <option value="AM">午前</option>
         <option value="PM">午後</option>
     </select><br><br>
 
-    <!-- 終了時間選択 -->
     <label for="endHour">終了時間:</label>
-    <select id="endHour"></select>
-    <select id="endMinute"></select><br><br>
+    <select id="endHour" name="endHour"></select>
+    <select id="endMinute" name="endMinute"></select>
+    <br><br>
 
-    <!-- 追加ボタン -->
-    <button id="btn">追加</button>
+    <button id="btn" type="button">候補日を追加</button>
 
-    <!-- 選択した候補日エリア -->
     <section class="available" id="available-column">
-        <!-- 選択された候補日がここに表示される -->
-        <div id="available-column"></div>
+        <h3>選択された候補日</h3>
+        <ul id="candidates-list">
+            <!-- 候補日がここにリスト表示される -->  
+        </ul>
+        
     </section>
 
     <label for="organizer_password">主催者パスワード:</label>
     <input type="password" id="organizer_password" name="organizer_password" required><br><br>
     
     <button type="submit">イベントを作成</button>                 
-
 </form>
 
 </body>
