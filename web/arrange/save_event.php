@@ -12,7 +12,6 @@ if (isset($_GET['event_id'])) {
     exit;
 
 }
-
 ?>
 
 <!DOCTYPE html>

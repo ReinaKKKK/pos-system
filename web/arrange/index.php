@@ -12,45 +12,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['name'];
     $detail = isset($_POST['detail']) ? $_POST['detail'] : '';  // 空欄でもOK
     $edit_password = isset($_POST['edit_password']) ? $_POST['edit_password'] : '';  // 空欄でもOK
+    $date = $_POST['date'];
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
 
     // nameが空でないか確認
     if (empty($name)) {
         echo "イベント名は必須です。";
         exit;
     }
-
     
-// イベント作成のためのSQLクエリ
-$sql = "INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
-VALUES (:name, :detail, :edit_password, NOW(), NOW())";
+    // dateが空でないか確認
+    if (empty($date)) {
+        echo "候補日時を入れてください。";
+        exit;
+    }
 
-// PDOを使用して実行
-$stmt = $db->prepare($sql);
-// プレースホルダと変数をバインド
-$stmt->bindParam(':name', $name);
-$stmt->bindParam(':detail', $detail);
-$stmt->bindParam(':edit_password', $edit_password);
+    // start_timeが空でないか確認
+    if (empty($start_time)) {
+        echo "候補日時を入れてください。";
+        exit;
+    }
 
-// SQL実行
-if ($stmt->execute()) {
-// イベント作成後にイベントIDを取得
-$event_id = $db->lastInsertId();
+    // end_timeが空でないか確認
+    if (empty($end_time)) {
+        echo "候補日時を入れてください。";
+        exit;
+    }
+    
+        // イベントをまずeventsテーブルに挿入
+        $sql_events = "INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
+        VALUES (:name, :detail, :edit_password, NOW(), NOW())";
+        $stmt_events = $db->prepare($sql_events);
+        $stmt_events->execute([
+        ':name' => $name,
+        ':detail' => $detail,
+        ':edit_password' => $edit_password,
+        ]);
+         
+        // 挿入されたイベントIDを取得
+        $event_id = $db->lastInsertId();  
+        
+        // availabilitiesテーブルに日時情報を挿入
+        $sql_availabilities = "INSERT INTO availabilities (event_id, date, start_time, end_time, created_at, updated_at) 
+                        VALUES (:event_id, :date, :start_time, :end_time, NOW(), NOW())";
+        $stmt_availabilities = $db->prepare($sql_availabilities);  
+        $stmt_availabilities->execute([
+        ':event_id' => $event_id,
+        ':date' => $date,
+        ':start_time' => $start_time, 
+        ':end_time' => $end_time, 
+        ]);
 
-// イベントURLを作成（イベント詳細ページ）
-// $event_url = "save_event.php?event_id=" . $event_id;
 
-// イベント作成後にURLを表示するページにリダイレクト
-// header("Location: $event_url");
-header("Location: save_event.php?event_id=" . $event_id);
-exit();  // リダイレクト後に処理を終了
-} else {
-// エラー時に詳細を表示
-$errorInfo = $stmt->errorInfo();
-echo "イベントの作成に失敗しました。エラー情報: " . print_r($errorInfo, true);
-}
-}
+    // イベント作成後にURLを表示するページにリダイレクト
+    header("Location: save_event.php?event_id=" . $event_id);
+    exit();  // リダイレクト後に処理を終了
+    } else {
+    // エラー時に詳細を表示
+    $errorInfo = $stmt_availabilities->errorInfo();  
+    echo "日時の挿入に失敗しました。エラー情報: " . print_r($errorInfo, true);
+    }
+
+    // 時間帯(AM/PM)と時間、分からDATETIMEを作成する関数
+    function convertToDatetime($date, $time, $ampm, $minute) {
+    $hour = (int)$time;
+    if ($ampm == 'PM' && $hour < 12) {
+    $hour += 12;
+    } elseif ($ampm == 'AM' && $hour == 12) {
+    $hour = 0;
+    }
+    return $date . ' ' . sprintf('%02d', $hour) . ':' . $minute . ':00';
+    }
+
 ?>
-
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -69,23 +104,46 @@ echo "イベントの作成に失敗しました。エラー情報: " . print_r(
         <label>イベント詳細:</label>
         <textarea name="detail"></textarea><br><br>
 
+        <label>
+        日付を選択してください
+        <input type='date' id="inputDate" name="date" oninput='dateResult.textContent = this.value'>
+        </label><br><br>
+        
+        <label for="start-time-of-day">時間帯:</label>
+        <select id="start-time-of-day">
+        <option value="AM">午前</option>
+        <option value="PM">午後</option>
+        </select><br><br>
+
+        <label for="start_time">時間:</label>
+        <select id="start_time" name="start_time"></select>
+        <br><br>
+
+        <label for="start_time_minute">分:</label>
+        <select id="start_time_minute" name="start_time_minute"></select>
+        <br><br>
+        <text> ～</text><br><br>
+
+        <label for="end-time-of-day">時間帯:</label>
+        <select id="end-time-of-day">
+        <option value="AM">午前</option>
+        <option value="PM">午後</option>
+        </select><br><br>
+
+        <label for="end_time">時間:</label>
+        <select id="end_time" name="end_time"></select>
+        <br><br>
+        <label for="end_time_minute">分:</label>
+        <select id="end_time_minute" name="end_time_minute"></select>
+        <br><br>
+        <button type="button" onclick="addTimeSlot()">候補を追加</button><br><br>
+
+        <!-- 候補日を表示するコンテナ -->
+        <div id="time-slot-container"></div>
+
         <label>編集パスワード:</label>
         <input type="password" name="edit_password"><br><br>
 
-        <label>候補日時:</label>
-        <div id="timeSlots">
-            <!-- 最初の日時入力欄 -->
-            <div class="time-slot">
-                <label>日付:</label>
-                <input type="date" name="dates[]" required>
-                <label>From:</label>
-                <input type="time" name="start_times[]" required>
-                <label>To:</label>
-                <input type="time" name="end_times[]" required><br>
-                <button type="button" class="remove-button" onclick="removeTimeSlot(this)">削除</button><br>
-            </div>
-        </div>
-        <button type="button" onclick="addTimeSlot()">時間帯を追加</button><br><br>
 
         <input type="submit" value="イベントを作成">
     </form>
