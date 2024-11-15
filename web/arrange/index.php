@@ -68,10 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':end_time' => $end_time,
         ]);
 
-        // 参加者に渡すURLの表示
-        $event_url = "http://yourdomain.com/event_details.php?id=" . $event_id; // イベントIDを含むURLを作成
-        echo "イベントが作成されました。参加者はこちらのURLからイベント詳細をご確認ください: <a href='$event_url'>$event_url</a>";
-        exit; // 追加後は処理を終了してページ遷移
+        
 
     } catch (PDOException $e) {
         // データベース挿入時のエラーハンドリング
@@ -86,6 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ]);
         exit();
     }
+    $event_id = rand(1000, 9999); // 仮のイベントID。データベースで生成されるべき
+
+    // セッションにイベントIDを保存
+    $_SESSION['event_id'] = $event_id;
+
+    // save_event.phpにリダイレクト
+    header("Location: save_event.php?event_id=" . $event_id);
+    exit; // リダイレクト後の処理を終了
+
+
 }
 
         ?>
