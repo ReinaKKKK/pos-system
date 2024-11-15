@@ -1,91 +1,94 @@
 <?php
 try {
     $db = new PDO('mysql:host=mysql; dbname=arrange; charset=utf8', 'root', '');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);  // エラーを例外として処理
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     echo 'DB接続エラー: ' . $e->getMessage();
     exit();
 }
 
-// フォームが送信された場合の処理
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['name'];
-    $detail = isset($_POST['detail']) ? $_POST['detail'] : '';  // 空欄でもOK
-    $edit_password = isset($_POST['edit_password']) ? $_POST['edit_password'] : '';  // 空欄でもOK
+    $detail = isset($_POST['detail']) ? $_POST['detail'] : '';
+    $edit_password = isset($_POST['edit_password']) ? $_POST['edit_password'] : '';
     $date = $_POST['date'];
-    $start_time = $_POST['start_time'];
-    $end_time = $_POST['end_time'];
+    $start_time_hour = $_POST['start_time'];
+    $start_time_minute = $_POST['start_time_minute'];
+    $start_time_of_day = $_POST['start_time_of_day'];
+    $end_time_hour = $_POST['end_time'];
+    $end_time_minute = $_POST['end_time_minute'];
+    $end_time_of_day = $_POST['end_time_of_day'];
 
-    // nameが空でないか確認
+
+ // 必須項目欄が空だった場合、選択しなかった場合
     if (empty($name)) {
         echo "イベント名は必須です。";
         exit;
     }
-    
-    // dateが空でないか確認
-    if (empty($date)) {
-        echo "候補日時を入れてください。";
-        exit;
-    }
 
-    // start_timeが空でないか確認
-    if (empty($start_time)) {
+    if (empty($date) || empty($start_time_hour) || empty($end_time_hour)) {
         echo "候補日時を入れてください。";
         exit;
     }
+    // 午前・午後を24時間形式に変換
+    $start_hour_24 = ($start_time_of_day == 'PM' && $start_time_hour != 12) ? $start_time_hour + 12 : ($start_time_hour == 12 && $start_time_of_day == 'AM' ? 0 : $start_time_hour);
+    $end_hour_24 = ($end_time_of_day == 'PM' && $end_time_hour != 12) ? $end_time_hour + 12 : ($end_time_hour == 12 && $end_time_of_day == 'AM' ? 0 : $end_time_hour);
 
-    // end_timeが空でないか確認
-    if (empty($end_time)) {
-        echo "候補日時を入れてください。";
+    // 終了時刻の時間が24時間制に収まっているかを確認
+    if ($end_hour_24 >= 24 || $end_hour_24 < 0) {
+        echo "終了時刻が無効です。24時間以内で入力してください。";
         exit;
     }
-    
-        // イベントをまずeventsテーブルに挿入
+ 
+    // 24時間形式の時間と日付を結合してDATETIMEを作成
+    $start_time = date("Y-m-d H:i:s", strtotime("$date $start_hour_24:$start_time_minute:00"));
+    $end_time = date("Y-m-d H:i:s", strtotime("$date $end_hour_24:$end_time_minute:00"));
+
+    try {
+        // eventsテーブルへのデータ挿入
         $sql_events = "INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
-        VALUES (:name, :detail, :edit_password, NOW(), NOW())";
+                       VALUES (:name, :detail, :edit_password, NOW(), NOW())";
         $stmt_events = $db->prepare($sql_events);
         $stmt_events->execute([
-        ':name' => $name,
-        ':detail' => $detail,
-        ':edit_password' => $edit_password,
-        ]);
-         
-        // 挿入されたイベントIDを取得
-        $event_id = $db->lastInsertId();  
-        
+            ':name' => $name,
+            ':detail' => $detail,
+            ':edit_password' => $edit_password,
+        ]); 
+
+        $event_id = $db->lastInsertId();
+
         // availabilitiesテーブルに日時情報を挿入
         $sql_availabilities = "INSERT INTO availabilities (event_id, date, start_time, end_time, created_at, updated_at) 
-                        VALUES (:event_id, :date, :start_time, :end_time, NOW(), NOW())";
-        $stmt_availabilities = $db->prepare($sql_availabilities);  
+                               VALUES (:event_id, :date, :start_time, :end_time, NOW(), NOW())";
+        $stmt_availabilities = $db->prepare($sql_availabilities);
         $stmt_availabilities->execute([
-        ':event_id' => $event_id,
-        ':date' => $date,
-        ':start_time' => $start_time, 
-        ':end_time' => $end_time, 
+            ':event_id' => $event_id,
+            ':date' => $date,
+            ':start_time' => $start_time,
+            ':end_time' => $end_time,
         ]);
 
+        // 参加者に渡すURLの表示
+        $event_url = "http://yourdomain.com/event_details.php?id=" . $event_id; // イベントIDを含むURLを作成
+        echo "イベントが作成されました。参加者はこちらのURLからイベント詳細をご確認ください: <a href='$event_url'>$event_url</a>";
+        exit; // 追加後は処理を終了してページ遷移
 
-    // イベント作成後にURLを表示するページにリダイレクト
-    header("Location: save_event.php?event_id=" . $event_id);
-    exit();  // リダイレクト後に処理を終了
-    } else {
-    // エラー時に詳細を表示
-    $errorInfo = $stmt_availabilities->errorInfo();  
-    echo "日時の挿入に失敗しました。エラー情報: " . print_r($errorInfo, true);
+    } catch (PDOException $e) {
+        // データベース挿入時のエラーハンドリング
+        echo "データベースエラー: " . $e->getMessage();
+        echo "<br><strong>デバッグ情報:</strong><br>";
+        echo "SQL: $sql_events <br>";
+        echo "Bindings: ";
+        print_r([
+            ':name' => $name,
+            ':detail' => $detail,
+            ':edit_password' => $edit_password,
+        ]);
+        exit();
     }
+}
 
-    // 時間帯(AM/PM)と時間、分からDATETIMEを作成する関数
-    function convertToDatetime($date, $time, $ampm, $minute) {
-    $hour = (int)$time;
-    if ($ampm == 'PM' && $hour < 12) {
-    $hour += 12;
-    } elseif ($ampm == 'AM' && $hour == 12) {
-    $hour = 0;
-    }
-    return $date . ' ' . sprintf('%02d', $hour) . ':' . $minute . ':00';
-    }
-
-?>
+        ?>
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -110,9 +113,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </label><br><br>
         
         <label for="start-time-of-day">時間帯:</label>
-        <select id="start-time-of-day">
-        <option value="AM">午前</option>
-        <option value="PM">午後</option>
+        <select id="start-time-of-day" name="start_time_of_day">
+            <option value="AM">午前</option>
+            <option value="PM">午後</option>
         </select><br><br>
 
         <label for="start_time">時間:</label>
@@ -125,9 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <text> ～</text><br><br>
 
         <label for="end-time-of-day">時間帯:</label>
-        <select id="end-time-of-day">
-        <option value="AM">午前</option>
-        <option value="PM">午後</option>
+        <select id="end-time-of-day" name="end_time_of_day">
+            <option value="AM">午前</option>
+            <option value="PM">午後</option>
         </select><br><br>
 
         <label for="end_time">時間:</label>
@@ -149,3 +152,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </form>
 </body>
 </html>
+
+
