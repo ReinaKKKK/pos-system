@@ -36,7 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endTimeHour = $_POST['endTimeHour'];
     $endTimeMinute = $_POST['endTimeMinute'];
     $endTimeOfDay = $_POST['endTimeOfDay'];
-    
+        // AM/PMを24時間形式に変換
+    $startHour24 = ($startTimeOfDay === 'PM' && $startTimeHour != 12) ? $startTimeHour + 12 : ($startTimeOfDay === 'AM' && $startTimeHour == 12 ? 0 : $startTimeHour);
+    $endHour24 = ($endTimeOfDay === 'PM' && $endTimeHour != 12) ? $endTimeHour + 12 : ($endTimeOfDay === 'AM' && $endTimeHour == 12 ? 0 : $endTimeHour);
+
 
     // 入力データのバリデーション
     $errors = validate([

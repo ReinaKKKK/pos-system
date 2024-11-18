@@ -1,5 +1,5 @@
 <?php
-include('env.php');
+require_once 'path/to/env.php'; 
 session_start(); // セッション開始
 
 // URLパラメータ「event_id」がセットされている場合、その値を取得

@@ -1,4 +1,5 @@
-<!-- イベントURLをリンクとして表示 -->
-<p><a href="<?php echo htmlspecialchars('http://localhost:18888/arrange/'. $event_id, ENT_QUOTES, 'UTF-8'); ?>" target="_blank">
-    <?php echo htmlspecialchars('http://localhost:18888/arrange/'.$event_id, ENT_QUOTES, 'UTF-8'); ?>
-</a></p>
+<?php
+// 環境によって変わる値を設定
+define('BASE_URL', 'http://localhost:18888/arrange/');
+?>
+

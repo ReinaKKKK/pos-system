@@ -4,19 +4,56 @@ document.addEventListener('DOMContentLoaded', function () {
         addButton.addEventListener('click', addTimeSlot);
     }
 
+    // 初期値としてAMの時間オプションを設定
     updateTimeOptions('AM', 'startTimeHour', 'startTimeMinute');
-    updateTimeOptions('AM', 'endTimeHour', 'endTimeMinute'); //AMPM
+    updateTimeOptions('AM', 'endTimeHour', 'endTimeMinute'); // AMPM
 
+    // AM/PM選択肢が変更されたときに開始時間のオプションを更新
     document.getElementById('startTimeOfDay').addEventListener('change', function () {
         updateTimeOptions(this.value, 'startTimeHour', 'startTimeMinute');
-    }); //選択された AM または PM に応じて開始時間のオプションを更新します
+    });
 
+    // 開始時間が変更されたときに終了時間のオプションを更新
     document.getElementById('startTimeHour').addEventListener('change', function () {
         updateTimeOptions(this.value, 'endTimeHour', 'endTimeMinute');
-    }); //開始時間を設定することで終了時間がそれよりも前にならないように。
+    });
+
+    // イベントIDの確認とデバッグ
+function debugEventID() {
+    const eventID = document.getElementById('eventID').value; // EventIDがどこに保存されているか確認
+    console.log('EventID:', eventID); // EventIDの値をデバッグ出力
+    return eventID;
+}
+    // フォーム送信時に時刻を24時間形式に変換して送信
+    document.getElementById('submitFormButton').addEventListener('click', function () {
+        const startHour = document.getElementById('startTimeHour').value;
+        const startPeriod = document.getElementById('startTimeOfDay').value;
+        const startHour24 = convertTo24HourFormat(parseInt(startHour), startPeriod);
+
+        const endHour = document.getElementById('endTimeHour').value;
+        const endPeriod = document.getElementById('endTimeOfDay').value;
+        const endHour24 = convertTo24HourFormat(parseInt(endHour), endPeriod);
+
+        // フォームに送信する値を更新
+        document.getElementById('startHour24').value = startHour24;
+        document.getElementById('endHour24').value = endHour24;
+
+        // フォームを送信
+        document.forms[0].submit();
+    });
 });
 
-// AMPMに基づいて時間オプションを設定
+// AM/PMを24時間形式に変換する関数
+function convertTo24HourFormat(hour, period) {
+    if (period === 'PM' && hour !== 12) {
+        return hour + 12; // 12 PM以外は24時間形式に変換
+    } else if (period === 'AM' && hour === 12) {
+        return 0; // 12 AMは0時に変換
+    }
+    return hour;
+}
+
+// 時間オプションをAM/PMに基づいて更新
 function updateTimeOptions(timeOfDay, timeSelectId, minuteSelectId) {
     const timeSelect = document.getElementById(timeSelectId);
     const minuteSelect = document.getElementById(minuteSelectId);
@@ -24,8 +61,9 @@ function updateTimeOptions(timeOfDay, timeSelectId, minuteSelectId) {
     minuteSelect.innerHTML = '';
 
     let startTime = (timeOfDay === 'PM') ? 12 : 0;
-    let endTime = (timeOfDay === 'PM') ? 24 : 12;
+    let endTime = (timeOfDay === 'PM') ? 12 : 24;
 
+    // 時間のオプションを追加
     for (let i = startTime; i < endTime; i++) {
         let option = document.createElement('option');
         option.value = i.toString().padStart(2, '0');
@@ -33,6 +71,7 @@ function updateTimeOptions(timeOfDay, timeSelectId, minuteSelectId) {
         timeSelect.appendChild(option);
     }
 
+    // 分のオプションを15分刻みで追加
     for (let i = 0; i < 60; i += 15) {
         let option = document.createElement('option');
         option.value = i.toString().padStart(2, '0');
