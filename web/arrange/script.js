@@ -1,109 +1,106 @@
 document.addEventListener('DOMContentLoaded', function () {
     const addButton = document.querySelector('button[type="button"]:not(.remove-button)');
-    
-    // ボタンが押されたときに時間スロットを追加
-    addButton.addEventListener('click', addTimeSlot);
+    if (addButton) {
+        addButton.addEventListener('click', addTimeSlot);
+    }
 
-    // 最初に時間帯を設定
-    populateTimeOptions();
+    updateTimeOptions('AM', 'startTimeHour', 'startTimeMinute');
+    updateTimeOptions('AM', 'endTimeHour', 'endTimeMinute'); //AMPM
+
+    document.getElementById('startTimeOfDay').addEventListener('change', function () {
+        updateTimeOptions(this.value, 'startTimeHour', 'startTimeMinute');
+    }); //選択された AM または PM に応じて開始時間のオプションを更新します
+
+    document.getElementById('startTimeHour').addEventListener('change', function () {
+        updateTimeOptions(this.value, 'endTimeHour', 'endTimeMinute');
+    }); //開始時間を設定することで終了時間がそれよりも前にならないように。
 });
 
-// 時間帯選択を更新する関数
+// AMPMに基づいて時間オプションを設定
 function updateTimeOptions(timeOfDay, timeSelectId, minuteSelectId) {
     const timeSelect = document.getElementById(timeSelectId);
     const minuteSelect = document.getElementById(minuteSelectId);
-    timeSelect.innerHTML = '';  // 既存のオプションをリセット
-    minuteSelect.innerHTML = ''; // 既存の分オプションをリセット
+    timeSelect.innerHTML = '';
+    minuteSelect.innerHTML = '';
 
-    // 午前と午後で異なる時間を選べるようにする
-    let startTime = 0;
-    let endTime = 12;
-    
-    if (timeOfDay === 'PM') {
-        startTime = 12;
-        endTime = 24;
-    }
-    
-    // 時間のオプションを追加
+    let startTime = (timeOfDay === 'PM') ? 12 : 0;
+    let endTime = (timeOfDay === 'PM') ? 24 : 12;
+
     for (let i = startTime; i < endTime; i++) {
         let option = document.createElement('option');
-        option.value = (i < 10) ? '0' + i : i; // 時間を2桁で表示
-        option.text = (i < 10) ? '0' + i : i;
+        option.value = i.toString().padStart(2, '0');
+        option.text = i.toString().padStart(2, '0');
         timeSelect.appendChild(option);
     }
 
-    // 分のオプションを追加 (00, 15, 30, 45)
     for (let i = 0; i < 60; i += 15) {
         let option = document.createElement('option');
-        option.value = (i < 10) ? '0' + i : i;
-        option.text = (i < 10) ? '0' + i : i;
+        option.value = i.toString().padStart(2, '0');
+        option.text = i.toString().padStart(2, '0');
         minuteSelect.appendChild(option);
     }
 }
 
-// イベント候補を追加する関数
-function addTimeSlot() {
-    const startTimeOfDay = document.getElementById('start-time-of-day').value;
-    const endTimeOfDay = document.getElementById('end-time-of-day').value;
-    const startTime = document.getElementById('start_time').value;
-    const startTimeMinute = document.getElementById('start_time_minute').value;
-    const endTime = document.getElementById('end_time').value;
-    const endTimeMinute = document.getElementById('end_time_minute').value;
-    const date = document.getElementById('inputDate').value;  // 日付を取得
+// 時刻をフォーマット
+function formatTime(hours, minutes) {
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+}
 
-    // 入力値を検証
-    if (!startTime || !startTimeMinute || !endTime || !endTimeMinute || !date) {
+// 候補日時リスト
+let timeSlots = [];
+
+// 候補日時を追加
+function addTimeSlot() {
+    const startTimeOfDay = document.getElementById('startTimeOfDay').value;
+    const endTimeOfDay = document.getElementById('endTimeOfDay').value;
+    const startTime = formatTime(
+        document.getElementById('startTimeHour').value,
+        document.getElementById('startTimeMinute').value
+    );
+    const endTime = formatTime(
+        document.getElementById('endTimeHour').value,
+        document.getElementById('endTimeMinute').value
+    );
+    const date = document.getElementById('inputDate').value;
+
+    if (!startTime || !endTime || !date) {
         alert('すべての時間、分、日付を入力してください。');
         return;
     }
 
-    // 時間帯と時間の組み合わせを整える
-    const startDate = date + ' ' + startTimeOfDay + ' ' + startTime + ':' + startTimeMinute;
-    const endDate = date + ' ' + endTimeOfDay + ' ' + endTime + ':' + endTimeMinute;
+    const startDate = `${date} ${startTimeOfDay} ${startTime}`;
+    const endDate = `${date} ${endTimeOfDay} ${endTime}`;
 
-    // 新しい候補日時を表示
-    displayTimeSlot(startDate, endDate);
+    if (timeSlots.some(slot => slot.startDate === startDate && slot.endDate === endDate)) {
+        alert('同じ候補日時が既に追加されています。');
+        return;
+    }
+
+    timeSlots.push({ startDate, endDate });
+    displayTimeSlots();
 }
 
-// 新しい時間帯の表示を行う関数
-function displayTimeSlot(startDate, endDate) {
-    const timeSlotContainer = document.getElementById("time-slot-container");
+// 候補日時を表示
+function displayTimeSlots() {
+    const timeSlotContainer = document.getElementById('timeSlotContainer');
+    timeSlotContainer.innerHTML = '';
 
-    // 新しい要素を作成
-    const timeSlot = document.createElement("div");
-    timeSlot.classList.add("time-slot");
-    timeSlot.innerHTML = `<p>選択された日付: ${startDate}</p><p>候補日時: ${startDate} ～ ${endDate}</p>`;
+    timeSlots.forEach((slot, index) => {
+        const timeSlot = document.createElement('div');
+        timeSlot.classList.add('timeSlot');
+        timeSlot.innerHTML = `
+            <p>候補日時: ${slot.startDate} ～ ${slot.endDate}</p>
+        `;
 
-    // 削除ボタンを作成して追加
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "削除";
-    removeButton.classList.add("remove-button");
-    removeButton.onclick = function () {
-        timeSlotContainer.removeChild(timeSlot);
-    };
-    timeSlot.appendChild(removeButton);
+        const removeButton = document.createElement('button');
+        removeButton.textContent = '削除';
+        removeButton.classList.add('removeButton');
+        removeButton.onclick = function () {
+            timeSlots.splice(index, 1);
+            displayTimeSlots();
+        };
 
-    // コンテナに新しい候補日を追加
-    timeSlotContainer.appendChild(timeSlot);
-}
-
-// 時間スロットを削除する関数
-function removeTimeSlot(button) {
-    button.parentElement.remove();
-}
-
-// ページ読み込み時に時間帯選択を初期化
-window.onload = function() {
-    updateTimeOptions('AM', 'start_time', 'start_time_minute');
-    updateTimeOptions('AM', 'end_time', 'end_time_minute');
-
-    // 開始時間帯が変更されたときに時間オプションを更新
-    document.getElementById('start-time-of-day').addEventListener('change', function() {
-        updateTimeOptions(this.value, 'start_time', 'start_time_minute');
+        timeSlot.appendChild(removeButton);
+        timeSlotContainer.appendChild(timeSlot);
     });
-
-    // 終了時間帯が変更されたときに時間オプションを更新
-    document.getElementById('end-time-of-day').addEventListener('change', function() {
-        updateTimeOptions(this.value, 'end_time', 'end_time_minute');
-    });
-};
+}
