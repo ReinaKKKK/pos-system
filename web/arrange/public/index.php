@@ -1,29 +1,8 @@
 <?php
-include 'db.php'; 
 
-// バリデーション
-function validate($data) {
-    $errors = [];
+include '../database/db.php';  // public から database への相対パス
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php';
 
-    // イベント名が空か255文字を超えている場合
-    if (empty($data['name'])) {
-        $errors[] = "イベント名は必須です。";
-    } elseif (strlen($data['name']) > 255) {
-        $errors[] = "イベント名は255文字以下で入力してください。";
-    }
-
-    // 日付と時刻のチェック
-    if (empty($data['date']) || empty($data['startTimeHour']) || empty($data['endTimeHour'])) {
-        $errors[] = "候補日時を入れてください。";
-    }
-
-    // 終了時刻が開始時刻より前か、無効な時間の場合
-    if ($data['endHour24'] <= $data['startHour24'] || $data['endHour24'] >= 24 || $data['endHour24'] < 0) {
-        $errors[] = "終了時刻が無効です。開始時刻より遅い時間を指定してください。また、終了時刻は24時間以内で入力してください。";
-    }
-
-    return $errors;
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
@@ -39,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // AM/PMを24時間形式に変換
     $startHour24 = ($startTimeOfDay === 'PM' && $startTimeHour != 12) ? $startTimeHour + 12 : ($startTimeOfDay === 'AM' && $startTimeHour == 12 ? 0 : $startTimeHour);
     $endHour24 = ($endTimeOfDay === 'PM' && $endTimeHour != 12) ? $endTimeHour + 12 : ($endTimeOfDay === 'AM' && $endTimeHour == 12 ? 0 : $endTimeHour);
-
 
     // 入力データのバリデーション
     $errors = validate([
@@ -58,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit;
     }
-    
+
     // 24時間形式の時間と日付を結合してDATETIMEを作成
     $startTime = date("Y-m-d H:i:s", strtotime("$date $startHour24:$startTimeMinute:00"));
     $endTime = date("Y-m-d H:i:s", strtotime("$date $endHour24:$endTimeMinute:00"));
@@ -66,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // トランザクション開始
         $db->beginTransaction();
-    
+
         // eventsテーブルへのデータ挿入
         $sqlEvents = "INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
                       VALUES (:name, :detail, :edit_password, NOW(), NOW())";
@@ -75,10 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':name' => $name,
             ':detail' => $detail,
             ':edit_password' => $editPassword,
-        ]); 
-    
-        $eventId = $db->lastInsertId(); // 追加したイベントIDを取得
-    
+        ]);
+
+        $eventId = $db->lastInsertId();
         // availabilitiesテーブルに日時情報を挿入
         $sqlAvailabilities = "INSERT INTO availabilities (event_id, date, start_time, end_time, created_at, updated_at) 
                               VALUES (:event_id, :date, :start_time, :end_time, NOW(), NOW())";
@@ -89,14 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':start_time' => $startTime,
             ':end_time' => $endTime,
         ]);
-    
+
         // トランザクションをコミット
         $db->commit();
-    
     } catch (PDOException $e) {
         // エラーが発生した場合はロールバック
         $db->rollBack();
-        
         // エラーメッセージとデバッグ情報を表示
         echo "データベースエラー: " . $e->getMessage();
         echo "<br><strong>デバッグ情報:</strong><br>";

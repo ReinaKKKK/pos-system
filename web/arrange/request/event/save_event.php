@@ -1,5 +1,7 @@
 <?php
-require_once 'path/to/env.php'; 
+
+require_once 'path/to/env.php';
+require_once 'path/to/functions.php';
 session_start(); // セッション開始
 
 // URLパラメータ「event_id」がセットされている場合、その値を取得
@@ -25,8 +27,11 @@ if (isset($_GET['event_id'])) {
 <p>参加者用のURLはこちらです：</p>
 
 <!-- イベントURLをリンクとして表示 -->
-<p><a href="<?php echo htmlspecialchars(BASE_URL . $event_id, ENT_QUOTES, 'UTF-8'); ?>" target="_blank">
-    <?php echo htmlspecialchars(BASE_URL . $event_id, ENT_QUOTES, 'UTF-8'); ?>
+//共通関数にする
+
+<!-- htmlspecialchars の代わりに関数 h() を使用 -->
+<p><a href="<?php echo h(BASE_URL . $event_id); ?>" target="_blank">
+    <?php echo h(BASE_URL . $event_id); ?>
 </a></p>
 
 </body>
