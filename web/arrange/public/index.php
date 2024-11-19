@@ -1,6 +1,6 @@
 <?php
 
-include '../database/db.php';  // public から database への相対パス
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php';
 
 
@@ -145,6 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>編集パスワード:</label>
         <input type="password" name="editPassword"><br><br>
         <input type="submit" value="イベントを作成">
-    </form>
+        </form>
 </body>
 </html>

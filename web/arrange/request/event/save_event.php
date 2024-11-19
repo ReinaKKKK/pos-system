@@ -27,8 +27,6 @@ if (isset($_GET['event_id'])) {
 <p>参加者用のURLはこちらです：</p>
 
 <!-- イベントURLをリンクとして表示 -->
-//共通関数にする
-
 <!-- htmlspecialchars の代わりに関数 h() を使用 -->
 <p><a href="<?php echo h(BASE_URL . $event_id); ?>" target="_blank">
     <?php echo h(BASE_URL . $event_id); ?>
