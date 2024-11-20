@@ -18,16 +18,20 @@ function validate($data)
     } elseif (strlen($data['name']) > 255) {
         $errors[] = "イベント名は255文字以下で入力してください。";
     }
-
-    // 日付と時刻のチェック
-    if (empty($data['date']) || empty($data['startTimeHour']) || empty($data['endTimeHour'])) {
-        $errors[] = "候補日時を入れてください。";
+    // 開始日と終了日のチェック
+    if (empty($data['startTime']) || empty($data['endTime'])) {
+        $errors[] = "開始時間と終了時間は必須です。";
     }
-
-    // 終了時刻が開始時刻より前か、無効な時間の場合
-    if ($data['endHour24'] <= $data['startHour24'] || $data['endHour24'] >= 24 || $data['endHour24'] < 0) {
-        $errors[] = "終了時刻が無効です。開始時刻より遅い時間を指定してください。また、終了時刻は24時間以内で入力してください。";
+    // 候補日時のリストが空かどうかを確認
+    if (empty($data['timeSlots'])) {
+        $errors[] = "少なくとも1つの候補日時を追加してください。";
+    } else {
+        foreach ($data['timeSlots'] as $slot) {
+            // 各候補日時が正しい形式かをチェック
+            if (empty($slot['startTime']) || empty($slot['endTime'])) {
+                $errors[] = "すべての候補日時に開始時間と終了時間を入力してください。";
+            }
+        }
     }
-
     return $errors;
 }

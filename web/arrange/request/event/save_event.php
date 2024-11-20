@@ -9,16 +9,16 @@ if (isset($_GET['event_id'])) {
     $event_id = $_GET['event_id'];  // URLパラメータからevent_idを取得
 } else {
     // event_idが存在しない場合、エラーメッセージを表示して処理を終了
-    echo "イベントURLが設定されていません。";
+    echo 'イベントURLが設定されていません。';
     exit;
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="ja">
+<html lang='ja'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>イベント作成完了</title>
 </head>
 <body>
@@ -28,7 +28,7 @@ if (isset($_GET['event_id'])) {
 
 <!-- イベントURLをリンクとして表示 -->
 <!-- htmlspecialchars の代わりに関数 h() を使用 -->
-<p><a href="<?php echo h(BASE_URL . $event_id); ?>" target="_blank">
+<p><a href='<?php echo h(BASE_URL . $event_id); ?>' target='_blank'>
     <?php echo h(BASE_URL . $event_id); ?>
 </a></p>
 
