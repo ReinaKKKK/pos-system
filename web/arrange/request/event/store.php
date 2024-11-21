@@ -4,7 +4,7 @@
  * Validates the given input data based on predefined rules.
  *
  * @param array $data Associative array containing input data to validate.
- *                    Expected keys: 'name', 'date', 'startHour24', 'endHour24', etc.
+ *                    Expected keys: 'name', 'startHour24', 'endHour24', etc.
  *
  * @return array An array of error messages. If valid, an empty array is returned.
  */
@@ -21,6 +21,13 @@ function validate($data)
     // 開始日と終了日のチェック
     if (empty($data['startTime']) || empty($data['endTime'])) {
         $errors[] = "開始時間と終了時間は必須です。";
+    }
+    // 重複する時間帯のチェック
+    $existingSlot = array_filter($data['timeSlots'], function ($slot) use ($data) {
+        return $slot['startTime'] === $data['startTime'] && $slot['endTime'] === $data['endTime'];
+    });
+    if (!empty($existingSlot)) {
+        $errors[] = "同じ候補日時が既に追加されています。";
     }
     // 候補日時のリストが空かどうかを確認
     if (empty($data['timeSlots'])) {

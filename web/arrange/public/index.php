@@ -7,7 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $detail = isset($_POST['detail']) ? $_POST['detail'] : '';
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
-    $date = $_POST['date'];
     $startTime = $_POST['startTime']; // フォームから受け取った開始時間
     $endTime = $_POST['endTime']; // フォームから受け取った終了時間
 
@@ -16,16 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endTime = date('Y-m-d H:i:s', strtotime($endTime));
     $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
 
-
     // 入力データのバリデーション
     $errors = validate([
         'name' => $name,
-        'date' => $date,
         'startTime' => $startTime,
         'endTime' => $endTime,
         'timeSlots' => $timeSlots,
     ]);
-
 
     // エラーがあれば表示
     if (!empty($errors)) {
@@ -34,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit;
     }
+
 
 // // 空き時間候補をデータベースから取得して配列に格納
 // $availabilitySlots = getAvailabilitySlotsFromDB(); // 仮の関数
@@ -56,23 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         $eventId = $db->lastInsertId();
-
         // availabilitiesテーブルに日時情報を挿入
         foreach ($timeSlots as $slot) {
             $startTime = date('Y-m-d H:i:s', strtotime($slot['startTime']));
             $endTime = date('Y-m-d H:i:s', strtotime($slot['endTime']));
 
-            $sqlAvailabilities = 'INSERT INTO availabilities (event_id, date, start_time, end_time, created_at, updated_at) 
-                                  VALUES (:event_id, :date, :start_time, :end_time, NOW(), NOW())';
+            $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
+                                  VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
             $stmtAvailabilities = $db->prepare($sqlAvailabilities);
             $stmtAvailabilities->execute([
                 ':event_id' => $eventId,
-                ':date' => $date,
                 ':start_time' => $startTime,
                 ':end_time' => $endTime,
             ]);
         }
-
 
         // トランザクションをコミット
         $db->commit();
@@ -104,7 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <h2>新しいイベントを作成</h2>
-    <form action='index.php' method='POST'>
+    <form action='save.php' method='POST'>
+        
         <label>イベント名:</label>
         <input type='text' name='name' required><br><br>
 
@@ -130,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type='password' name='editPassword'><br><br>
         
         <input type="hidden" id="timeSlotsInput" name="timeSlots"> <!-- 候補日時をここに送信 -->
-
+        <input type="hidden" id="eventIdInput" name="event_id" value="">
         <button type="submit" id="submitFormButton">イベントを作成</button>
 
     </form>

@@ -1,81 +1,77 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const addButton = document.querySelector("button[type='button']:not(.remove-button)");
-    if (addButton) {
-        addButton.addEventListener('click', addTimeSlot);
-    }
-//終了時間が開始時間よりも後にならないように
-document.getElementById("startTime").addEventListener("input", function() {
-    let startTime = document.getElementById("startTime").value;
-document.getElementById("endTime").min = startTime;  // startTimeより後に終了時間を設定
-    });
-
-//     const availabilitySlots = <?php echo json_encode($availabilitySlots); ?>;
-
-// // 空き時間候補を表示する
-// foreach ($availabilitySlots as $slot) {
-//     echo '<option value="' . $slot['start_time'] . '">' . $slot['start_time'] . ' - ' . $slot['end_time'] . '</option>';
-// }
-
-
-    // 候補日時リスト
-    let timeSlots = [];
-
+    const addTimeSlotButton = document.getElementById('btn'); 
+    const timeSlots = [];
+    const timeSlotContainer = document.getElementById('timeSlotContainer');
+    const timeSlotsInput = document.getElementById('timeSlotsInput');
     // 候補日時を追加
     function addTimeSlot() {
         const startTime = document.getElementById('startTime').value;
         const endTime = document.getElementById('endTime').value;
-
-        if (!startTime || !endTime) {
-            alert('開始時間と終了時間を入力してください');
-            return;
-        }
-
-        // 候補日時が重複しないか確認
-        if (timeSlots.some(slot => slot.startTime === startTime && slot.endTime === endTime)) {
-            alert('同じ候補日時が既に追加されています。');
-            return;
-        }
-
+        
         timeSlots.push({ startTime, endTime });
         displayTimeSlots();
         updateTimeSlotsInput();
     }
-// 空き時間候補を表示する
-availabilitySlots.forEach(function(slot) {
-    const option = document.createElement("option");
-    option.value = slot.start_time;
-    option.textContent = slot.start_time + " - " + slot.end_time;
-    // 例: 任意の<select>要素に追加する場合
-    document.getElementById("availabilitySelect").appendChild(option);
-});
-    // 候補日時を表示
-    function displayTimeSlots() {
-        const timeSlotContainer = document.getElementById('timeSlotContainer');
-        timeSlotContainer.innerHTML = '';
 
-        timeSlots.forEach((slot, index) => {
-            const timeSlot = document.createElement('div');
-            timeSlot.classList.add('timeSlot');
-            timeSlot.innerHTML = `
-                <p>候補日時: ${slot.startTime} ～ ${slot.endTime}</p>
-            `;
+// 候補日時を表示
+function displayTimeSlots() {
+    timeSlotContainer.innerHTML = '';
+    timeSlots.forEach((slot, index) => {
+        const timeSlot = document.createElement('div');
+        timeSlot.classList.add('timeSlot');
 
-            const removeButton = document.createElement('button');
-            removeButton.textContent = '削除';
-            removeButton.onclick = function () {
-                timeSlots.splice(index, 1);
-                displayTimeSlots();
-                updateTimeSlotsInput();
-            };
+        // 日付と時間のフォーマットを変更
+        const formattedStartTime = formatDateTime(slot.startTime);
+        const formattedEndTime = formatDateTime(slot.endTime);
 
-            timeSlot.appendChild(removeButton);
-            timeSlotContainer.appendChild(timeSlot);
-        });
-    }
+        timeSlot.innerHTML = `<p>候補日時: ${formattedStartTime} ～ ${formattedEndTime}</p>`;
 
-    // 候補日時のリストをフォームのhiddenフィールドに更新
+        const removeButton = document.createElement('button');
+        removeButton.textContent = '削除';
+        removeButton.onclick = () => {
+            timeSlots.splice(index, 1);
+            displayTimeSlots();
+            updateTimeSlotsInput();
+        };
+
+        timeSlot.appendChild(removeButton);
+        timeSlotContainer.appendChild(timeSlot);
+    });
+}
+// 日付と時間を"YYYY-MM-DD HH:MM"形式にフォーマットする関数
+function formatDateTime(dateTime) {
+    const date = new Date(dateTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月は0始まりなので+1
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+    // 候補日時リストをhiddenフィールドに更新
     function updateTimeSlotsInput() {
-        const timeSlotsInput = document.getElementById('timeSlotsInput');
-        timeSlotsInput.value = JSON.stringify(timeSlots); // 配列をJSON形式で送信
+        timeSlotsInput.value = JSON.stringify(timeSlots);
     }
+
+    // イベントリスナーを追加
+    if (addTimeSlotButton) {
+        addTimeSlotButton.addEventListener('click', addTimeSlot);
+    }
+
+      // URLからevent_idを取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventId = urlParams.get('event_id'); // 'event_id'を取得
+  
+      // event_idを隠しフィールドに設定
+      const eventIdInput = document.getElementById('eventIdInput');
+      if (eventIdInput && eventId) {
+          eventIdInput.value = eventId; // ここでhiddenフィールドにevent_idをセット
+      }
+  
+      // console.logで確認
+      console.log('イベントID:', eventId);
+
+    // 必要に応じて他の処理を追加
+    // 例: URLのカスタマイズ表示
 });

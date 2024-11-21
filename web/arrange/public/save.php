@@ -1,17 +1,19 @@
 <?php
 
-require_once 'path/to/env.php';
-require_once 'path/to/functions.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/config/env.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/service/functions.php';
+
 session_start(); // セッション開始
 
 // URLパラメータ「event_id」がセットされている場合、その値を取得
-if (isset($_GET['event_id'])) {
+if (isset($_GET['event_id']) && !empty($_GET['event_id'])) {
     $event_id = $_GET['event_id'];  // URLパラメータからevent_idを取得
 } else {
     // event_idが存在しない場合、エラーメッセージを表示して処理を終了
     echo 'イベントURLが設定されていません。';
     exit;
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -31,6 +33,7 @@ if (isset($_GET['event_id'])) {
 <p><a href='<?php echo h(BASE_URL . $event_id); ?>' target='_blank'>
     <?php echo h(BASE_URL . $event_id); ?>
 </a></p>
-
+<!-- event_idをHTML内で表示・利用する -->
+<p id="eventId" data-id="<?php echo h($event_id); ?>"></p>
 </body>
 </html>
