@@ -31,13 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-
-// // 空き時間候補をデータベースから取得して配列に格納
-// $availabilitySlots = getAvailabilitySlotsFromDB(); // 仮の関数
-//     // 24時間形式の時間と日付を結合してDATETIMEを作成
-//     $startTime = date('Y-m-d H:i:s', strtotime('$date $startHour24:$startTimeMinute:00'));
-//     $endTime = date('Y-m-d H:i:s', strtotime('$date $endHour24:$endTimeMinute:00'));
-
     try {
         // トランザクション開始
         $db->beginTransaction();
@@ -97,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src='script.js'></script><!-- 外部CSSファイルをリンク -->
 </head>
 <body>
-    <h2>新しいイベントを作成</h2>
     <form action='save.php' method='POST'>
         
         <label>イベント名:</label>
@@ -125,9 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type='password' name='editPassword'><br><br>
         
         <input type="hidden" id="timeSlotsInput" name="timeSlots"> <!-- 候補日時をここに送信 -->
-        <input type="hidden" id="eventIdInput" name="event_id" value="">
         <button type="submit" id="submitFormButton">イベントを作成</button>
 
     </form>
 </body>
 </html>
+

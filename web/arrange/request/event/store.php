@@ -4,7 +4,7 @@
  * Validates the given input data based on predefined rules.
  *
  * @param array $data Associative array containing input data to validate.
- *                    Expected keys: 'name', 'startHour24', 'endHour24', etc.
+ *                    Expected keys: 'name', 'startTime', 'endTime', 'timeSlots', etc.
  *
  * @return array An array of error messages. If valid, an empty array is returned.
  */
@@ -12,33 +12,42 @@ function validate($data)
 {
     $errors = [];
 
-    // イベント名が空か255文字を超えている場合
+    // イベント名のチェック
     if (empty($data['name'])) {
-        $errors[] = "イベント名は必須です。";
+        $errors[] = 'イベント名は必須です。';
     } elseif (strlen($data['name']) > 255) {
-        $errors[] = "イベント名は255文字以下で入力してください。";
+        $errors[] = 'イベント名は255文字以下で入力してください。';
     }
-    // 開始日と終了日のチェック
+
+    // 開始時間と終了時間のチェック
     if (empty($data['startTime']) || empty($data['endTime'])) {
         $errors[] = "開始時間と終了時間は必須です。";
+    } elseif (strtotime($data['startTime']) >= strtotime($data['endTime'])) {
+        $errors[] = "終了時間は開始時間より後である必要があります。";
     }
-    // 重複する時間帯のチェック
-    $existingSlot = array_filter($data['timeSlots'], function ($slot) use ($data) {
-        return $slot['startTime'] === $data['startTime'] && $slot['endTime'] === $data['endTime'];
-    });
-    if (!empty($existingSlot)) {
-        $errors[] = "同じ候補日時が既に追加されています。";
-    }
-    // 候補日時のリストが空かどうかを確認
+
+    // 候補日時リストのチェック
     if (empty($data['timeSlots'])) {
         $errors[] = "少なくとも1つの候補日時を追加してください。";
     } else {
-        foreach ($data['timeSlots'] as $slot) {
-            // 各候補日時が正しい形式かをチェック
+        foreach ($data['timeSlots'] as $index => $slot) {
             if (empty($slot['startTime']) || empty($slot['endTime'])) {
-                $errors[] = "すべての候補日時に開始時間と終了時間を入力してください。";
+                $errors[] = '候補日時の{$index + 1}番目に開始時間と終了時間を入力してください。';
+            } elseif (strtotime($slot['startTime']) >= strtotime($slot['endTime'])) {
+                $errors[] = '候補日時の[$index + 1]番目に開始時間と終了時間を入力してください。';
             }
         }
     }
+
+    // 重複する候補日時のチェック
+    $timeSlotHashes = [];
+    foreach ($data['timeSlots'] as $slot) {
+        $hash = md5($slot['startTime'] . $slot['endTime']);
+        if (isset($timeSlotHashes[$hash])) {
+            $errors[] = "同じ候補日時（{$slot['startTime']} ～ {$slot['endTime']}）が重複しています。";
+        }
+        $timeSlotHashes[$hash] = true;
+    }
+
     return $errors;
 }

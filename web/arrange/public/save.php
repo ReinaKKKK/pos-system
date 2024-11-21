@@ -1,19 +1,20 @@
 <?php
 
+session_start(); // セッション開始
+
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/config/env.php';
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/service/functions.php';
 
-session_start(); // セッション開始
-
 // URLパラメータ「event_id」がセットされている場合、その値を取得
-if (isset($_GET['event_id']) && !empty($_GET['event_id'])) {
-    $event_id = $_GET['event_id'];  // URLパラメータからevent_idを取得
+$event_id = $_GET['event_id'] ?? null;
+
+if ($event_id) {
+    // event_idが存在する場合、イベントURLを生成
+    $event_url = rtrim(BASE_URL, '/') . '/events/' . urlencode($event_id);
 } else {
-    // event_idが存在しない場合、エラーメッセージを表示して処理を終了
-    echo 'イベントURLが設定されていません。';
+    echo 'イベントIDが設定されていません。';
     exit;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -29,10 +30,10 @@ if (isset($_GET['event_id']) && !empty($_GET['event_id'])) {
 <p>参加者用のURLはこちらです：</p>
 
 <!-- イベントURLをリンクとして表示 -->
-<!-- htmlspecialchars の代わりに関数 h() を使用 -->
-<p><a href='<?php echo h(BASE_URL . $event_id); ?>' target='_blank'>
-    <?php echo h(BASE_URL . $event_id); ?>
+<p><a href='<?php echo h($event_url); ?>' target='_blank'>
+    <?php echo h($event_url); ?>
 </a></p>
+
 <!-- event_idをHTML内で表示・利用する -->
 <p id="eventId" data-id="<?php echo h($event_id); ?>"></p>
 </body>

@@ -1,155 +1,84 @@
-/* 全体のスタイル */
+/* ベースのスタイル */
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #e5f5e0; /* 優しい緑の背景 */
+  background-color: #f4f8f4; /* 背景色に薄い緑色 */
+  margin: 0;
+  padding: 0;
 }
 
-/* コンテナ全体 */
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* ヘッダーのスタイル */
+h2 {
+  text-align: left; /* 左寄せに変更 */
+  color: #388e3c; /* 緑色の文字 */
+  margin-top: 20px; /* 少し上にスペースを追加 */
+  margin-bottom: 10px; /* 下に少しスペースを追加 */
+}
+/* フォームのスタイル */
+form {
+  width: 60%;
+  margin: 0 auto;
   padding: 20px;
-  width: 70%;
-  max-width: 1200px;
-  box-shadow: 0 0 15px rgba(0, 128, 0, 0.1); /* 軽い影を追加 */
-  border-radius: 10px;
+  background-color: #ffffff; /* フォームの背景は白 */
+  border-radius: 8px; /* 角を丸める */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 軽い影をつける */
 }
 
-/* ヘッダー */
-.site-header {
-  text-align: left;
+/* ラベルのスタイル */
+label {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 5px;
+  color: #388e3c; /* 緑色のラベル */
+}
+
+/* 入力フィールドとテキストエリアのスタイル */
+input[type='text'],
+textarea,
+input[type='datetime-local'],
+input[type='password'] {
   width: 100%;
   padding: 10px;
-  border-bottom: 2px solid #a8d5a3; /* 薄緑の境界線 */
-  color: #2e7d32; /* 落ち着いた緑のテキスト */
-  font-weight: bold;
-  
-}
-
-/* メインコンテナ全体のスタイル */
-.main-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-/* メインコンテンツエリア */
-.main-content {
-  display: flex;
-  gap: 2%;
-  width: 100%;
-  max-width: 1200px;
-  padding: 20px;
-  border: 1px solid #a8d5a3;
-  border-radius: 10px;
-  background-color: #ffffff;
-  box-sizing: border-box;
-  max-height: 800px;
-}
-
-/* オプションセクション */
-.options {
-  flex: 1;
-  background: #e0f2f1;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 128, 0, 0.1);
-}
-
-/* パスワードボックス */
-.password-box {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px;
-  border: 1px solid #a8d5a3;
+  border: 1px solid #ccc; /* 薄いグレーのボーダー */
   border-radius: 4px;
-  overflow-x: auto;
-  margin: 5px 0;
-  background-color: #f1f8e9; /* 優しい緑の背景 */
-}
-
-.password-box span {
-  align-self: center;
-}
-
-span {
-  cursor: pointer;
-}
-
-/* 各ラベルやオプション */
-.length-options, .checkbox-label, #btn {
   margin-bottom: 15px;
+  font-size: 1rem;
 }
 
-/* パスワード生成ボタン */
-#btn {
-  background-color: #2e7d32;
-  color: white;
+/* ボタンのスタイル */
+button {
+  background-color: #388e3c; /* 緑色のボタン */
+  color: white; /* 白い文字 */
   border: none;
-  padding: 15px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #2c6e2f; /* ボタンをホバーしたときに色を少し暗く */
+}
+
+/* 時間スロットを表示する部分のスタイル */
+#timeSlotContainer {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e8f5e9; /* 明るい緑色の背景 */
   border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 10px 0;
-  font-weight: bold;
-  transition: background-color 0.3s;
+  border: 1px solid #388e3c;
 }
 
-#btn:hover {
-  background-color: #388e3c; /* ホバー時の少し濃い緑 */
+/* hiddenの時間スロット入力のスタイル（目に見えない） */
+#timeSlotsInput {
+  display: none;
 }
 
-/* 生成されたパスワードエリア */
-.passwords {
-  flex: 1;
-  background: #e0f2f1;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 128, 0, 0.1);
-  overflow-y: auto;
-  overflow-x: auto;
-  max-height: 450px;
+/* フォームが送信できる状態のボタン */
+#submitFormButton {
+  background-color: #2c6e2f; /* 送信ボタンを少し暗い緑色に */
+  padding: 12px 20px;
 }
 
-/* コピーボタン */
-.copy-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2em;
-  margin-left: 10px;
-  color: #2e7d32;
-  transition: color 0.3s;
-}
-
-.copy-btn:hover {
-  color: #388e3c; /* ホバー時の色 */
-}
-
-/* スクロールのスタイル */
-.overflow-div {
-  width: 300px;
-  height: 300px;
-  border: solid 1px;
-  overflow: scroll;
-}
-
-.can-scroll {
-  width: max-content;
-  height: 200px;
-  background-color: #f1f8e9;
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: auto;
+#submitFormButton:hover {
+  background-color: #1b4d1a; /* 送信ボタンをホバーしたときにさらに暗く */
 }
