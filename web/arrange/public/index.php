@@ -7,20 +7,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $detail = isset($_POST['detail']) ? $_POST['detail'] : '';
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
-    $startTime = $_POST['startTime']; // フォームから受け取った開始時間
-    $endTime = $_POST['endTime']; // フォームから受け取った終了時間
+    $startTime = $_POST['startTime'];
+    $endTime = $_POST['endTime'];
+    $eventId = $_POST['event_id'];
+    $event_url = $_POST['event_url'];
 
     // ここで日時を適切な形式に変換してデータベースに保存
     $startTime = date('Y-m-d H:i:s', strtotime($startTime));
     $endTime = date('Y-m-d H:i:s', strtotime($endTime));
-    $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
+
 
     // 入力データのバリデーション
     $errors = validate([
         'name' => $name,
         'startTime' => $startTime,
         'endTime' => $endTime,
-        'timeSlots' => $timeSlots,
     ]);
 
     // エラーがあれば表示
@@ -48,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $eventId = $db->lastInsertId();
         // availabilitiesテーブルに日時情報を挿入
         foreach ($timeSlots as $slot) {
-            $startTime = date('Y-m-d H:i:s', strtotime($slot['startTime']));
-            $endTime = date('Y-m-d H:i:s', strtotime($slot['endTime']));
+            $startTime = $slot['startTime'];
+            $endTime = $slot['endTime'];
 
             $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
                                   VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
@@ -64,18 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // トランザクションをコミット
         $db->commit();
     } catch (PDOException $e) {
-        // エラーが発生した場合はロールバック
         $db->rollBack();
-        // エラーメッセージとデバッグ情報を表示
-        echo 'データベースエラー: ' . $e->getMessage();
-        echo '<br><strong>デバッグ情報:</strong><br>';
-        echo 'SQL: $sqlEvents <br>';
-        echo 'Bindings: ';
-        print_r([
-            ':name' => $name,
-            ':detail' => $detail,
-            ':edit_password' => $editPassword,
-        ]);
+        echo 'イベント作成に失敗しました。';
+        error_log($e->getMessage()); // エラーログに記録
         exit();
     }
 }
@@ -86,8 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset='UTF-8'>
     <title>イベント作成</title>
-    <link rel='stylesheet' href='style.css'> <!-- 外部CSSファイルをリンク -->
-    <script src='script.js'></script><!-- 外部CSSファイルをリンク -->
+    <link rel='stylesheet' href='style.css'> 
+    <script src='script.js'></script>
 </head>
 <body>
     <form action='save.php' method='POST'>

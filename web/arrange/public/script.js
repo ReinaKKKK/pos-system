@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const eventId = urlParams.get('event_id'); // 'event_id'を取得
 
     if (eventId) {
-        // event_idを隠しフィールドに設定
+        // event_idをユーザーには見えないように保持する隠しフィールドに設定
         const eventIdInput = document.getElementById('eventIdInput');
         if (eventIdInput) {
             eventIdInput.value = eventId; // ここでhiddenフィールドにevent_idをセット
@@ -75,10 +75,48 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('イベントID:', eventId);
     } else {
         // event_idがない場合のエラーハンドリング
-        console.error('イベントURLが設定されていません。');
         alert('イベントURLが設定されていません。');
     }
 
-    // 必要に応じて他の処理を追加
-    // 例: URLのカスタマイズ表示
+    // ボタンのクリックイベントを処理
+    function validateTimeSlots(timeSlots) {
+        const errors = [];
+        for (let i = 0; i < timeSlots.length; i++) {
+            const start = new Date(timeSlots[i].startTime);
+            const end = new Date(timeSlots[i].endTime);
+            for (let j = i + 1; j < timeSlots.length; j++) {
+                const compareStart = new Date(timeSlots[j].startTime);
+                const compareEnd = new Date(timeSlots[j].endTime);
+                if (start < compareEnd && end > compareStart) {
+                    errors.push(`候補日時 ${i + 1} と ${j + 1} が重複しています。`);
+                }
+            }
+        }
+        return errors;
+    }
+    
+document.getElementById('submitFormButton').addEventListener('click', async () => {
+    try {
+        // POSTリクエストでイベント作成
+        const response = await fetch('save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_name: 'サンプルイベント' }),
+        });
+
+        if (!response.ok) {
+            throw new Error('イベント作成に失敗しました。');
+        }
+
+        // サーバーからのレスポンスを取得
+        const html = await response.text();
+
+        // HTMLを画面に表示
+        document.body.innerHTML = html;
+    } catch (error) {
+        console.error(error);
+        alert('エラーが発生しました: ' + error.message);
+    }
+});
+
 });

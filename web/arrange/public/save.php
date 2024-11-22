@@ -1,40 +1,20 @@
 <?php
 
-session_start(); // セッション開始
+require '../config/env.php';
+require '../request/event/store.php';
 
-include $_SERVER['DOCUMENT_ROOT'] . '/arrange/config/env.php';
-include $_SERVER['DOCUMENT_ROOT'] . '/arrange/service/functions.php';
+// イベントIDを生成（UUIDを使用）
+$eventId = uniqid('event_', true); // UUIDを使いたければここを変更
 
-// URLパラメータ「event_id」がセットされている場合、その値を取得
-$event_id = $_GET['event_id'] ?? null;
+// データベースに保存
+if (saveEventToDatabase($eventId)) {
+    // 完全なURLを生成
+    $event_url = BASE_URL . '?event_id=' . $eventId;
 
-if ($event_id) {
-    // event_idが存在する場合、イベントURLを生成
-    $event_url = rtrim(BASE_URL, '/') . '/events/' . urlencode($event_id);
-} else {
-    echo 'イベントIDが設定されていません。';
+    // イベント作成後に自動的にリダイレクト
+    header('Location: ' . $event_url);
     exit;
+} else {
+    // エラーメッセージを返す
+    echo "イベント作成に失敗しました。";
 }
-?>
-
-<!DOCTYPE html>
-<html lang='ja'>
-<head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>イベント作成完了</title>
-</head>
-<body>
-<h1>イベントが作成されました！</h1>
-
-<p>参加者用のURLはこちらです：</p>
-
-<!-- イベントURLをリンクとして表示 -->
-<p><a href='<?php echo h($event_url); ?>' target='_blank'>
-    <?php echo h($event_url); ?>
-</a></p>
-
-<!-- event_idをHTML内で表示・利用する -->
-<p id="eventId" data-id="<?php echo h($event_id); ?>"></p>
-</body>
-</html>

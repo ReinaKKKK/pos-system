@@ -1,53 +1,101 @@
 <?php
 
 /**
- * Validates the given input data based on predefined rules.
- *
- * @param array $data Associative array containing input data to validate.
- *                    Expected keys: 'name', 'startTime', 'endTime', 'timeSlots', etc.
- *
- * @return array An array of error messages. If valid, an empty array is returned.
+ * 入力値が空かどうかを検証する関数
+ * @param string $val 検証対象の文字列
+ * @return boolean 空であればtrue、それ以外はfalse
  */
-function validate($data)
+function validate($val)
 {
-    $errors = [];
-
-    // イベント名のチェック
-    if (empty($data['name'])) {
-        $errors[] = 'イベント名は必須です。';
-    } elseif (strlen($data['name']) > 255) {
-        $errors[] = 'イベント名は255文字以下で入力してください。';
-    }
-
-    // 開始時間と終了時間のチェック
-    if (empty($data['startTime']) || empty($data['endTime'])) {
-        $errors[] = "開始時間と終了時間は必須です。";
-    } elseif (strtotime($data['startTime']) >= strtotime($data['endTime'])) {
-        $errors[] = "終了時間は開始時間より後である必要があります。";
-    }
-
-    // 候補日時リストのチェック
-    if (empty($data['timeSlots'])) {
-        $errors[] = "少なくとも1つの候補日時を追加してください。";
-    } else {
-        foreach ($data['timeSlots'] as $index => $slot) {
-            if (empty($slot['startTime']) || empty($slot['endTime'])) {
-                $errors[] = '候補日時の{$index + 1}番目に開始時間と終了時間を入力してください。';
-            } elseif (strtotime($slot['startTime']) >= strtotime($slot['endTime'])) {
-                $errors[] = '候補日時の[$index + 1]番目に開始時間と終了時間を入力してください。';
-            }
-        }
-    }
-
-    // 重複する候補日時のチェック
-    $timeSlotHashes = [];
-    foreach ($data['timeSlots'] as $slot) {
-        $hash = md5($slot['startTime'] . $slot['endTime']);
-        if (isset($timeSlotHashes[$hash])) {
-            $errors[] = "同じ候補日時（{$slot['startTime']} ～ {$slot['endTime']}）が重複しています。";
-        }
-        $timeSlotHashes[$hash] = true;
-    }
-
-    return $errors;
+    return trim($val) === '';
 }
+
+/**
+ * 入力値が最大文字数を超えているかを検証する関数
+ * @param string $val 検証対象の文字列
+ * @return boolean 255文字を超えていればtrue、それ以外はfalse
+ */
+function maxLength($val)
+{
+    return strlen($val) > 255;
+}
+
+/**
+ * イベント時刻の入力が空かどうかを検証する関数
+ * @param mixed $val 検証対象の値
+ * @return boolean 空であればtrue、それ以外はfalse
+ */
+function validationEventTimes($val)
+{
+    return empty($val);
+}
+
+/**
+ * 開始時間と終了時間の設定が有効かどうかを検証する関数
+ * @param string $startTime 開始時間
+ * @param string $endTime   終了時間
+ * @return boolean 開始時間が終了時間よりも後であればtrue、それ以外はfalse
+ */
+function Timesetting($startTime, $endTime)
+{
+    $startTime = strtotime($startTime);
+    $endTime = strtotime($endTime);
+
+    // Ensure both times are valid
+    if ($startTime === false || $endTime === false) {
+        return false; // Return false if either input is invalid
+    }
+
+    return $startTime >= $endTime; // If start time is later than or equal to end time, return true
+}
+var_dump($startTime);
+var_dump($endTime);
+
+/**
+ * エラータイプに応じたエラーメッセージを生成する関数
+ * @param string $errorType エラータイプ
+ * @param string $str       エラーメッセージに使用する文字列
+ * @return string 生成されたエラーメッセージ
+ */
+function createErrorMessage($errorType, $str)
+{
+    switch ($errorType) {
+        case 'is_empty':
+            $errorMessage = $str . 'は必須です。';
+            break;
+        case 'max_length':
+            $errorMessage = $str . 'は255文字以下にしてください。';
+            break;
+        case 'is_empty_time':
+            $errorMessage = $str . 'の時刻は必須です。';
+            break;
+        case 'time_setting':
+            $errorMessage = $str . 'の時間設定が正しくありません。開始時間よりも後の終了時間にしてください';
+            break;
+        default:
+            $errorMessage = '正常です';
+    }
+    return $errorMessage;
+}
+
+// エラー判定
+$errorType = '';
+$name = 'テストイベント名'; // 例として設定
+$startTime = '2024-01-01 10:00:00';
+$endTime = '2024-01-01 09:00:00';
+
+// 入力検証
+if (validate($name)) {
+    $errorType = 'is_empty';
+} elseif (maxLength($name)) {
+    $errorType = 'max_length';
+} elseif (Timesetting($startTime, $endTime)) {
+    $errorType = 'time_setting';
+}
+
+// エラーメッセージの作成
+$errors = [];
+$errors['name'] = createErrorMessage($errorType, 'イベント');
+
+// 結果出力
+print_r($errors);
