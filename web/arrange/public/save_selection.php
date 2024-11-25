@@ -2,6 +2,7 @@
 
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/config/env.php';
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/service/functions.php';
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 
 session_start();
 
@@ -40,6 +41,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_id'])) {
 } else {
     echo '無効なリクエストです。';
 }
-
-
-

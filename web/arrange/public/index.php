@@ -1,6 +1,7 @@
 <?php
 
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
+require '../public/createEvent.php';
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -9,13 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
     $startTime = $_POST['startTime'];
     $endTime = $_POST['endTime'];
-    $eventId = $_POST['event_id'];
-    $event_url = $_POST['event_url'];
 
     // ここで日時を適切な形式に変換してデータベースに保存
     $startTime = date('Y-m-d H:i:s', strtotime($startTime));
     $endTime = date('Y-m-d H:i:s', strtotime($endTime));
-
 
     // 入力データのバリデーション
     $errors = validate([
@@ -26,27 +24,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // エラーがあれば表示
     if (!empty($errors)) {
-        foreach ($errors as $error) {
-            echo $error . '<br>';
+        foreach ($errors as $field => $error) {
+            echo "Error in $field: $error<br>";
         }
         exit;
     }
 
     try {
         // トランザクション開始
-        $db->beginTransaction();
+        $databaseConnection->beginTransaction();
 
         // eventsテーブルへのデータ挿入
         $sqlEvents = 'INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
                       VALUES (:name, :detail, :edit_password, NOW(), NOW())';
-        $stmtEvents = $db->prepare($sqlEvents);
+        $stmtEvents = $databaseConnection->prepare($sqlEvents);
         $stmtEvents->execute([
             ':name' => $name,
             ':detail' => $detail,
             ':edit_password' => $editPassword,
         ]);
 
-        $eventId = $db->lastInsertId();
+        $eventId = $databaseConnection->lastInsertId();
         // availabilitiesテーブルに日時情報を挿入
         foreach ($timeSlots as $slot) {
             $startTime = $slot['startTime'];
@@ -54,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
                                   VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
-            $stmtAvailabilities = $db->prepare($sqlAvailabilities);
+            $stmtAvailabilities = $databaseConnection->prepare($sqlAvailabilities);
             $stmtAvailabilities->execute([
                 ':event_id' => $eventId,
                 ':start_time' => $startTime,
@@ -63,9 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // トランザクションをコミット
-        $db->commit();
+        $databaseConnection->commit();
     } catch (PDOException $e) {
-        $db->rollBack();
+        $databaseConnection->rollBack();
         echo 'イベント作成に失敗しました。';
         error_log($e->getMessage()); // エラーログに記録
         exit();
@@ -107,11 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label>編集パスワード:</label>
         <input type='password' name='editPassword'><br><br>
-        
+
         <input type="hidden" id="timeSlotsInput" name="timeSlots"> <!-- 候補日時をここに送信 -->
         <button type="submit" id="submitFormButton">イベントを作成</button>
 
     </form>
 </body>
 </html>
-

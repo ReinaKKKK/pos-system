@@ -36,7 +36,7 @@ function validationEventTimes($val)
  * @param string $endTime   終了時間
  * @return boolean 開始時間が終了時間よりも後であればtrue、それ以外はfalse
  */
-function Timesetting($startTime, $endTime)
+function isInvalidTimeRange($startTime, $endTime)
 {
     $startTime = strtotime($startTime);
     $endTime = strtotime($endTime);
@@ -48,8 +48,6 @@ function Timesetting($startTime, $endTime)
 
     return $startTime >= $endTime; // If start time is later than or equal to end time, return true
 }
-var_dump($startTime);
-var_dump($endTime);
 
 /**
  * エラータイプに応じたエラーメッセージを生成する関数
@@ -78,24 +76,23 @@ function createErrorMessage($errorType, $str)
     return $errorMessage;
 }
 
-// エラー判定
-$errorType = '';
-$name = 'テストイベント名'; // 例として設定
-$startTime = '2024-01-01 10:00:00';
-$endTime = '2024-01-01 09:00:00';
-
-// 入力検証
-if (validate($name)) {
-    $errorType = 'is_empty';
-} elseif (maxLength($name)) {
-    $errorType = 'max_length';
-} elseif (Timesetting($startTime, $endTime)) {
-    $errorType = 'time_setting';
+/**
+ * Debugエラーメッセージを生成する関数
+ *
+ * 指定されたエラータイプに基づいて適切なエラーメッセージを返します。
+ * コンテキストを指定することで、メッセージ内に詳細を含めることができます。
+ *
+ * @param string $errorType エラータイプ (例: 'is_empty', 'max_length', 'time_invalid')
+ * @param string $context   エラーメッセージに付加する追加情報 (例: 'イベント名')
+ * @return string エラータイプに対応するエラーメッセージ
+ */
+function generateDebugMessage($errorType, $context = '')
+{
+    $messages = [
+        'is_empty' => "【エラー: 必須項目】{$context} が入力されていません。",
+        'max_length' => "【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。",
+        'time_invalid' => "【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。",
+        'time_format' => "【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。",
+    ];
+    return $messages[$errorType] ?? "【エラー】未知のエラーが発生しました。";
 }
-
-// エラーメッセージの作成
-$errors = [];
-$errors['name'] = createErrorMessage($errorType, 'イベント');
-
-// 結果出力
-print_r($errors);
