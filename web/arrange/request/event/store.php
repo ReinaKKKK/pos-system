@@ -2,32 +2,42 @@
 
 /**
  * 入力値が空かどうかを検証する関数
- * @param string $val 検証対象の文字列
+ * @param string $name 検証対象の文字列
  * @return boolean 空であればtrue、それ以外はfalse
  */
-function validate($val)
+function validate($name)
 {
-    return trim($val) === '';
+    // $nameが配列の場合、その中の "name" に対して処理を行う
+    if (is_array($name)) {
+        if (isset($name['name'])) {
+            return trim($name['name']) === ''; // "name" フィールドの値をチェック
+        }
+        // "name" フィールドが存在しない場合、false を返す（必要に応じて処理を追加）
+        return false;
+    }
+
+    // 文字列の場合
+    return trim($name) === '';
 }
 
 /**
  * 入力値が最大文字数を超えているかを検証する関数
- * @param string $val 検証対象の文字列
+ * @param string $name 検証対象の文字列
  * @return boolean 255文字を超えていればtrue、それ以外はfalse
  */
-function maxLength($val)
+function maxLength($name)
 {
-    return strlen($val) > 255;
+    return strlen($name) > 255;
 }
 
 /**
  * イベント時刻の入力が空かどうかを検証する関数
- * @param mixed $val 検証対象の値
+ * @param mixed $name 検証対象の値
  * @return boolean 空であればtrue、それ以外はfalse
  */
-function validationEventTimes($val)
+function validationEventTimes($name)
 {
-    return empty($val);
+    return empty($name);
 }
 
 /**
@@ -89,10 +99,10 @@ function createErrorMessage($errorType, $str)
 function generateDebugMessage($errorType, $context = '')
 {
     $messages = [
-        'is_empty' => "【エラー: 必須項目】{$context} が入力されていません。",
-        'max_length' => "【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。",
-        'time_invalid' => "【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。",
-        'time_format' => "【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。",
+        'is_empty' => '【エラー: 必須項目】{$context} が入力されていません。',
+        'max_length' => '【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。',
+        'time_invalid' => '【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。',
+        'time_format' => '【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。',
     ];
-    return $messages[$errorType] ?? "【エラー】未知のエラーが発生しました。";
+    return $messages[$errorType] ?? '【エラー】未知のエラーが発生しました。';
 }
