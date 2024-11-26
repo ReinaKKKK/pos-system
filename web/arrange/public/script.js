@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    
     // 時間スロットの追加処理
     document.getElementById('btn').addEventListener('click', function() {
         // 入力された開始時間と終了時間を取得
@@ -99,7 +98,7 @@ document.getElementById('submitFormButton').addEventListener('click', async () =
         const timeSlots = timeSlotsInput ? JSON.parse(timeSlotsInput.value) : []; 
 
         // POSTリクエストでサーバーへデータ送信
-        const response = await fetch('save.php', {
+        const response = await fetch('index.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
