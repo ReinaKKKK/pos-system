@@ -2,9 +2,8 @@
 
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php';
-use arrange\publicFunctions\createEvent;
 
-// POSTリクエストがある場合のみ処理を行う
+// POSTリクエストがある場合のみイベント作成処理を実行
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POSTリクエストからデータを取得
     $name = isset($_POST['name']) ? $_POST['name'] : '';
@@ -12,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : ''; // editPasswordも任意
     $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : '';
     $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : '';
+
     // 日時を適切な形式に変換
     $startTime = date('Y-m-d H:i:s', strtotime($startTime));
     $endTime = date('Y-m-d H:i:s', strtotime($endTime));
@@ -39,12 +39,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 挿入されたイベントIDを取得
         $eventId = $databaseConnection->lastInsertId();
+        if ($eventId === false) {
+            throw new Exception("イベントIDの取得に失敗しました。");
+        }
+
+/**
+     * Generate time slots between the given start and end times.
+     *
+     * This function divides the given time range into hourly slots and
+     * returns them in an array with 'startTime' and 'endTime' keys.
+     *
+     * @param string $startTime The start time in 'Y-m-d H:i:s' format.
+     * @param string $endTime   The end time in 'Y-m-d H:i:s' format.
+     * @return array An array of time slots, each containing 'startTime' and 'endTime'.
+     */
+        function generateTimeSlots($startTime, $endTime)
+        {
+            // 時間スロットを生成するロジック（例: 1時間ごと）
+            $timeSlots = [];
+            $current = strtotime($startTime);
+            $end = strtotime($endTime);
+
+            while ($current < $end) {
+                $slotEnd = min($end, strtotime('+1 hour', $current));
+                $timeSlots[] = [
+                    'startTime' => date('Y-m-d H:i:s', $current),
+                    'endTime' => date('Y-m-d H:i:s', $slotEnd),
+                ];
+                $current = $slotEnd;
+            }
+
+            return $timeSlots;
+        }
 
         // `availabilities` テーブルに日時スロットを挿入
         $timeSlots = generateTimeSlots($startTime, $endTime);
         foreach ($timeSlots as $slot) {
             $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
-                                  VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
+                                VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
             $stmtAvailabilities = $databaseConnection->prepare($sqlAvailabilities);
             $stmtAvailabilities->execute([
                 ':event_id' => $eventId,
@@ -53,22 +85,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
 
+
         // トランザクションをコミット
         $databaseConnection->commit();
 
-        // URL表示ページにリダイレクト（event_idをURLパラメータとして渡す）
-        header('Location: /arrange/display_url.php?event_id=' . $eventId);
-        exit;
+        // イベントURLを表示するページ（event_url.php）へリダイレクト
+        if (!headers_sent()) {
+            header('Location: event_url.php?event_id=123');
+            exit;
+        } else {
+            echo "リダイレクトに失敗しました。手動でアクセスしてください。";
+            echo '<a href="event_url.php?event_id=' . htmlspecialchars($eventId, ENT_QUOTES) . '">ここをクリック</a>';
+            exit;
+        }
     } catch (PDOException $e) {
-        // エラー発生時はロールバック
+        // データベース関連のエラーをキャッチしてロールバック
         $databaseConnection->rollBack();
-        echo 'イベント作成に失敗しました。';
-        error_log($e->getMessage()); // エラーログに記録
-        exit;
+        echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        error_log($e->getMessage());
+    } catch (Exception $e) {
+        // その他の例外をキャッチ
+        echo "エラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        error_log($e->getMessage());
     }
-} else {
-    // POSTリクエスト以外のアクセスはエラー表示
-    echo '<p>不正なリクエストです。再度お試しください。</p>';
 }
 ?>
 

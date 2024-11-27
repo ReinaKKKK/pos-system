@@ -47,12 +47,12 @@ if (isset($_GET['event_id'])) {
        <?php foreach ($availabilities as $availabilities) : ?>
           <div>
               <label for="availabilities_<?php echo $availabilities['id']; ?>">
-              <?php 
+              <?php
                   // start_time と end_time を表示
                   $startTime = new DateTime(availabilities['start_time']);
                   $endTime = new DateTime($availabilities['end_time']);
                   echo '開始: ' . $startTime->format('Y-m-d H:i') . ' - 終了: ' . $endTime->format('Y-m-d H:i');
-                  ?>:
+                ?>:
               </label>
               <select name="availabilities[<?php echo $availabilities['id']; ?>]" id="availabilities_<?php echo $availabilities['id']; ?>" required>
                   <option value="1">〇</option>
