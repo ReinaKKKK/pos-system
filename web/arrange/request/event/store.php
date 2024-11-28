@@ -15,6 +15,39 @@ function validateEditPassword($password)
     }
     return ''; // エラーなし
 }
+
+
+// 編集用パスワードが正しいかをチェックする関数
+function wrongPassword($password)
+{
+    // 正しい編集用パスワードが設定されていると仮定
+    $correctPassword = '正しい編集用パスワード';  // ここには実際に設定されている編集用パスワードを格納
+
+    // 入力されたパスワードと正しいパスワードが一致するかをチェック
+    if ($password !== $correctPassword) {
+        return createErrorMessage('edit_password', '編集パスワードが間違っています');
+    }
+    // パスワードが正しい場合はエラーなしとして空文字を返す
+    return ''; // エラーなし
+}
+
+// 参加者用パスワードが正しいかをチェックする関数
+function wrongForallPassword($password)
+{
+    // 正しい参加者用パスワードが設定されていると仮定
+    $correctPassword = '正しい参加者用編集パスワード';  // ここには実際に設定されている参加者用パスワードを格納
+
+    // 入力されたパスワードと正しいパスワードが一致するかをチェック
+    if ($password !== $correctPassword) {
+        return createErrorMessage('participant_password', '参加者用編集パスワードが間違っています');
+    }
+
+    // パスワードが正しい場合はエラーなしとして空文字を返す
+    return ''; // エラーなし
+}
+
+
+
 /**
  * 入力値が空かどうかを検証する関数
  * @param string $name 検証対象の文字列
@@ -107,6 +140,12 @@ function createErrorMessage($errorType, $str)
             break;
         case 'edit_password':
             $errorMessage = '編集パスワードを設定した場合のみ、編集が可能になります。';
+            break;
+        case 'edit_password':
+                $errorMessage = 'パスワードが間違っています。設定した正しいものを入れてください';
+            break;
+        case 'participant_password':
+                $errorMessage = 'パスワードが間違っています。設定した正しいものを入れてください';
             break;
         default:
             $errorMessage = '正常です';
