@@ -53,6 +53,7 @@ if (isset($_GET['event_id'])) {
 <body>
   <h1><?php echo htmlspecialchars($event['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
   <form method="POST" action="submit_response.php">
+    
       <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>">
       <label for="name">名前:</label>
       <input type="text" name="name" id="name" required>
@@ -76,6 +77,10 @@ if (isset($_GET['event_id'])) {
 
       <label for="comment">コメント:</label>
       <textarea name="comment" id="comment"></textarea>
+      <label for="participant_password">参加者用編集パスワード:</label>
+      <input type="text" name="participant_password" id="participant_password" required>
+
+
       <button type="submit">送信</button>
   </form>
 </body>

@@ -2,58 +2,99 @@
 
 require_once('/var/www/html/arrange/database/db.php');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // イベントIDと名前を取得
-    $eventId = $_POST['event_id'];
-    $name = $_POST['name'];
-    $comment = $_POST['comment'];
+// POST から participant_password を取得
+$participantPassword = isset($_POST['participant_password']) ? $_POST['participant_password'] : null;
+var_dump($_POST);
 
-        // availabilities の各選択を取得
-    if (isset($_POST['availabilities'])) {
-            // 各候補日の選択（〇×△）
-            $availabilities = $_POST['availabilities'];
+if (empty($participantPassword)) {
+    echo '<p>参加者用編集パスワードが必要です。</p>';
+    exit;
+    // POSTデータをチェック
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // フォームデータの取得
+        $eventId = $_POST['event_id'];
+        $userId = $_POST['participant_password']; // ここでパスワードをユーザーIDとして取得
+
+        // availabilities の選択を取得
+        $availabilities = $_POST['availabilities'] ?? [];
 
         try {
-              // トランザクション開始
-              $databaseConnection->beginTransaction();
+            // トランザクション開始
+            $databaseConnection->beginTransaction();
 
-              // 名前とコメントをイベント参加者のテーブルに挿入
-              $stmt = $databaseConnection->prepare('
-                  INSERT INTO availabilities (event_id, name, comment, responses, availabilities_id) 
-                  VALUES (:event_id, :name, :comment, :responses, :availabilities_id)
-              ');
-              $stmt->execute([
-                  ':event_id' => $eventId,
-                  ':name' => $name,
-                  ':comment' => $comment,
-                  ':responses' => $responses,
-                  ':availabilities_id' => $availabilitiesId
-              ]);
-              $responseId = $databaseConnection->lastInsertId(); // 挿入されたレスポンスのID
-
-              // 各候補日について出欠（〇×△）を挿入
-            foreach ($availabilities as $availabilitiesId => $responses) {
-                  $stmt = $databaseConnection->prepare('
-                      INSERT INTO availabilities (event_id, start_time, end_time, updated_at, created_at) 
-                      VALUES (:response_id, :availabilities_id, :responses, NOW(), NOW())
-                  ');
-                  $stmt->execute([
-                      ':response_id' => $responseId,
-                      ':availabilities_id' => $availabilitiesId,
-                      ':responses' => $responses
-                  ]);
+            // user_id（パスワード）の確認
+            if (empty($userId)) {
+                echo '<p>参加者用編集パスワードが必要です。</p>';
+                exit;
             }
 
-              // トランザクションをコミット
-              $databaseConnection->commit();
+            // 参加者IDがデータベースに存在するか、パスワードが一致するかを確認
+            $stmt = $databaseConnection->prepare('
+                SELECT id FROM users WHERE id = :user_id
+            ');
+            $stmt->execute([':user_id' => $userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-              // 成功メッセージ
-              echo '<p>回答が送信されました。</p>';
+            if (!$user) {
+                echo '<p>無効な参加者用編集パスワードです。</p>';
+                exit;
+            }
+
+            // availabilities の選択肢に対してループ
+            foreach ($availabilities as $availabilityId => $response) {
+                // レスポンスデータを保存する処理
+                $stmt = $databaseConnection->prepare('
+                    INSERT INTO responses (user_id, availability_id, response) 
+                    VALUES (:user_id, :availability_id, :response)
+                ');
+                $stmt->execute([
+                    ':user_id' => $userId,
+                    ':availability_id' => $availabilityId,
+                    ':response' => $response
+                ]);
+            }
+
+            // トランザクションをコミット
+            $databaseConnection->commit();
+
+            echo '<p>回答が送信されました。</p>';
         } catch (PDOException $e) {
-              // エラーが発生した場合はロールバック
-              $databaseConnection->rollBack();
-              echo '<p>エラーが発生しました。もう一度お試しください。</p>';
-              echo '<p>エラーメッセージ: ' . $e->getMessage() . '</p>';
+            // エラーが発生した場合はロールバック
+            $databaseConnection->rollBack();
+            echo '<p>エラーが発生しました。もう一度お試しください。</p>';
+            echo '<p>エラーメッセージ: ' . $e->getMessage() . '</p>';
         }
     }
 }
+?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編集パスワード入力</title>
+</head>
+<body>
+    <h1>イベントの編集または回答の編集</h1>
+
+    <!-- 主催者用と参加者用のパスワードを入力するフォーム -->
+    <form method="POST" action="submit_response.php">
+        <div>
+            <!-- 主催者用パスワード -->
+            <label for="organizer_password">主催者用編集パスワード:</label>
+            <input type="text" name="organizer_password" id="organizer_password">
+        </div>
+
+        <div>
+            <!-- 参加者用パスワード -->
+            <label for="participant_password">参加者用編集パスワード:</label>
+            <input type="text" name="participant_password" id="participant_password">
+        </div>
+
+        <button type="submit">パスワード送信</button>
+    </form>
+
+</body>
+</html>
+

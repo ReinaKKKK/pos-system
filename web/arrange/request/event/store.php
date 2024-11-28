@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * 編集パスワードが設定されていない場合、エラーメッセージを表示する関数
+ *
+ * この関数は、編集パスワードが空であるかどうかを確認し、設定されていない場合はエラーメッセージを返します。
+ *
+ * @param string $password 編集パスワード
+ * @return string 編集パスワードが設定されていない場合、エラーメッセージを返します。設定されている場合は空文字列を返します。
+ */
+function validateEditPassword($password)
+{
+    if (empty(trim($password))) {
+        return createErrorMessage('edit_password', '編集パスワード');
+    }
+    return ''; // エラーなし
+}
+/**
  * 入力値が空かどうかを検証する関数
  * @param string $name 検証対象の文字列
  * @return boolean 空であればtrue、それ以外はfalse
@@ -18,6 +33,16 @@ function validate($name)
 
     // 文字列の場合
     return trim($name) === '';
+}
+
+/**
+ * 編集パスワードのバリデーションを行う関数
+ * @param string $password 編集パスワード
+ * @return boolean 編集パスワードが空ならtrue、それ以外はfalse
+ */
+function isEditPasswordSet($password)
+{
+    return !empty(trim($password)); // パスワードが設定されている場合にtrue
 }
 
 /**
@@ -80,6 +105,9 @@ function createErrorMessage($errorType, $str)
         case 'time_setting':
             $errorMessage = $str . 'の時間設定が正しくありません。開始時間よりも後の終了時間にしてください';
             break;
+        case 'edit_password':
+            $errorMessage = '編集パスワードを設定した場合のみ、編集が可能になります。';
+            break;
         default:
             $errorMessage = '正常です';
     }
@@ -103,6 +131,7 @@ function generateDebugMessage($errorType, $context = '')
         'max_length' => '【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。',
         'time_invalid' => '【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。',
         'time_format' => '【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。',
+        'edit_password' => '【エラー: 編集パスワード未設定】{$context} 編集パスワードが設定されていません。',
     ];
     return $messages[$errorType] ?? '【エラー】未知のエラーが発生しました。';
 }

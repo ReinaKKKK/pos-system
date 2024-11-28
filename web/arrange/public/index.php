@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POSTリクエストからデータを取得
     $name = isset($_POST['name']) ? $_POST['name'] : '';
     $detail = isset($_POST['detail']) ? $_POST['detail'] : ''; // detailは任意
-    $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : ''; // editPasswordも任意
+    $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
     $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : '';
     $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : '';
 
