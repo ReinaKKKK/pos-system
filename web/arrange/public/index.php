@@ -75,7 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // `availabilities` テーブルに日時スロットを挿入
         $timeSlots = generateTimeSlots($startTime, $endTime);
         foreach ($timeSlots as $slot) {
-            $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
+            $sqlAvailabilities = 'INSERT INTO availabilities (
+            event_id, start_time, end_time, created_at, updated_at) 
                                 VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
             $stmtAvailabilities = $databaseConnection->prepare($sqlAvailabilities);
             $stmtAvailabilities->execute([
@@ -91,9 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // イベントURLを表示するページ（event_url.php）へリダイレクト
         if (!headers_sent()) {
-            header('Location: event_url.php?event_id=123');
+            header('Location: event_url.php?event_id=' . urlencode($eventId));
             exit;
         } else {
+            // リダイレクト失敗時には手動でアクセスするためのリンクを表示
             echo "リダイレクトに失敗しました。手動でアクセスしてください。";
             echo '<a href="event_url.php?event_id=' . htmlspecialchars($eventId, ENT_QUOTES) . '">ここをクリック</a>';
             exit;

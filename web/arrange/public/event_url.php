@@ -6,6 +6,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php'; // データベ�
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php'; // イベントの保存処理
 
 /**
+ *
  * Escapes special characters in a string for use in HTML.
  *
  * This function is a wrapper for `htmlspecialchars` to simplify usage and prevent XSS (Cross-Site Scripting) attacks.
