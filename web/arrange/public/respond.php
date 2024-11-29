@@ -80,7 +80,6 @@ if (isset($_GET['event_id'])) {
       <label for="participant_password">参加者用編集パスワード:</label>
       <input type="text" name="participant_password" id="participant_password" required>
 
-
       <button type="submit">送信</button>
   </form>
 </body>

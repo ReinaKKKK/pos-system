@@ -3,10 +3,8 @@
 /**
  * 編集パスワードが設定されていない場合、エラーメッセージを表示する関数
  *
- * この関数は、編集パスワードが空であるかどうかを確認し、設定されていない場合はエラーメッセージを返します。
- *
  * @param string $password 編集パスワード
- * @return string 編集パスワードが設定されていない場合、エラーメッセージを返します。設定されている場合は空文字列を返します。
+ * @return string エラーメッセージまたは空文字列
  */
 function validateEditPassword($password)
 {
@@ -16,70 +14,64 @@ function validateEditPassword($password)
     return ''; // エラーなし
 }
 
-
-// 編集用パスワードが正しいかをチェックする関数
-function wrongPassword($password)
+/**
+ * 入力されたパスワードが正しいかをチェックする関数。
+ *
+ * @param string $inputPassword 入力されたパスワード。
+ * @param string $type          A'edit' (主催者) または 'participant' (参加者)。
+ * @return string エラーメッセージまたは空文字列
+ */
+function validatePassword($inputPassword, $type)
 {
-    // 正しい編集用パスワードが設定されていると仮定
-    $correctPassword = '正しい編集用パスワード';  // ここには実際に設定されている編集用パスワードを格納
+    $correctPasswords = [
+        'edit' => '正しい編集用パスワード',
+        'participant' => '正しい参加者用パスワード'
+    ];
 
-    // 入力されたパスワードと正しいパスワードが一致するかをチェック
-    if ($password !== $correctPassword) {
-        return createErrorMessage('edit_password', '編集パスワードが間違っています');
-    }
-    // パスワードが正しい場合はエラーなしとして空文字を返す
-    return ''; // エラーなし
-}
+    $errorMessages = [
+        'edit' => 'edit_password',
+        'participant' => 'participant_password'
+    ];
 
-// 参加者用パスワードが正しいかをチェックする関数
-function wrongForallPassword($password)
-{
-    // 正しい参加者用パスワードが設定されていると仮定
-    $correctPassword = '正しい参加者用編集パスワード';  // ここには実際に設定されている参加者用パスワードを格納
-
-    // 入力されたパスワードと正しいパスワードが一致するかをチェック
-    if ($password !== $correctPassword) {
-        return createErrorMessage('participant_password', '参加者用編集パスワードが間違っています');
+    if (!isset($correctPasswords[$type])) {
+        return '不正なパスワードタイプが指定されました。';
     }
 
-    // パスワードが正しい場合はエラーなしとして空文字を返す
+    if ($inputPassword !== $correctPasswords[$type]) {
+        return createErrorMessage($errorMessages[$type], 'パスワードが間違っています');
+    }
+
     return ''; // エラーなし
 }
-
-
 
 /**
  * 入力値が空かどうかを検証する関数
- * @param string $name 検証対象の文字列
+ *
+ * @param string|array $name 検証対象の文字列または配列
  * @return boolean 空であればtrue、それ以外はfalse
  */
 function validate($name)
 {
-    // $nameが配列の場合、その中の "name" に対して処理を行う
-    if (is_array($name)) {
-        if (isset($name['name'])) {
-            return trim($name['name']) === ''; // "name" フィールドの値をチェック
-        }
-        // "name" フィールドが存在しない場合、false を返す（必要に応じて処理を追加）
-        return false;
+    if (is_array($name) && isset($name['name'])) {
+        return trim($name['name']) === '';
     }
-
-    // 文字列の場合
     return trim($name) === '';
 }
 
 /**
  * 編集パスワードのバリデーションを行う関数
+ *
  * @param string $password 編集パスワード
- * @return boolean 編集パスワードが空ならtrue、それ以外はfalse
+ * @return boolean 編集パスワードが空ならfalse、それ以外はtrue
  */
 function isEditPasswordSet($password)
 {
-    return !empty(trim($password)); // パスワードが設定されている場合にtrue
+    return !empty(trim($password));
 }
 
 /**
  * 入力値が最大文字数を超えているかを検証する関数
+ *
  * @param string $name 検証対象の文字列
  * @return boolean 255文字を超えていればtrue、それ以外はfalse
  */
@@ -89,17 +81,8 @@ function maxLength($name)
 }
 
 /**
- * イベント時刻の入力が空かどうかを検証する関数
- * @param mixed $name 検証対象の値
- * @return boolean 空であればtrue、それ以外はfalse
- */
-function validationEventTimes($name)
-{
-    return empty($name);
-}
-
-/**
  * 開始時間と終了時間の設定が有効かどうかを検証する関数
+ *
  * @param string $startTime 開始時間
  * @param string $endTime   終了時間
  * @return boolean 開始時間が終了時間よりも後であればtrue、それ以外はfalse
@@ -109,68 +92,50 @@ function isInvalidTimeRange($startTime, $endTime)
     $startTime = strtotime($startTime);
     $endTime = strtotime($endTime);
 
-    // Ensure both times are valid
     if ($startTime === false || $endTime === false) {
-        return false; // Return false if either input is invalid
+        return false; // 無効な日時
     }
 
-    return $startTime >= $endTime; // If start time is later than or equal to end time, return true
+    return $startTime >= $endTime;
 }
 
 /**
  * エラータイプに応じたエラーメッセージを生成する関数
+ *
  * @param string $errorType エラータイプ
  * @param string $str       エラーメッセージに使用する文字列
  * @return string 生成されたエラーメッセージ
  */
 function createErrorMessage($errorType, $str)
 {
-    switch ($errorType) {
-        case 'is_empty':
-            $errorMessage = $str . 'は必須です。';
-            break;
-        case 'max_length':
-            $errorMessage = $str . 'は255文字以下にしてください。';
-            break;
-        case 'is_empty_time':
-            $errorMessage = $str . 'の時刻は必須です。';
-            break;
-        case 'time_setting':
-            $errorMessage = $str . 'の時間設定が正しくありません。開始時間よりも後の終了時間にしてください';
-            break;
-        case 'edit_password':
-            $errorMessage = '編集パスワードを設定した場合のみ、編集が可能になります。';
-            break;
-        case 'edit_password':
-                $errorMessage = 'パスワードが間違っています。設定した正しいものを入れてください';
-            break;
-        case 'participant_password':
-                $errorMessage = 'パスワードが間違っています。設定した正しいものを入れてください';
-            break;
-        default:
-            $errorMessage = '正常です';
-    }
-    return $errorMessage;
+    $messages = [
+        'is_empty' => $str . 'は必須です。',
+        'max_length' => $str . 'は255文字以下にしてください。',
+        'is_empty_time' => $str . 'の時刻は必須です。',
+        'time_setting' => $str . 'の時間設定が正しくありません。開始時間よりも後の終了時間にしてください。',
+        'edit_password' => 'パスワードが間違っています。設定した正しいものを入れてください。',
+        'participant_password' => 'パスワードが間違っています。設定した正しいものを入れてください。',
+    ];
+
+    return $messages[$errorType] ?? '不明なエラーが発生しました。';
 }
 
 /**
  * Debugエラーメッセージを生成する関数
  *
- * 指定されたエラータイプに基づいて適切なエラーメッセージを返します。
- * コンテキストを指定することで、メッセージ内に詳細を含めることができます。
- *
- * @param string $errorType エラータイプ (例: 'is_empty', 'max_length', 'time_invalid')
- * @param string $context   エラーメッセージに付加する追加情報 (例: 'イベント名')
+ * @param string $errorType エラータイプ
+ * @param string $context   コンテキスト情報
  * @return string エラータイプに対応するエラーメッセージ
  */
 function generateDebugMessage($errorType, $context = '')
 {
     $messages = [
-        'is_empty' => '【エラー: 必須項目】{$context} が入力されていません。',
-        'max_length' => '【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。',
-        'time_invalid' => '【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。',
-        'time_format' => '【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。',
-        'edit_password' => '【エラー: 編集パスワード未設定】{$context} 編集パスワードが設定されていません。',
+        'is_empty' => "【エラー: 必須項目】{$context} が入力されていません。",
+        'max_length' => "【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。",
+        'time_invalid' => "【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。",
+        'time_format' => "【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。",
+        'edit_password' => "【エラー: 編集パスワード未設定】{$context} 編集パスワードが設定されていません。",
     ];
+
     return $messages[$errorType] ?? '【エラー】未知のエラーが発生しました。';
 }
