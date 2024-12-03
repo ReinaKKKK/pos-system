@@ -3,34 +3,31 @@
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php';
 
+// タイムゾーンを東京に設定
+date_default_timezone_set('Asia/Tokyo');
+
 // POSTリクエストがある場合のみイベント作成処理を実行
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POSTリクエストからデータを取得
     $name = isset($_POST['name']) ? $_POST['name'] : '';
     $detail = isset($_POST['detail']) ? $_POST['detail'] : ''; // detailは任意
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
-    $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : '';
-    $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : '';
-
-    // 日時を適切な形式に変換
-    $startTime = date('Y-m-d H:i:s', strtotime($startTime));
-    $endTime = date('Y-m-d H:i:s', strtotime($endTime));
+    $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
 
     // 入力データのバリデーション
     $errors = validate([
         'name' => $name,
-        'startTime' => $startTime,
-        'endTime' => $endTime,
+        'timeSlots' => $timeSlots,
     ]);
 
     try {
         // トランザクション開始
-        $databaseConnection->beginTransaction();
+        $pdo->beginTransaction();
 
         // `events` テーブルにデータを挿入
         $sqlEvents = 'INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
                       VALUES (:name, :detail, :edit_password, NOW(), NOW())';
-        $stmtEvents = $databaseConnection->prepare($sqlEvents);
+        $stmtEvents = $pdo->prepare($sqlEvents);
         $stmtEvents->execute([
             ':name' => $name,
             ':detail' => $detail,
@@ -38,47 +35,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // 挿入されたイベントIDを取得
-        $eventId = $databaseConnection->lastInsertId();
+        $eventId = $pdo->lastInsertId();
         if ($eventId === false) {
             throw new Exception("イベントIDの取得に失敗しました。");
         }
 
-/**
-     * Generate time slots between the given start and end times.
-     *
-     * This function divides the given time range into hourly slots and
-     * returns them in an array with 'startTime' and 'endTime' keys.
-     *
-     * @param string $startTime The start time in 'Y-m-d H:i:s' format.
-     * @param string $endTime   The end time in 'Y-m-d H:i:s' format.
-     * @return array An array of time slots, each containing 'startTime' and 'endTime'.
-     */
-        function generateTimeSlots($startTime, $endTime)
-        {
-            // 時間スロットを生成するロジック（例: 1時間ごと）
-            $timeSlots = [];
-            $current = strtotime($startTime);
-            $end = strtotime($endTime);
+        // `availabilities` テーブルに複数の日時スロットを挿入
+        $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
+                              VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
+        $stmtAvailabilities = $pdo->prepare($sqlAvailabilities);
 
-            while ($current < $end) {
-                $slotEnd = min($end, strtotime('+1 hour', $current));
-                $timeSlots[] = [
-                    'startTime' => date('Y-m-d H:i:s', $current),
-                    'endTime' => date('Y-m-d H:i:s', $slotEnd),
-                ];
-                $current = $slotEnd;
-            }
-
-            return $timeSlots;
-        }
-
-        // `availabilities` テーブルに日時スロットを挿入
-        $timeSlots = generateTimeSlots($startTime, $endTime);
         foreach ($timeSlots as $slot) {
-            $sqlAvailabilities = 'INSERT INTO availabilities (
-            event_id, start_time, end_time, created_at, updated_at) 
-                                VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
-            $stmtAvailabilities = $databaseConnection->prepare($sqlAvailabilities);
             $stmtAvailabilities->execute([
                 ':event_id' => $eventId,
                 ':start_time' => $slot['startTime'],
@@ -86,9 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
 
-
         // トランザクションをコミット
-        $databaseConnection->commit();
+        $pdo->commit();
 
         // イベントURLを表示するページ（event_url.php）へリダイレクト
         if (!headers_sent()) {
@@ -102,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } catch (PDOException $e) {
         // データベース関連のエラーをキャッチしてロールバック
-        $databaseConnection->rollBack();
+        $pdo->rollBack();
         echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         error_log($e->getMessage());
     } catch (Exception $e) {
@@ -118,8 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset='UTF-8'>
     <title>イベント作成</title>
-    <link rel='stylesheet' href='style.css'> 
-    <script src='script.js'></script>
+    <link rel='stylesheet' href='style.css'>
 </head>
 <body>
     <form action='index.php' method='POST'>
@@ -140,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type='datetime-local' id='endTime' name='endTime' required>
         </label><br><br>
 
-        <button id='btn' type='button'>候補日を追加</button>
+        <button type='button' id='addSlotBtn'>候補日を追加</button>
 
         <!-- 日付を表示する部分 -->
         <div id='timeSlotContainer'></div>
@@ -149,8 +114,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type='password' name='editPassword'><br><br>
 
         <input type='hidden' id='timeSlotsInput' name='timeSlots'> <!-- 候補日時をここに送信 -->
-        <button type='submit' id='submitFormButton'>イベントを作成</button>
+        <button type='submit'>イベントを作成</button>
 
     </form>
+
+    <script>
+document.getElementById('addSlotBtn').addEventListener('click', function() {
+    // 開始時間と終了時間を取得
+    var startTime = document.getElementById('startTime').value;
+    var endTime = document.getElementById('endTime').value;
+    
+    // 時間スロットを生成
+    var timeSlotContainer = document.getElementById('timeSlotContainer');
+    var newSlot = document.createElement('div');
+    newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
+
+    // 新しいスロットを表示する
+    timeSlotContainer.appendChild(newSlot);
+
+    // 入力した時間スロットをフォームに追加
+    var timeSlotsInput = document.getElementById('timeSlotsInput');
+    var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
+    existingTimeSlots.push({ startTime: startTime, endTime: endTime });
+    timeSlotsInput.value = JSON.stringify(existingTimeSlots);
+});
+</script>
+
 </body>
 </html>

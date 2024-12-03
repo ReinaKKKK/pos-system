@@ -15,36 +15,6 @@ function validateEditPassword($password)
 }
 
 /**
- * 入力されたパスワードが正しいかをチェックする関数。
- *
- * @param string $inputPassword 入力されたパスワード。
- * @param string $type          A'edit' (主催者) または 'participant' (参加者)。
- * @return string エラーメッセージまたは空文字列
- */
-function validatePassword($inputPassword, $type)
-{
-    $correctPasswords = [
-        'edit' => '正しい編集用パスワード',
-        'participant' => '正しい参加者用パスワード'
-    ];
-
-    $errorMessages = [
-        'edit' => 'edit_password',
-        'participant' => 'participant_password'
-    ];
-
-    if (!isset($correctPasswords[$type])) {
-        return '不正なパスワードタイプが指定されました。';
-    }
-
-    if ($inputPassword !== $correctPasswords[$type]) {
-        return createErrorMessage($errorMessages[$type], 'パスワードが間違っています');
-    }
-
-    return ''; // エラーなし
-}
-
-/**
  * 入力値が空かどうかを検証する関数
  *
  * @param string|array $name 検証対象の文字列または配列
@@ -59,7 +29,7 @@ function validate($name)
 }
 
 /**
- * 編集パスワードのバリデーションを行う関数
+ * 編集パスワードの空かバリデーションを行う関数
  *
  * @param string $password 編集パスワード
  * @return boolean 編集パスワードが空ならfalse、それ以外はtrue
@@ -68,7 +38,6 @@ function isEditPasswordSet($password)
 {
     return !empty(trim($password));
 }
-
 /**
  * 入力値が最大文字数を超えているかを検証する関数
  *
