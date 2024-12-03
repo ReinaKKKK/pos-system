@@ -42,21 +42,21 @@ try {
 
 // POSTリクエストで回答を処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (empty($_POST['name']) || empty($_POST['participant_password'])) {
+    if (empty($_POST['name']) || empty($_POST['user_id'])) {
         echo '<p>名前または編集用パスワードが入力されていません。</p>';
         exit;
     }
 
     $userName = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $participantPassword = htmlspecialchars($_POST['participant_password'], ENT_QUOTES, 'UTF-8');
+    $participantPassword = htmlspecialchars($_POST['user_id'], ENT_QUOTES, 'UTF-8');
 
     try {
         // ユーザーを作成
-        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, participant_password) VALUES (:name, :event_id, :participant_password)');
+        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, user_id) VALUES (:name, :event_id, :user_id)');
         $stmt->execute([
             ':name' => $userName,
             ':event_id' => $eventId,
-            ':participant_password' => $participantPassword,
+            ':user_id' => $participantPassword,
         ]);
         $userId = $pdo->lastInsertId();
 
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="availabilities_<?php echo $availability['id']; ?>">
                     <?php
                         $startTime = new DateTime($availability['start_time'], new DateTimeZone('Asia/Tokyo'));
-                        $endTime = new DateTime($availability['end_time'], new DateTimeZone('Asia/Tokyo'));
+                        $endTime = new DateTime($availability['end_time'], new DateTimeZone('Asia/Ho_Chi_Minh'));
                         echo '開始: ' . $startTime->format('Y-m-d H:i') . ' - 終了: ' . $endTime->format('Y-m-d H:i');
                     ?>:
                 </label>
@@ -112,8 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
         <?php endforeach; ?>
-        <label for="participant_password">参加者用編集パスワード:</label>
-        <input type="text" name="participant_password" id="participant_password" required>
+        <label for="user_id">参加者用編集パスワード:</label>
+        <input type="text" name="user_id" id="user_id" required>
         <button type="submit">送信</button>
     </form>
 </body>
