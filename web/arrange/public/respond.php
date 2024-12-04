@@ -52,24 +52,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // ユーザーを作成
-        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, user_id) VALUES (:name, :event_id, :user_id)');
+        $stmt = $pdo->prepare('INSERT INTO users (name, event_id) VALUES (:name, :event_id)');
         $stmt->execute([
             ':name' => $userName,
             ':event_id' => $eventId,
-            ':user_id' => $participantPassword,
         ]);
-        $userId = $pdo->lastInsertId();
+        $userId = $pdo->lastInsertId();  // 新しく作成したユーザーのIDを取得
 
-        // 各回答を保存
+        // 各回答を保存し、レスポンスIDを取得
         foreach ($availabilities as $availability) {
             $response = $_POST['availabilities'][$availability['id']] ?? null;
             if ($response !== null) {
+                // レスポンスをresponsesテーブルに挿入
                 $stmt = $pdo->prepare('INSERT INTO responses (user_id, availability_id, response, created_at, updated_at)
                                        VALUES (:user_id, :availability_id, :response, NOW(), NOW())');
                 $stmt->execute([
-                    ':user_id' => $userId,
+                    ':user_id' => $userId,  // usersテーブルのID
                     ':availability_id' => $availability['id'],
                     ':response' => $response,
+                ]);
+                $responseId = $pdo->lastInsertId();  // 新しく作成したレスポンスのIDを取得
+
+                // usersテーブルにresponse_idを更新
+                $stmt = $pdo->prepare('UPDATE users SET response_id = :response_id WHERE id = :user_id');
+                $stmt->execute([
+                    ':response_id' => $responseId,  // レスポンスID
+                    ':user_id' => $userId,  // usersテーブルのID
                 ]);
             }
         }
