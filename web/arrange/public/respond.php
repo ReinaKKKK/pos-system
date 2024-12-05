@@ -42,20 +42,21 @@ try {
 
 // POSTリクエストで回答を処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (empty($_POST['name']) || empty($_POST['user_id'])) {
+    if (empty($_POST['name']) || empty($_POST['edit_password'])) {
         echo '<p>名前または編集用パスワードが入力されていません。</p>';
         exit;
     }
 
     $userName = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $participantPassword = htmlspecialchars($_POST['user_id'], ENT_QUOTES, 'UTF-8');
+    $participantPassword = htmlspecialchars($_POST['edit_password'], ENT_QUOTES, 'UTF-8');
 
     try {
         // ユーザーを作成
-        $stmt = $pdo->prepare('INSERT INTO users (name, event_id) VALUES (:name, :event_id)');
+        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password) VALUES (:name, :event_id, NOW(), NOW(), :edit_password)');
         $stmt->execute([
             ':name' => $userName,
             ':event_id' => $eventId,
+            ':edit_password' => password_hash($participantPassword, PASSWORD_DEFAULT),   // パスワードのハッシュ化
         ]);
         $userId = $pdo->lastInsertId();  // 新しく作成したユーザーのIDを取得
 
@@ -102,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1><?php echo htmlspecialchars($event['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
     <form method="POST" action="">
         <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>">
-        <label for="name">名前:</label>
+        <label for="name">ユーザー名:</label>
         <input type="text" name="name" id="name" required>
         <?php foreach ($availabilities as $availability) : ?>
             <div>
@@ -121,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endforeach; ?>
         <label for="user_id">参加者用編集パスワード:</label>
-        <input type="text" name="user_id" id="user_id" required>
+        <input type="text" name="edit_password" id="edit_password" required>
         <button type="submit">送信</button>
     </form>
 </body>

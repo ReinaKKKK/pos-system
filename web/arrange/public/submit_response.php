@@ -7,7 +7,7 @@ if (isset($_GET['event_id'])) {
     $eventId = (int)$_GET['event_id'];
 
     // 参加者編集用パスワード、主催者編集用パスワード
-    $participantPassword = $_POST['user_id'] ?? ''; // 参加者のパスワード
+    $participantPassword = $_POST['edit_password'] ?? ''; // 参加者のパスワード
     $hostPassword = $_POST['edit_password'] ?? ''; // 主催者のパスワード
 
     try {
@@ -22,12 +22,12 @@ if (isset($_GET['event_id'])) {
             exit;
         }
 
-        // 参加者認証（passwordが正しい場合）
+        // 参加者認証（edit_passwordが正しい場合）
         $isParticipantAuthenticated = false;
         if ($participantPassword) {
-            $stmt = $pdo->prepare('SELECT id FROM responses WHERE event_id = :event_id AND user_id = :user_id');
+            $stmt = $pdo->prepare('SELECT id FROM responses WHERE event_id = :event_id AND edit_password = :edit_password');
             $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-            $stmt->bindValue(':user_id', $participantPassword, PDO::PARAM_STR);
+            $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
             $stmt->execute();
             $isParticipantAuthenticated = $stmt->fetchColumn() !== false;
         }
@@ -45,7 +45,8 @@ if (isset($_GET['event_id'])) {
         $availabilities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // 参加者とその回答を取得
-        $stmt = $pdo->prepare('SELECT users.id AS user_id, users.name AS user_name, responses.availability_id, responses.response, responses.comment FROM responses JOIN users ON responses.user_id = users.id WHERE responses.availability_id IN (SELECT id FROM availabilities WHERE event_id = :event_id)');
+        $stmt = $pdo->prepare('SELECT users.id AS user_id, users.name AS user_name, responses.availability_id, responses.response, responses.comment FROM responses JOIN users ON responses.user_id = users.id WHERE responses.availability_id IN (
+            SELECT id FROM availabilities WHERE event_id = :event_id)');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -96,14 +97,16 @@ foreach ($responses as $response) {
     <script>
     // ポップアップを表示
     function showPasswordPopup(url, eventId) {
+        console.log("showPasswordPopup called with: ", url, eventId); // デバッグ: URLとeventIdを確認
         document.getElementById('popup').style.display = 'flex';
         document.getElementById('editForm').action = url;
         document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
+        console.log("event_id_field value set to: ", eventId); // デバッグ: フィールドに設定された値を確認
     }
 
     // パスワード確認後にポップアップを非表示にする
     function submitPasswordForm() {
-        const password = document.getElementById('user_id').value;
+        const password = document.getElementById('edit_password').value;
         if (password.trim() !== "") {
             document.getElementById('popup').style.display = 'none';
             document.getElementById('editForm').submit(); // フォーム送信
@@ -128,7 +131,8 @@ foreach ($responses as $response) {
             <h2>編集用パスワードを入力してください</h2>
             <form id="editForm" method="POST">
                 <input type="hidden" id="event_id_field" name="event_id" value=""> <!-- イベントIDを保持 -->
-                <input type="password" id="user_id" name="password" placeholder="パスワード" required>
+                <input type="name" id="name" name="name" placeholder="ユーザー名" required>
+                <input type="edit_password" id="edit_password" name="edit_password" placeholder="パスワード" required>
                 <br><br>
                 <button type="button" onclick="submitPasswordForm()">送信</button>
                 <button type="button" onclick="document.getElementById('popup').style.display='none'">キャンセル</button>
