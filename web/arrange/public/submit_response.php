@@ -68,6 +68,23 @@ foreach ($responses as $response) {
     ];
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_id = $_POST['user_id'] ?? '';
+    $response = $_POST['response'];
+
+    try {
+        $stmt = $pdo->prepare('UPDATE responses SET response = :response WHERE user_id = :user_id');
+        $stmt->bindValue(':response', $response);
+        $stmt->bindValue(':user_id', $user_id);
+
+        $stmt->execute();
+
+        header("Location: index.php"); // 一覧ページへリダイレクト
+    } catch (PDOException $e) {
+        echo "更新エラー: " . $e->getMessage();
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -131,8 +148,10 @@ foreach ($responses as $response) {
             <h2>編集用パスワードを入力してください</h2>
             <form id="editForm" method="POST">
                 <input type="hidden" id="event_id_field" name="event_id" value=""> <!-- イベントIDを保持 -->
-                <input type="name" id="name" name="name" placeholder="ユーザー名" required>
-                <input type="edit_password" id="edit_password" name="edit_password" placeholder="パスワード" required>
+                <label for="name">ユーザー名:</label>
+                <input type="text" id="name" name="name" placeholder="ユーザー名" required>
+                <label for="edit_password">編集パスワード:</label>
+                <input type="password" id="edit_password" name="edit_password" placeholder="パスワード" required>
                 <br><br>
                 <button type="button" onclick="submitPasswordForm()">送信</button>
                 <button type="button" onclick="document.getElementById('popup').style.display='none'">キャンセル</button>
