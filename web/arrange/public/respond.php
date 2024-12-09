@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $userName = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
     $participantPassword = htmlspecialchars($_POST['edit_password'], ENT_QUOTES, 'UTF-8');
+    $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
 
     try {
         // ユーザーを作成
@@ -65,12 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = $_POST['availabilities'][$availability['id']] ?? null;
             if ($response !== null) {
                 // レスポンスをresponsesテーブルに挿入
-                $stmt = $pdo->prepare('INSERT INTO responses (user_id, availability_id, response, created_at, updated_at)
-                                       VALUES (:user_id, :availability_id, :response, NOW(), NOW())');
+                $stmt = $pdo->prepare('INSERT INTO responses (user_id, availability_id, response, comment, created_at, updated_at)
+                                       VALUES (:user_id, :availability_id, :response, :comment, NOW(), NOW())');
                 $stmt->execute([
                     ':user_id' => $userId,  // usersテーブルのID
                     ':availability_id' => $availability['id'],
                     ':response' => $response,
+                    ':comment' => $comment,
                 ]);
                 $responseId = $pdo->lastInsertId();  // 新しく作成したレスポンスのIDを取得
 
@@ -121,6 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
         <?php endforeach; ?>
+        <label>コメント</label>
+        <textarea name='comment'></textarea><br><br>
         <label for="user_id">参加者用編集パスワード:</label>
         <input type="text" name="edit_password" id="edit_password" required>
         <button type="submit">送信</button>

@@ -192,18 +192,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     default:
                                         echo "未回答";
                                 }
-                                // コメントがあれば表示
-                                if ($comment) {
-                                    echo "<br>" . htmlspecialchars($comment);
-                                }
                             } else {
                                 echo "未回答";
                             }
                             ?>
-                        </td>
+                    </td>
                     <?php endforeach; ?>
-                </tr>
+            </tr>
             <?php endforeach; ?>
+
+        <!-- コメント行 -->
+        <tr>
+            <td>コメント</td> <!-- コメント列の見出し -->
+            <?php foreach ($participantsResponses as $userName => $responsesForUser) : ?>
+                <td>
+                    <?php
+                    // 各ユーザーのコメントを表示
+                    if (!empty($responsesForUser)) {
+                        // 最初の応答からコメントを取得（ここでは最初の応答があると仮定）
+                        $comment = reset($responsesForUser)['comment'];
+                        if (!empty($comment)) {
+                            echo htmlspecialchars($comment); // コメントがあれば表示
+                        } else {
+                            echo "なし"; // コメントがない場合は「なし」と表示
+                        }
+                    } else {
+                        echo "なし"; // 応答がない場合も「なし」と表示
+                    }
+                    ?>
+                </td>
+            <?php endforeach; ?>
+        </tr>
         </tbody>
     </table>
 </body>
