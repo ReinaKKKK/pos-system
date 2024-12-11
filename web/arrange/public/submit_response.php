@@ -1,6 +1,7 @@
 <?php
 
 require_once('/var/www/html/arrange/database/db.php');
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php'; // イベントの保存処理
 
 // イベントIDを取得
 if (isset($_GET['event_id'])) {

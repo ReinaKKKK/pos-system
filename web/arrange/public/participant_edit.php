@@ -41,49 +41,27 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
 }
 
 // POSTデータ処理：ユーザーが更新を送信
-// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
-//     try {
-//         // 各レスポンスを更新
-//         foreach ($_POST['response'] as $responseId => $responseValue) {
-//             // SQL文を準備
-//             $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE id = :response_id AND event_id = :event_id');
-//             $stmt->bindValue(':response', $responseValue);
-//             // コメントも一緒に更新
-//             if (isset($_POST['comment'])) {
-//                 $stmt->bindValue(':comment', $_POST['comment']);
-//             } else {
-//                 // コメントがない場合はNULLを設定
-//                 $stmt->bindValue(':comment', null, PDO::PARAM_NULL);
-//             }
-//             $stmt->bindValue(':response_id', $_POST['response_id']);
-//             // event_idもバインド
-//             if (isset($_POST['event_id'])) {
-//                 $stmt->bindValue(':event_id', $_POST['event_id'], PDO::PARAM_INT);
-//             }
-
-//             // 実行
-//             $stmt->execute();
-//         }
-
-//         // 更新後はリダイレクト
-//         header("Location: submit_response.php");
-//         exit;
-//     } catch (PDOException $e) {
-//         echo "更新エラー: " . htmlspecialchars($e->getMessage());
-//     }
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
     try {
         foreach ($_POST['response'] as $responseId => $responseValue) {
             $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE id = :response_id AND event_id = :event_id');
             $stmt->bindValue(':response', $responseValue);
-            $stmt->bindValue(':comment', $_POST['comment'][$responseId] ?? null, PDO::PARAM_STR);
             $stmt->bindValue(':response_id', $responseId, PDO::PARAM_INT);
-            $stmt->bindValue(':event_id', $_POST['event_id'], PDO::PARAM_INT);
+            $stmt->bindValue(':response', $responseValue, PDO::PARAM_INT);
 
+            // コメントの処理
+            if (isset($_POST['comment'][$responseId])) {
+                $stmt->bindValue(':comment', $_POST['comment'][$responseId], PDO::PARAM_STR);
+            } else {
+                $stmt->bindValue(':comment', null, PDO::PARAM_NULL);
+            }
+
+            $stmt->bindValue(':event_id', $event_id, PDO::PARAM_INT);
             $stmt->execute();
         }
 
-        header("Location: submit_response.php");
+        // 更新後はリダイレクト
+        header('Location: submit_response.php?event_id=' . urlencode($_POST['event_id']));
         exit;
     } catch (PDOException $e) {
         echo "更新エラー: " . htmlspecialchars($e->getMessage());
@@ -99,9 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response'])) {
 </head>
 <body>
     <h1>回答編集画面</h1>
-    <form action="" method="POST">
-        <input type="hidden" id="event_id_field" name="event_id" value="<?php echo htmlspecialchars($eventId); ?>">
+    <form action="participant_edit.php" method="POST">
+     <!-- 送るデータを正しく隠しフィールドで送信 -->
+        <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId); ?>">
+        <input type="hidden" name="name" value="<?php echo htmlspecialchars($name); ?>">
         <input type="hidden" name="edit_password" value="<?php echo htmlspecialchars($_POST['edit_password']); ?>">
+
         <table border="1">
             <tr>
                 <th>日程</th>
@@ -117,9 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response'])) {
                             <option value="3" <?php echo $response['response'] == 3 ? 'selected' : ''; ?>>△</option>
                         </select>
                     </td>
-                    <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId); ?>">
-                    <input type="hidden" name="name" value="<?php echo htmlspecialchars($name); ?>">
-                    <input type="hidden" name="edit_password" value="<?php echo htmlspecialchars($_POST['edit_password']); ?>">
                 </tr>
             <?php endforeach; ?>
             <tr>
