@@ -1,12 +1,10 @@
 <?php
 
-require_once('/var/www/html/arrange/database/db.php');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// デバッグ用コード: POSTデータとGETデータを確認popupのデータを受け取る
-echo "<pre>";
-echo "POSTデータ:\n";
-print_r($_POST);
-echo "</pre>";
+require_once('/var/www/html/arrange/database/db.php');
 
 // イベントIDと名前、編集パスワードを取得.「isset」はこの変数に値が入っているかどうかを確認するための関数
 if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
@@ -15,28 +13,51 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
     $participantPassword = $_POST['edit_password'];
 
     try {
-        // データベースからイベントデータ取得してパスワード検証
-        $stmt = $pdo->prepare('SELECT edit_password FROM users WHERE event_id = :event_id and name = :name'); //users テーブルから edit_password 列を選択し、event_id と name に基づいてフィルタリングします。:event_id と :name はプレースホルダで、実際の値は後でバインドされる
-        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); //プレースホルダ :event_id に変数 $eventId の値を整数型としてバインド
-        $stmt->bindValue(':name', $name, PDO::PARAM_STR); //プレースホルダ :name に変数 $name の値を文字列型としてバインド
-        $stmt->execute(); //準備したSQLクエリを実行.バインドされた値がプレースホルダに挿入され、実際にデータベースに対してクエリが実行される
-        $event = $stmt->fetch(PDO::FETCH_ASSOC); //実行したクエリの結果から1行を取得.結果は連想配列として $event 変数に格納
-
-        if (!$event || !password_verify($participantPassword, $event['edit_password'])) {
+        // データベースからイベントデータを取得してパスワードを検証
+        $stmt = $pdo->prepare('SELECT id, edit_password FROM users WHERE event_id = :event_id AND name = :name');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // event_id をバインド
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR); // name をバインド
+        $stmt->execute(); // クエリ実行
+        $user = $stmt->fetch(PDO::FETCH_ASSOC); // 結果を取得
+        // ユーザーが見つからない、またはパスワードが一致しない場合
+        if (!$user || !password_verify($participantPassword, $user['edit_password'])) {
             echo '<p>認証エラー: パスワードが正しくありません。</p>';
             exit;
-        } // $event が存在しない（つまり、指定された条件に一致するユーザーが見つからない）場合や、参加者が入力したパスワード（$participantPassword）がデータベースに保存されているパスワード（$event['edit_password']）と一致しない場合、エラーメッセージを表示し、処理を終了します
-        // 参加者の回答を取得。ハッシュ化されたパスワードとユーザーが入力したパスワードを比較する。
-        $stmt = $pdo->prepare('SELECT responses.id, responses.availability_id, responses.response, responses.comment, availabilities.start_time, availabilities.end_time FROM responses JOIN availabilities ON responses.availability_id = availabilities.id WHERE availabilities.event_id = :event_id');
-        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-        $stmt->execute();
-        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        // 名前とパスワードがOKなら、特定の参加者の回答を取得
+        $userId = $user['id']; // users テーブルから取得した id が user_id に相当
+        $stmt = $pdo->prepare('
+            SELECT 
+                responses.id, 
+                responses.availability_id, 
+                responses.user_id, 
+                responses.response, 
+                responses.comment, 
+                availabilities.start_time, 
+                availabilities.end_time
+            FROM 
+                responses 
+            JOIN 
+                availabilities 
+            ON 
+                responses.availability_id = availabilities.id 
+            WHERE 
+                responses.user_id = :user_id
+        ');
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT); // 特定の user_id をバインド
+        $stmt->execute(); // クエリ実行
+        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC); // 特定の参加者の回答を取得
     } catch (PDOException $e) {
+        // データベースエラーの処理
         echo 'データベースエラー: ' . $e->getMessage();
         exit;
     }
 } else {
     echo '<p>イベントIDまたはパスワードが無効です。</p>';
+    exit;
+}
+if (headers_sent($file, $line)) {
+    echo "Headers already sent in $file on line $line";
     exit;
 }
 
@@ -47,19 +68,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
             $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE id = :response_id AND event_id = :event_id');
             $stmt->bindValue(':response', $responseValue);
             $stmt->bindValue(':response_id', $responseId, PDO::PARAM_INT);
-            $stmt->bindValue(':response', $responseValue, PDO::PARAM_INT);
+            $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
 
             // コメントの処理
-            if (isset($_POST['comment'][$responseId])) {
-                $stmt->bindValue(':comment', $_POST['comment'][$responseId], PDO::PARAM_STR);
-            } else {
-                $stmt->bindValue(':comment', null, PDO::PARAM_NULL);
-            }
+            $comment = $_POST['comment'][$responseId] ?? null;
+            $stmt->bindValue(':comment', $comment, $comment !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
-            $stmt->bindValue(':event_id', $event_id, PDO::PARAM_INT);
             $stmt->execute();
         }
-
         // 更新後はリダイレクト
         header('Location: submit_response.php?event_id=' . urlencode($_POST['event_id']));
         exit;

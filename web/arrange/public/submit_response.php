@@ -5,7 +5,7 @@ include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php'; // イ�
 
 // イベントIDを取得
 if (isset($_GET['event_id'])) {
-    $eventId = (int)$_GET['event_id'];
+    $eventId = (int)$_POST['event_id'];
 
     // 参加者編集用パスワード、主催者編集用パスワード
     $participantPassword = $_POST['edit_password'] ?? ''; // 参加者のパスワード
