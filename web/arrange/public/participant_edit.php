@@ -61,6 +61,12 @@ if (headers_sent($file, $line)) {
     exit;
 }
 
+var_dump($_SERVER['REQUEST_METHOD'] === 'POST');
+var_dump(isset($_POST['response']));
+var_dump($_POST);
+var_dump(isset($_POST['response_id']));
+
+
 // POSTデータ処理：ユーザーが更新を送信
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
     try {
@@ -76,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
 
             $stmt->execute();
         }
-        // 更新後はリダイレクト
+
         header('Location: submit_response.php?event_id=' . urlencode($_POST['event_id']));
         exit;
     } catch (PDOException $e) {
@@ -98,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
         <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId); ?>">
         <input type="hidden" name="name" value="<?php echo htmlspecialchars($name); ?>">
         <input type="hidden" name="edit_password" value="<?php echo htmlspecialchars($_POST['edit_password']); ?>">
+
 
         <table border="1">
             <tr>

@@ -3,13 +3,13 @@
 /**
  * 編集パスワードが設定されていない場合、エラーメッセージを表示する関数
  *
- * @param string $password 編集パスワード
+ * @param string $editPassword 編集パスワード
  * @return string エラーメッセージまたは空文字列
  */
-function validateEditPassword($password)
+function validateEditPassword($editPassword)
 {
-    if (empty(trim($password))) {
-        return createErrorMessage('edit_password', '編集パスワード');
+    if (empty(trim($editPassword))) {
+        return createErrorMessage('editPassword', '編集パスワード');
     }
     return ''; // エラーなし
 }
@@ -17,7 +17,7 @@ function validateEditPassword($password)
 /**
  * 入力値が空かどうかを検証する関数
  *
- * @param string|array $name 検証対象の文字列または配列
+ * @param array $name 検証対象の配列
  * @return boolean 空であればtrue、それ以外はfalse
  */
 function validate($name)
@@ -25,19 +25,20 @@ function validate($name)
     if (is_array($name) && isset($name['name'])) {
         return trim($name['name']) === '';
     }
-    return trim($name) === '';
+    return true;
 }
 
-/**
- * 編集パスワードの空かバリデーションを行う関数
- *
- * @param string $password 編集パスワード
- * @return boolean 編集パスワードが空ならfalse、それ以外はtrue
- */
-function isEditPasswordSet($password)
-{
-    return !empty(trim($password));
-}
+// /**
+//  * 編集パスワードの空かバリデーションを行う関数
+//  *
+//  * @param string $editPassword 編集パスワード
+//  * @return boolean 編集パスワードが空ならfalse、それ以外はtrue
+//  */
+// function isEditPasswordSet($editPassword)
+// {
+//     return !empty(trim($editPassword));
+// }
+
 /**
  * 入力値が最大文字数を超えているかを検証する関数
  *
