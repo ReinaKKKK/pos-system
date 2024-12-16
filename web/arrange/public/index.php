@@ -10,24 +10,32 @@ date_default_timezone_set('Asia/Tokyo');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POSTリクエストからデータを取得
     $name = isset($_POST['name']) ? $_POST['name'] : '';
-
-//     if (name あったら){ isset($_POST['name'])
-//         true
-//         入力されたnameが$nameに入る$name = $_POST['name']
-//     }
-//  else{
-// nameないから空白＄nameにとりあえず入れる。$name = ''
-//  }
-
     $detail = isset($_POST['detail']) ? $_POST['detail'] : ''; // detailは任意
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
     $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
 
-    // // 入力データのバリデーション
-    // $errors = validate([
-    //     'name' => $name,
-    //     'timeSlots' => $timeSlots,
-    // ]);
+// 入力データのバリデーション
+    $errors = [];
+
+    // 必須項目の検証
+    if (!empty($name) && maxLength($name)) {
+        $errors[] = createErrorMessage('max_length', 'イベント名');
+    }
+    // 時間スロットの検証
+    foreach ($timeSlots as $slot) {
+        if (isInvalidTimeRange($slot['startTime'], $slot['endTime'])) {
+            $errors[] = createErrorMessage('time_setting', '時間スロット');
+        }
+    }
+
+    // バリデーションエラーがあれば終了
+    if (!empty($errors)) {
+        foreach ($errors as $error) {
+            echo "<p style='color: red;'>$error</p>";
+        }
+        exit;
+    }
+
 
     try {
         // トランザクション開始

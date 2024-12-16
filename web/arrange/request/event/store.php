@@ -6,13 +6,13 @@
  * @param string $editPassword 編集パスワード
  * @return string エラーメッセージまたは空文字列
  */
-function validateEditPassword($editPassword)
-{
-    if (empty(trim($editPassword))) {
-        return createErrorMessage('editPassword', '編集パスワード');
-    }
-    return ''; // エラーなし
-}
+// function validateEditPassword($editPassword)
+// {
+//     if (empty(trim($editPassword))) {
+//         return createErrorMessage('editPassword', '編集パスワード');
+//     }
+//     return ''; // エラーなし
+// }
 
 /**
  * 入力値が空かどうかを検証する関数
@@ -20,24 +20,14 @@ function validateEditPassword($editPassword)
  * @param array $name 検証対象の配列
  * @return boolean 空であればtrue、それ以外はfalse
  */
-function validate($name)
-{
-    if (is_array($name) && isset($name['name'])) {
-        return trim($name['name']) === '';
-    }
-    return true;
-}
-
-// /**
-//  * 編集パスワードの空かバリデーションを行う関数
-//  *
-//  * @param string $editPassword 編集パスワード
-//  * @return boolean 編集パスワードが空ならfalse、それ以外はtrue
-//  */
-// function isEditPasswordSet($editPassword)
+// function validate($name)
 // {
-//     return !empty(trim($editPassword));
+//     if (is_array($name) && isset($name['name'])) {
+//         return trim($name['name']) === '';
+//     }
+//     return true;
 // }
+
 
 /**
  * 入力値が最大文字数を超えているかを検証する関数
@@ -79,33 +69,11 @@ function isInvalidTimeRange($startTime, $endTime)
 function createErrorMessage($errorType, $str)
 {
     $messages = [
-        'is_empty' => $str . 'は必須です。',
         'max_length' => $str . 'は255文字以下にしてください。',
-        'is_empty_time' => $str . 'の時刻は必須です。',
         'time_setting' => $str . 'の時間設定が正しくありません。開始時間よりも後の終了時間にしてください。',
         'edit_password' => 'パスワードが間違っています。設定した正しいものを入れてください。',
         'participant_password' => 'パスワードが間違っています。設定した正しいものを入れてください。',
     ];
 
     return $messages[$errorType] ?? '不明なエラーが発生しました。';
-}
-
-/**
- * Debugエラーメッセージを生成する関数
- *
- * @param string $errorType エラータイプ
- * @param string $context   コンテキスト情報
- * @return string エラータイプに対応するエラーメッセージ
- */
-function generateDebugMessage($errorType, $context = '')
-{
-    $messages = [
-        'is_empty' => "【エラー: 必須項目】{$context} が入力されていません。",
-        'max_length' => "【エラー: 入力が長すぎます】{$context} は255文字以内にしてください。",
-        'time_invalid' => "【エラー: 時間設定が不正】{$context} 開始時間は終了時間よりも前に設定してください。",
-        'time_format' => "【エラー: 日時形式が不正】{$context} 正しい日時形式を使用してください。",
-        'edit_password' => "【エラー: 編集パスワード未設定】{$context} 編集パスワードが設定されていません。",
-    ];
-
-    return $messages[$errorType] ?? '【エラー】未知のエラーが発生しました。';
 }
