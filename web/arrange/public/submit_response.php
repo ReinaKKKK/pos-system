@@ -46,7 +46,7 @@ if (isset($_GET['event_id'])) {
         $availabilities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // 参加者とその回答を取得
-        $stmt = $pdo->prepare('SELECT users.id AS user_id, users.name AS user_name, responses.availability_id, responses.response, responses.comment FROM responses JOIN users ON responses.user_id = users.id WHERE responses.availability_id IN (
+        $stmt = $pdo->prepare('SELECT users.id AS user_id, users.name AS user_name, responses.availability_id, responses.response, FROM responses JOIN users ON responses.user_id = users.id WHERE responses.availability_id IN (
             SELECT id FROM availabilities WHERE event_id = :event_id)');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
@@ -132,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             alert("パスワードを入力してください");
         }
     }
+    
     </script>
 </head>
 <body>
@@ -211,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // 各ユーザーのコメントを表示
                     if (!empty($responsesForUser)) {
                         // 最初の応答からコメントを取得（ここでは最初の応答があると仮定）
-                        $comment = reset($responsesForUser)['comment'];
+                        $comment = ($responsesForUser)['comment'];
                         if (!empty($comment)) {
                             echo htmlspecialchars($comment); // コメントがあれば表示
                         } else {

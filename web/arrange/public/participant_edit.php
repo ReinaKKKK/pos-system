@@ -1,8 +1,8 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
 require_once('/var/www/html/arrange/database/db.php');
 
@@ -15,8 +15,8 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
     try {
         // データベースからイベントデータを取得してパスワードを検証
         $stmt = $pdo->prepare('SELECT id, edit_password FROM users WHERE event_id = :event_id AND name = :name');
-        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // event_id をバインド
-        $stmt->bindValue(':name', $name, PDO::PARAM_STR); // name をバインド
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // event_id をバインド。プレースホルダに実際の値が置き換えられる
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR); // name をstring型でバインド
         $stmt->execute(); // クエリ実行
         $user = $stmt->fetch(PDO::FETCH_ASSOC); // 結果を取得
         // ユーザーが見つからない、またはパスワードが一致しない場合
@@ -56,25 +56,24 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
     echo '<p>イベントIDまたはパスワードが無効です。</p>';
     exit;
 }
-if (headers_sent($file, $line)) {
-    echo "Headers already sent in $file on line $line";
-    exit;
-}
+// if (headers_sent($file, $line)) {
+//     echo "Headers already sent in $file on line $line";
+//     exit;
+// }
 
-var_dump($_SERVER['REQUEST_METHOD'] === 'POST');
-var_dump(isset($_POST['response']));
-var_dump($_POST);
-var_dump(isset($_POST['response_id']));
+// var_dump($_SERVER['REQUEST_METHOD'] === 'POST');
+// var_dump(isset($_POST['response']));
+// var_dump($_POST);
+// var_dump(isset($_POST['response_id']));
 
 
 // POSTデータ処理：ユーザーが更新を送信
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
     try {
         foreach ($_POST['response'] as $responseId => $responseValue) {
-            $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE id = :response_id AND event_id = :event_id');
+            $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE id = :response_id');
             $stmt->bindValue(':response', $responseValue);
             $stmt->bindValue(':response_id', $responseId, PDO::PARAM_INT);
-            $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
 
             // コメントの処理
             $comment = $_POST['comment'][$responseId] ?? null;
@@ -83,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
             $stmt->execute();
         }
 
-        header('Location: submit_response.php?event_id=' . urlencode($_POST['event_id']));
+        header('Location: submit_response.php?event_id=' . $eventId);
         exit;
     } catch (PDOException $e) {
         echo "更新エラー: " . htmlspecialchars($e->getMessage());
@@ -120,6 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
                             <option value="2" <?php echo $response['response'] == 2 ? 'selected' : ''; ?>>×</option>
                             <option value="3" <?php echo $response['response'] == 3 ? 'selected' : ''; ?>>△</option>
                         </select>
+                        <!-- response_id を隠しフィールドとして追加 -->
+                        <input type="hidden" name="response_id[<?php echo htmlspecialchars($response['id']); ?>]" value="<?php echo htmlspecialchars($response['id']); ?>">
                     </td>
                 </tr>
             <?php endforeach; ?>

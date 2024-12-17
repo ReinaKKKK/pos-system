@@ -53,10 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // ユーザーを作成
-        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password) VALUES (:name, :event_id, NOW(), NOW(), :edit_password)');
+        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password,comment) VALUES (:name, :event_id, NOW(), NOW(), :edit_password,:comment)');
         $stmt->execute([
             ':name' => $userName,
             ':event_id' => $eventId,
+            ':comment' => $comment,
             ':edit_password' => password_hash($participantPassword, PASSWORD_DEFAULT),   // パスワードのハッシュ化
         ]);
         $userId = $pdo->lastInsertId();  // 新しく作成したユーザーのIDを取得
@@ -66,20 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = $_POST['availabilities'][$availability['id']] ?? null;
             if ($response !== null) {
                 // レスポンスをresponsesテーブルに挿入
-                $stmt = $pdo->prepare('INSERT INTO responses (user_id, availability_id, response, comment, created_at, updated_at)
-                                       VALUES (:user_id, :availability_id, :response, :comment, NOW(), NOW())');
+                $stmt = $pdo->prepare('INSERT INTO responses (user_id, availability_id, response, created_at, updated_at)
+                                       VALUES (:user_id, :availability_id, :response, NOW(), NOW())');
                 $stmt->execute([
-                    ':user_id' => $userId,  // usersテーブルのID
+                    ':user_id' => $userId,
                     ':availability_id' => $availability['id'],
                     ':response' => $response,
-                    ':comment' => $comment,
                 ]);
                 $responseId = $pdo->lastInsertId();  // 新しく作成したレスポンスのIDを取得
 
-                // usersテーブルにresponse_idを更新
-                $stmt = $pdo->prepare('UPDATE users SET response_id = :response_id WHERE id = :user_id');
+                // usersテーブルにcommentを更新
+                $stmt = $pdo->prepare('UPDATE users SET comment = :comment WHERE id = :user_id');
                 $stmt->execute([
-                    ':response_id' => $responseId,  // レスポンスID
+                    ':comment' => $comment,  // コメント
                     ':user_id' => $userId,  // usersテーブルのID
                 ]);
             }
