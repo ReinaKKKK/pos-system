@@ -46,8 +46,14 @@ if (isset($_GET['event_id'])) {
         $availabilities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // 参加者とその回答を取得
-        $stmt = $pdo->prepare('SELECT users.id AS user_id, users.name AS user_name, responses.availability_id, responses.response, FROM responses JOIN users ON responses.user_id = users.id WHERE responses.availability_id IN (
-            SELECT id FROM availabilities WHERE event_id = :event_id)');
+        $stmt = $pdo->prepare('
+        SELECT users.id AS user_id, users.name AS name, responses.availability_id, responses.response, users.comment 
+        FROM responses 
+        JOIN users ON responses.user_id = users.id 
+        WHERE responses.availability_id IN (
+            SELECT id FROM availabilities WHERE event_id = :event_id
+        )
+    ');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -63,9 +69,8 @@ if (isset($_GET['event_id'])) {
 // 参加者の回答を整理
 $participantsResponses = [];
 foreach ($responses as $response) {
-    $participantsResponses[$response['user_name']][$response['availability_id']] = [
+    $participantsResponses[$response['user_id']][$response['availability_id']] = [
         'response' => $response['response'],
-        'comment' => $response['comment']
     ];
 }
 
