@@ -32,7 +32,7 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
                 responses.availability_id, 
                 responses.user_id, 
                 responses.response, 
-                responses.comment, 
+                users.comment, 
                 availabilities.start_time, 
                 availabilities.end_time
             FROM 

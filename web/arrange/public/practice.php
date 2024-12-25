@@ -22,13 +22,18 @@ echo "Total: {$sum} <br/>";
 $scores = [35, 65, 50, 45, 80, 90, 30];
 echo "---------- <br/>";
 echo "Question3 <br/>";
+$array = [];
+
 foreach ($scores as $score) {
-    if ($score <= 50) {
-        continue;
+    if ($score >= 50) {
+        $array[] = $score;
+        // echo "Passing scores: {$score} <br/>";
     }
-    //  echo 'Passing scores: ' . $score . '<br/>';
-     echo "Passing scores: {$score} <br/>";
 }
+// var_dump($array);
+$str = implode(", ", $array);
+// echo $str . "\n";
+echo "Passing scores: {$str} <br/>";
 // Question4 連想配列のキーと値を表示する
 $person = [
     "name" => "Alice",
@@ -60,17 +65,22 @@ foreach ($categories as $type => $menu) {
 $numbers = [1, 2, 3, 4, 5];
 echo "---------- <br/>";
 echo "Question6 <br/>";
+$array = [];
+
 foreach ($numbers as $number) {
     $number = $number * 2;
+    $array[] = $number;
 }
-echo "{$numbers} <br/>";
+$str = implode(", ", $array);
+echo "{$str} <br/>";
+
 
 // Question7 特定の条件で値を変更する
 $scores = [35, 65, 50, 45, 80, 90, 30];
 echo "---------- <br/>";
 echo "Question7 <br/>";
 foreach ($scores as $score) {
-    if ($score <= 50) {
+    if ($score < 50) {
         echo "Fail";
     } else {
         echo "Pass";
@@ -86,20 +96,36 @@ echo "Question8 <br/>";
 
 $items = array_count_values($items);
 
-foreach ($items as $value) {
-    echo $value;
+foreach ($items as $key => $value) {
+    echo  "Key: {$key}, Value: {$value} <br>";
     echo '<br>';
 }
-
+var_dump($items);
 
   // Question9  配列の値を逆順に表示する
   $colors = ["Red", "Blue", "Green", "Yellow"];
 
-echo "---------- <br/>";
+echo "<br/>---------- <br/>";
 echo "Question9 <br/>";
-$result = array_reverse($colors);
-echo'<br>';
-print_r($result);
+// 配列の長さを取得
+$len = count($colors);
+
+// 配列を逆順に表示
+// for ($i = $len - 1; $i >= 0; $i--) {
+//     echo $colors[$i] . "<br/>";
+// }
+$array = [];
+foreach ($colors as $color) {
+// $array[] = $color
+array_unshift($array, $color);
+        // echo "Name: {$color} <br/>";
+}
+foreach ($array as $color) {
+    echo " {$color} <br/>";
+}
+
+//colors配列の中身を１つずつcolorでループ処理させる。それを逆に取り出して表示
+// 箱に順にいれていって上から取り出せば逆順になる？逆順にする方法を考える
 
 
 // Question10 特定のキーを持つ値を表示する
@@ -142,13 +168,33 @@ foreach ($words as $word) {
 $numbers = [1, 2, 3, 4, 5, 6, 7, 8];
 echo "---------- <br/>";
 echo "Question13 <br/>";
+$array = [];
+$odd = [];
 foreach ($numbers as $value) {
     if ($value % 2 == 0) {
-        echo "Even: [$value ]<br>";
+        $array[] = $value;
     } else {
-        echo "Odd: [$value ]<br>";
+        $odd[] = $value;
     }
 }
+
+foreach ($array as $value) {
+    echo " {$value} <br/>";
+}
+foreach ($odd as $value) {
+    echo " {$value} <br/>";
+}
+
+
+$str = implode(", ", $array);
+// echo $str . "\n";
+echo "even: {$str} <br/>";
+
+
+$str = implode(", ", $odd);
+// echo $str . "\n";
+echo "odd: {$str} <br/>";
+
 
   // Question14  配列の値をスキップする
   $numbers = [10, 20, 30, 40, 50];

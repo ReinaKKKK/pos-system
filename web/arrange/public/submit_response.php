@@ -90,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "更新エラー: " . $e->getMessage();
     }
 }
-
 ?>
 
 <!DOCTYPE html>
