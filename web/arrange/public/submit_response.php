@@ -47,14 +47,23 @@ if (isset($_GET['event_id'])) {
 
         // 参加者とその回答を取得
         $stmt = $pdo->prepare('
-        SELECT users.id AS user_id, users.name AS name, responses.availability_id, responses.response, users.comment 
+        SELECT 
+            users.id AS user_id, 
+            users.name AS name, 
+            responses.availability_id, 
+            responses.response, 
+            users.comment 
         FROM responses 
         JOIN users ON responses.user_id = users.id 
         WHERE responses.availability_id IN (
             SELECT id FROM availabilities WHERE event_id = :event_id
         )
-    ');
+        ');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->execute();
+        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -69,8 +78,10 @@ if (isset($_GET['event_id'])) {
 // 参加者の回答を整理
 $participantsResponses = [];
 foreach ($responses as $response) {
-    $participantsResponses[$response['user_id']][$response['availability_id']] = [
+    $userName = $response['name']; // ユーザー名を取得
+    $participantsResponses[$userName][$response['availability_id']] = [
         'response' => $response['response'],
+        'comment' => $response['comment'] ?? 'コメントなし', // コメントも保存
     ];
 }
 
@@ -184,7 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php
                             if (isset($responsesForUser[$availability['id']])) {
                                 $response = $responsesForUser[$availability['id']]['response'];
-                                $comment = $responsesForUser[$availability['id']]['comment'];
+                                if (isset($responsesForUser[$availability['id']])) {
+                                    $comment = $responsesForUser[$availability['id']]['comment'] ?? 'コメントなし';
+                                }
                                 switch ($response) {
                                     case 1:
                                         echo "〇";
@@ -214,17 +227,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <td>
                     <?php
                     // 各ユーザーのコメントを表示
+                    // 各ユーザーのコメントを表示
                     if (!empty($responsesForUser)) {
-                        // 最初の応答からコメントを取得（ここでは最初の応答があると仮定）
-                        $comment = ($responsesForUser)['comment'];
+                        // 最初の応答がある場合にコメントを取得（複数応答がある場合、最初のものと仮定）
+                        $comment = $responsesForUser['comment'] ?? null; // 存在しない場合は null を設定
                         if (!empty($comment)) {
-                            echo htmlspecialchars($comment); // コメントがあれば表示
+                            echo htmlspecialchars($comment); // コメントがあればエスケープして表示
                         } else {
                             echo "なし"; // コメントがない場合は「なし」と表示
                         }
                     } else {
                         echo "なし"; // 応答がない場合も「なし」と表示
                     }
+
                     ?>
                 </td>
             <?php endforeach; ?>

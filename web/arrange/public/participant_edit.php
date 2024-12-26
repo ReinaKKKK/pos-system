@@ -27,12 +27,13 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
         // 名前とパスワードがOKなら、特定の参加者の回答を取得
         $userId = $user['id']; // users テーブルから取得した id が user_id に相当
         $stmt = $pdo->prepare('
+
             SELECT 
                 responses.id, 
                 responses.availability_id, 
                 responses.user_id, 
                 responses.response, 
-                users.comment, 
+                users.comment,  -- users.comment を参照
                 availabilities.start_time, 
                 availabilities.end_time
             FROM 
@@ -41,9 +42,17 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
                 availabilities 
             ON 
                 responses.availability_id = availabilities.id 
+            JOIN 
+                users 
+            ON 
+                responses.user_id = users.id  -- usersテーブルをJOIN
             WHERE 
                 responses.user_id = :user_id
         ');
+
+
+
+
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT); // 特定の user_id をバインド
         $stmt->execute(); // クエリ実行
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC); // 特定の参加者の回答を取得
@@ -71,14 +80,17 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
     try {
         foreach ($_POST['response'] as $responseId => $responseValue) {
-            $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE id = :response_id');
+            // 'responses' テーブルの 'response' を更新
+            $stmt = $pdo->prepare('UPDATE responses SET response = :response WHERE id = :response_id');
             $stmt->bindValue(':response', $responseValue);
             $stmt->bindValue(':response_id', $responseId, PDO::PARAM_INT);
+            $stmt->execute();
 
-            // コメントの処理
+            // 'users' テーブルの 'comment' を更新
             $comment = $_POST['comment'][$responseId] ?? null;
+            $stmt = $pdo->prepare('UPDATE users SET comment = :comment WHERE id = :user_id');
             $stmt->bindValue(':comment', $comment, $comment !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
             $stmt->execute();
         }
 
@@ -88,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
         echo "更新エラー: " . htmlspecialchars($e->getMessage());
     }
 }
+
 ?>
 
 <!DOCTYPE html>
