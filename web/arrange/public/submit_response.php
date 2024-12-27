@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ポップアップを表示
     function showPasswordPopup(url, eventId) {
         console.log("showPasswordPopup called with: ", url, eventId); // デバッグ: URLとeventIdを確認
-        document.getElementById('popup').style.display = 'flex';
+        document.getElementById('popup').style.display = 'flex'; //表示
         document.getElementById('editForm').action = url;
         document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
         console.log("event_id_field value set to: ", eventId); // デバッグ: フィールドに設定された値を確認

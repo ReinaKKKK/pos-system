@@ -178,12 +178,12 @@ foreach ($numbers as $value) {
     }
 }
 
-foreach ($array as $value) {
-    echo " {$value} <br/>";
-}
-foreach ($odd as $value) {
-    echo " {$value} <br/>";
-}
+// foreach ($array as $value) {
+//     echo " {$value} <br/>";
+// }
+// foreach ($odd as $value) {
+//     echo " {$value} <br/>";
+// }
 
 
 $str = implode(", ", $array);
@@ -243,12 +243,14 @@ echo "Total: {$total} <br> ";
   $count = 0;
   while ($count < count($scores)) {
         $tmp = null;
-      foreach ($scores as $key => $val) {
-          if (in_array($val, $sorted_scores)) continue;
+      foreach ($scores as $val) {
+          if (in_array($val, $sorted_scores)) {
+              continue;
+          }
           if ($tmp === null) {
                $tmp = $val;
           } else {
-               $tmp = min($tmp, $val);
+               $tmp = max($tmp, $val);
           }
       }
       $sorted_scores[] = $tmp;
@@ -281,7 +283,37 @@ echo "Total: {$total} <br> ";
 
   echo "<br/>---------- <br/>";
   echo "Question20 <br/>";
-  foreach ($data as $word) {
-      echo "$word:";
-       echo mb_strlen($word) . " <br/>";
-}
+//   foreach ($data as $word) {
+//       echo "$word:";
+//        echo mb_strlen($word) . " <br/>";
+// }
+
+    // $yes = [];
+    // $no = [];
+    //     foreach ($data as $value) {
+    //     if ($value == 'yes') {
+    //         $yes[] = $value;
+    //     } else {
+    //         $no[] = $value;
+    //     }
+    // }
+
+    $yesCount = 0;
+    $noCount = 0;
+    foreach ($data as $value) {
+        if ($value == 'yes') {
+            $yes[] = $value;
+            $yesCount++;
+        } else {
+            $no[] = $value;
+            $noCount++;
+        }
+    }
+
+    $str = implode(", ", $array);
+    // echo $str . "\n";
+    echo "yes: {$yesCount} <br/>";
+
+    $str = implode(", ", $odd);
+    // echo $str . "\n";
+    echo "no: {$noCount} <br/>";
