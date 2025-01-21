@@ -36,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-
     try {
         // トランザクション開始
         $pdo->beginTransaction();

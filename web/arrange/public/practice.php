@@ -4,8 +4,8 @@
 $names = ["Alice", "Bob", "Charlie", "Diana"];
 echo "---------- <br/>";
 echo "Question1 <br/>";
-foreach ($names as $value) {
-    echo "Name: {$value} <br/>";
+foreach ($names as $name) {
+    echo "Name: {$name} <br/>";
 }
 
 // Question2 配列の合計を計算する
@@ -13,8 +13,8 @@ $numbers = [10, 20, 30, 40, 50];
 echo "---------- <br/>";
 echo "Question2 <br/>";
 $sum = 0;
-foreach ($numbers as $value) {
-    $sum += $value;
+foreach ($numbers as $number) {
+    $sum += $number;
 }
 echo "Total: {$sum} <br/>";
 
@@ -54,10 +54,10 @@ $categories = [
 ];
   echo "---------- <br/>";
   echo "Question5 <br/>";
-foreach ($categories as $type => $menu) {
+foreach ($categories as $type => $menus) {
     echo 'Category:' . $type . "<br>";
-    foreach ($menu as $val) {
-        echo '・' . $val . "<br>";
+    foreach ($menus as $menu) {
+        echo '・' . $menu . "<br>";
     }
 }
 
@@ -79,14 +79,17 @@ echo "{$str} <br/>";
 $scores = [35, 65, 50, 45, 80, 90, 30];
 echo "---------- <br/>";
 echo "Question7 <br/>";
+$array = [];
 foreach ($scores as $score) {
     if ($score < 50) {
-        echo "Fail";
+        $array[] = "Fail";
     } else {
-        echo "Pass";
+        $array[] = "Pass";
     }
 }
-echo "<br/>";
+$str = implode(", ", $array);
+
+echo "{$str} <br/>";
 
 
 // Question8 配列の中の重複をカウントする
