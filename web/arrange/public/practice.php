@@ -72,7 +72,7 @@ foreach ($numbers as $number) {
     $array[] = $number;
 }
 $str = implode(", ", $array);
-echo "{$str} <br/>";
+echo "[{$str}] <br/>";
 
 
 // Question7 特定の条件で値を変更する
@@ -89,7 +89,7 @@ foreach ($scores as $score) {
 }
 $str = implode(", ", $array);
 
-echo "{$str} <br/>";
+echo "[{$str}] <br/>";
 
 
 // Question8 配列の中の重複をカウントする
@@ -100,36 +100,23 @@ echo "Question8 <br/>";
 $items = array_count_values($items);
 
 foreach ($items as $key => $value) {
-    echo  "Key: {$key}, Value: {$value} <br>";
-    echo '<br>';
+    echo  "{$key}: {$value} <br>";
 }
-var_dump($items);
 
   // Question9  配列の値を逆順に表示する
   $colors = ["Red", "Blue", "Green", "Yellow"];
-
 echo "<br/>---------- <br/>";
 echo "Question9 <br/>";
 // 配列の長さを取得
 $len = count($colors);
-
-// 配列を逆順に表示
-// for ($i = $len - 1; $i >= 0; $i--) {
-//     echo $colors[$i] . "<br/>";
-// }
 $array = [];
 foreach ($colors as $color) {
-// $array[] = $color
-array_unshift($array, $color);
+    array_unshift($array, $color);
         // echo "Name: {$color} <br/>";
 }
 foreach ($array as $color) {
-    echo " {$color} <br/>";
+    echo " {$color} <br>";
 }
-
-//colors配列の中身を１つずつcolorでループ処理させる。それを逆に取り出して表示
-// 箱に順にいれていって上から取り出せば逆順になる？逆順にする方法を考える
-
 
 // Question10 特定のキーを持つ値を表示する
 $products = [
@@ -139,7 +126,6 @@ $products = [
 ];
 echo "<br/>---------- <br/>";
 echo "Question10 <br/>";
-
 
 foreach ($products as $product) {
     if ($product['price'] >= 50) {
@@ -154,13 +140,13 @@ echo "---------- <br/>";
 echo "Question11 <br/>";
 
 foreach ($words as $word) {
-    echo strtoupper($word) . '、' . " <br/>";
+    echo strtoupper($word) . ', ' ;
 }
 
  // Question12 文字列の長さを計算する
  $words = ["apple", "banana", "cherry"];
 
- echo "---------- <br/>";
+ echo "<br/>---------- <br/>";
  echo "Question12 <br/>";
 foreach ($words as $word) {
     echo "$word:";
@@ -181,22 +167,14 @@ foreach ($numbers as $value) {
     }
 }
 
-// foreach ($array as $value) {
-//     echo " {$value} <br/>";
-// }
-// foreach ($odd as $value) {
-//     echo " {$value} <br/>";
-// }
-
-
 $str = implode(", ", $array);
 // echo $str . "\n";
-echo "even: {$str} <br/>";
+echo "Even: {$str} <br/>";
 
 
 $str = implode(", ", $odd);
 // echo $str . "\n";
-echo "odd: {$str} <br/>";
+echo "Odd: {$str} <br/>";
 
 
   // Question14  配列の値をスキップする
@@ -259,8 +237,8 @@ echo "Total: {$total} <br> ";
       $sorted_scores[] = $tmp;
       $count++;
   }
-
-  var_dump($sorted_scores);
+  $str = implode(", ", $sorted_scores);
+  echo " {$str}";
 
 // Question18  配列の重複を削除する
   $items = ["apple", "banana", "apple", "orange", "banana"];
@@ -269,17 +247,19 @@ echo "Total: {$total} <br> ";
   echo "Question18 <br/>";
   $arrayUnique = array_unique($items);
   foreach ($arrayUnique as $value) {
-      echo $value;
-      echo '<br>';
+      echo $value . ",";
   }
 
   // Question19 配列の値を逆順にする（変更）
   $letters = ["A", "B", "C", "D"];
-  echo "---------- <br/>";
+  echo "<br/>---------- <br/>";
   echo "Question19 <br/>";
   $letters = array_reverse($letters);
-  echo'<br>';
-  print_r($letters);
+
+  $str = implode(", ", $letters);
+
+    echo "[{$str}]";
+
 
   // Question20 各値の出現回数を数える
   $data = ["yes", "no", "yes", "no", "yes"];
@@ -303,15 +283,15 @@ echo "Total: {$total} <br> ";
 
     $yesCount = 0;
     $noCount = 0;
-    foreach ($data as $value) {
-        if ($value == 'yes') {
+  foreach ($data as $value) {
+      if ($value == 'yes') {
             $yes[] = $value;
             $yesCount++;
-        } else {
+      } else {
             $no[] = $value;
             $noCount++;
-        }
-    }
+      }
+  }
 
     $str = implode(", ", $array);
     // echo $str . "\n";

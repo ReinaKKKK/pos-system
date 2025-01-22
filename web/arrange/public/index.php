@@ -102,7 +102,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>イベント作成</title>
     <link rel='stylesheet' href='style.css'>
 </head>
+<header>
+      <div class="container">
+        <div class="header-left">
+          <img class="logo" src="https://itviec.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVlqUFE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--76777d2ebf9ab42c750bffca6eb909302c5107bf/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdCem9MWm05eWJXRjBPZ2wzWldKd09oSnlaWE5wZW1WZmRHOWZabWwwV3dkcEFhb3ciLCJleHAiOm51bGwsInB1ciI6InZhcmlhdGlvbiJ9fQ==--bb0ebae071595ab1791dc0ad640ef70a76504047/Yet.png">
+        </div>
+        <div class="header-right">
+        </div>
+      </div>
+  </header>
 <body>
+  
+  <div class="top-wrapper">
+  <div class="container">
     <form action='index.php' method='POST'>
         
         <label>イベント名:</label>
@@ -111,29 +123,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>イベント詳細:</label>
         <textarea name='detail'></textarea><br><br>
 
-        <label>
-        開始時間:
-        <input type='datetime-local' id='startTime' name='startTime' required>
-        </label><br><br>
+        <label>開始時間:</label>
+        <input type='datetime-local' id='startTime' name='startTime' required><br><br>
 
-        <label>
-        終了時間:
-        <input type='datetime-local' id='endTime' name='endTime' required>
-        </label><br><br>
+        <label>終了時間:</label>
+        <input type='datetime-local' id='endTime' name='endTime' required><br><br>
 
         <button type='button' id='addSlotBtn'>候補日を追加</button>
 
         <!-- 日付を表示する部分 -->
         <div id='timeSlotContainer'></div>
+        <button type='button' id='deleteSchedule'>消す</button>
 
-        <label>編集パスワード:</label>
+        <label>編集パスワード:※イベント内容を変更する際に使用します。</label>
         <input type='password' name='editPassword'><br><br>
 
         <input type='hidden' id='timeSlotsInput' name='timeSlots'> <!-- 候補日時をここに送信 -->
         <button type='submit'>イベントを作成</button>
 
     </form>
-
+    </div>
+    <div class="top-wrapper">
     <script>
 document.getElementById('addSlotBtn').addEventListener('click', function() {
     // 開始時間と終了時間を取得
@@ -155,6 +165,11 @@ document.getElementById('addSlotBtn').addEventListener('click', function() {
     timeSlotsInput.value = JSON.stringify(existingTimeSlots);
 });
 </script>
-
+<footer>
+      <div class="container">
+        <img src="https://itviec.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVlqUFE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--76777d2ebf9ab42c750bffca6eb909302c5107bf/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdCem9MWm05eWJXRjBPZ2wzWldKd09oSnlaWE5wZW1WZmRHOWZabWwwV3dkcEFhb3ciLCJleHAiOm51bGwsInB1ciI6InZhcmlhdGlvbiJ9fQ==--bb0ebae071595ab1791dc0ad640ef70a76504047/Yet.png">
+        <p>Learn to code, learn to be creative.</p>
+      </div>
+    </footer>
 </body>
 </html>
