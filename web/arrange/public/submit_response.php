@@ -81,22 +81,24 @@ foreach ($responses as $response) {
     $userName = $response['name']; // ユーザー名を取得
     $participantsResponses[$userName][$response['availability_id']] = [
         'response' => $response['response'],
-        'comment' => $response['comment'] ?? 'コメントなし', // コメントも保存
+        'comment' => $response['comment']
     ];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'] ?? '';
+    $user_comment = $_POST['comment'];
     $response = $_POST['response'];
 
     try {
         $stmt = $pdo->prepare('UPDATE responses SET response = :response WHERE user_id = :user_id');
         $stmt->bindValue(':response', $response);
         $stmt->bindValue(':user_id', $user_id);
+        $stmt->bindValue(':comment', $comment);
 
         $stmt->execute();
 
-        header("Location: index.php"); // 一覧ページへリダイレクト
+        header("Location: submit=response.php"); // 一覧ページへリダイレクト
     } catch (PDOException $e) {
         echo "更新エラー: " . $e->getMessage();
     }
@@ -196,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             if (isset($responsesForUser[$availability['id']])) {
                                 $response = $responsesForUser[$availability['id']]['response'];
                                 if (isset($responsesForUser[$availability['id']])) {
-                                    $comment = $responsesForUser[$availability['id']]['comment'] ?? 'コメントなし';
+                                    // $comment = $responsesForUser[$availability['id']]['comment'] ?? 'コメントなし';
                                 }
                                 switch ($response) {
                                     case 1:
@@ -218,6 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </td>
                     <?php endforeach; ?>
             </tr>
+            
             <?php endforeach; ?>
 
         <!-- コメント行 -->
@@ -227,17 +230,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <td>
                     <?php
                     // 各ユーザーのコメントを表示
-                    // 各ユーザーのコメントを表示
                     if (!empty($responsesForUser)) {
-                        // 最初の応答がある場合にコメントを取得（複数応答がある場合、最初のものと仮定）
-                        $comment = $responsesForUser['comment'] ?? null; // 存在しない場合は null を設定
+                        // $comment = $responsesForUser['comment'] ?? null; // 存在しない場合は null を設定
                         if (!empty($comment)) {
                             echo htmlspecialchars($comment); // コメントがあればエスケープして表示
                         } else {
                             echo "なし"; // コメントがない場合は「なし」と表示
                         }
-                    } else {
-                        echo "なし"; // 応答がない場合も「なし」と表示
                     }
 
                     ?>

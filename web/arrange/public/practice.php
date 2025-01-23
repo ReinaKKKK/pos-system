@@ -82,9 +82,9 @@ echo "Question7 <br/>";
 $array = [];
 foreach ($scores as $score) {
     if ($score < 50) {
-        $array[] = "Fail";
+        $array[] = '"Fail"';
     } else {
-        $array[] = "Pass";
+        $array[] = '"Pass"';
     }
 }
 $str = implode(", ", $array);
@@ -105,7 +105,7 @@ foreach ($items as $key => $value) {
 
   // Question9  配列の値を逆順に表示する
   $colors = ["Red", "Blue", "Green", "Yellow"];
-echo "<br/>---------- <br/>";
+echo "---------- <br/>";
 echo "Question9 <br/>";
 // 配列の長さを取得
 $len = count($colors);
@@ -124,7 +124,7 @@ $products = [
     ["name" => "Mouse", "price" => 20],
     ["name" => "Keyboard", "price" => 50],
 ];
-echo "<br/>---------- <br/>";
+echo "---------- <br/>";
 echo "Question10 <br/>";
 
 foreach ($products as $product) {
@@ -169,12 +169,12 @@ foreach ($numbers as $value) {
 
 $str = implode(", ", $array);
 // echo $str . "\n";
-echo "Even: {$str} <br/>";
+echo "Even: [{$str}] <br/>";
 
 
 $str = implode(", ", $odd);
 // echo $str . "\n";
-echo "Odd: {$str} <br/>";
+echo "Odd: [{$str}] <br/>";
 
 
   // Question14  配列の値をスキップする
@@ -247,6 +247,7 @@ echo "Total: {$total} <br> ";
   echo "Question18 <br/>";
   $arrayUnique = array_unique($items);
   foreach ($arrayUnique as $value) {
+
       echo $value . ",";
   }
 
@@ -259,6 +260,14 @@ echo "Total: {$total} <br> ";
   $str = implode(", ", $letters);
 
     echo "[{$str}]";
+
+  $cnt = count($letters);
+  $array = [];
+  $loop = 1;
+  foreach ($letters as $value) {
+    $array[] = $letters[$cnt - $loop];
+    $loop++;
+  }
 
 
   // Question20 各値の出現回数を数える
