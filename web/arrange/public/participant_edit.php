@@ -49,10 +49,6 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
             WHERE 
                 responses.user_id = :user_id
         ');
-
-
-
-
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT); // 特定の user_id をバインド
         $stmt->execute(); // クエリ実行
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC); // 特定の参加者の回答を取得

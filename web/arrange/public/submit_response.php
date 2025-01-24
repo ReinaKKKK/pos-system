@@ -8,8 +8,8 @@ if (isset($_GET['event_id'])) {
     $eventId = (int)$_GET['event_id'];
 
     // 参加者編集用パスワード、主催者編集用パスワード
-    $participantPassword = $_POST['edit_password'] ?? ''; // 参加者のパスワード
-    $hostPassword = $_POST['edit_password'] ?? ''; // 主催者のパスワード
+    // $participantPassword = $_POST['participant_edit_password'] ?? ''; // 参加者のパスワード
+    // $hostPassword = $_POST['host_edit_password'] ?? ''; // 主催者のパスワード
 
     try {
         // イベント名を取得
@@ -24,20 +24,18 @@ if (isset($_GET['event_id'])) {
         }
 
         // 参加者認証（edit_passwordが正しい場合）
-        $isParticipantAuthenticated = false;
-        if ($participantPassword) {
-            $stmt = $pdo->prepare('SELECT id FROM responses WHERE event_id = :event_id AND edit_password = :edit_password');
-            $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-            $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
-            $stmt->execute();
-            $isParticipantAuthenticated = $stmt->fetchColumn() !== false;
-        }
+        // if ($participantPassword) {
+        //     $stmt = $pdo->prepare('SELECT id FROM responses WHERE event_id = :event_id AND edit_password = :edit_password');
+        //     $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        //     $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
+        //     $stmt->execute();
+        //     $isParticipantAuthenticated = $stmt->fetchColumn() !== false;
+        // }
 
         // 主催者認証（edit_passwordが正しい場合）
-        $isHostAuthenticated = false;
-        if ($hostPassword && $hostPassword === $event['edit_password']) {
-            $isHostAuthenticated = true;
-        }
+        // if ($hostPassword && $hostPassword === $event['edit_password']) {
+        //     $isHostAuthenticated = true;
+        // }
 
         // イベントの日程を取得
         $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id');
@@ -60,10 +58,6 @@ if (isset($_GET['event_id'])) {
         )
         ');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-        $stmt->execute();
-        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -91,19 +85,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $response = $_POST['response'];
 
     try {
-        $stmt = $pdo->prepare('UPDATE responses SET response = :response WHERE user_id = :user_id');
+        // コメントと回答をデータベースに保存
+        $stmt = $pdo->prepare('UPDATE responses SET response = :response, comment = :comment WHERE user_id = :user_id');
         $stmt->bindValue(':response', $response);
         $stmt->bindValue(':user_id', $user_id);
-        $stmt->bindValue(':comment', $comment);
+        $stmt->bindValue(':comment', $user_comment);
 
         $stmt->execute();
 
-        header("Location: submit=response.php"); // 一覧ページへリダイレクト
+        header("Location: submit_response.php"); // 一覧ページへリダイレクト
     } catch (PDOException $e) {
         echo "更新エラー: " . $e->getMessage();
     }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -128,27 +125,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 20px;
             border-radius: 5px;
         }
+        /* ポップアップのスタイル */
+        .popup_event {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-content_event {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
     </style>
     <script>
-    // ポップアップを表示
-    function showPasswordPopup(url, eventId) {
-        console.log("showPasswordPopup called with: ", url, eventId); // デバッグ: URLとeventIdを確認
-        document.getElementById('popup').style.display = 'flex'; //表示
-        document.getElementById('editForm').action = url;
-        document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
-        console.log("event_id_field value set to: ", eventId); // デバッグ: フィールドに設定された値を確認
-    }
+// 参加者用ポップアップを表示
+function showPasswordPopupForParticipant(url, eventId) {
+    console.log("showPasswordPopupForParticipant called with: ", url, eventId);
+    document.getElementById('popup').style.display = 'flex'; //表示
+    document.getElementById('editForm').action = url;
+    document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
+}
 
-    // パスワード確認後にポップアップを非表示にする
-    function submitPasswordForm() {
-        const password = document.getElementById('edit_password').value;
-        if (password.trim() !== "") {
-            document.getElementById('popup').style.display = 'none';
-            document.getElementById('editForm').submit(); // フォーム送信
-        } else {
-            alert("パスワードを入力してください");
-        }
+// 主催者用ポップアップを表示
+function showPasswordPopupForOrganizer(url, eventId) {
+    console.log("showPasswordPopupForOrganizer called with: ", url, eventId);
+    document.getElementById('popup_event').style.display = 'flex'; //表示
+    document.getElementById('editForm_event').action = url;
+    document.getElementById('event_id_field_event').value = eventId; // イベントIDをフォームに設定
+}
+
+// 参加者用パスワード確認後にポップアップを非表示にする
+function submitPasswordForm() {
+    const password = document.getElementById('response_edit_password').value;
+    if (password.trim() !== "") {
+        document.getElementById('popup').style.display = 'none';
+        document.getElementById('editForm').submit(); // フォーム送信
+    } else {
+        alert("パスワードを入力してください");
     }
+}
+
+// 主催者用パスワード確認後にポップアップを非表示にする
+function submitPasswordFormEvent() {
+    const password = document.getElementById('event_edit_password').value;
+    
+    if (password.trim() !== "") {
+        document.getElementById('popup_event').style.display = 'none';
+        document.getElementById('editForm_event').submit(); // フォーム送信
+    } else {
+        alert("パスワードを入力してください");
+    }
+}
+
     
     </script>
 </head>
@@ -156,27 +191,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>イベント: <?php echo htmlspecialchars($event['name']); ?></h1>
 
     <!-- 編集ボタン（参加者用） -->
-    <button onclick="showPasswordPopup('participant_edit.php', <?php echo $eventId; ?>)">回答を編集</button>
+    <button onclick="showPasswordPopupForParticipant('participant_edit.php', <?php echo $eventId; ?>)">回答を編集</button>
 
     <!-- 編集ボタン（主催者用） -->
-    <button onclick="showPasswordPopup('organizer_edit.php', <?php echo $eventId; ?>)">イベントを編集</button>
+    <button onclick="showPasswordPopupForOrganizer('organizer_edit.php', <?php echo $eventId; ?>)">イベントを編集</button>
 
-    <!-- ポップアップ -->
-    <div id="popup" class="popup">
-        <div class="popup-content">
-            <h2>編集用パスワードを入力してください</h2>
-            <form id="editForm" method="POST">
-                <input type="hidden" id="event_id_field" name="event_id" value=""> <!-- イベントIDを保持 -->
-                <label for="name">ユーザー名:</label>
-                <input type="text" id="name" name="name" placeholder="ユーザー名" required>
-                <label for="edit_password">編集パスワード:</label>
-                <input type="password" id="edit_password" name="edit_password" placeholder="パスワード" required>
-                <br><br>
-                <button type="button" onclick="submitPasswordForm()">送信</button>
-                <button type="button" onclick="document.getElementById('popup').style.display='none'">キャンセル</button>
-            </form>
-        </div>
+<!-- 参加者用ポップアップ -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <h2>回答を編集</h2>
+        <form id="editForm" method="POST">
+            <input type="hidden" id="event_id_field" name="event_id" value=""> <!-- イベントIDを保持 -->
+            <label for="name">ユーザー名:</label>
+            <input type="text" id="name" name="name" placeholder="ユーザー名" required>
+            <label for="response_edit_password">編集パスワード:</label>
+            <input type="password" id="response_edit_password" name="response_edit_password" placeholder="回答編集用パスワード" required>
+            <br><br>
+            <button type="button" onclick="submitPasswordForm()">送信</button>
+            <button type="button" onclick="document.getElementById('popup').style.display='none'">キャンセル</button>
+        </form>
     </div>
+</div>
+
+<!-- 主催者用ポップアップ -->
+<div id="popup_event" class="popup_event">
+    <div class="popup-content_event">
+        <h2>イベントを編集</h2>
+        <form id="editForm_event" method="POST">
+            <input type="hidden" id="event_id_field_event" name="event_id" value=""> <!-- イベントIDを保持 -->
+            <label for="name">イベント名:</label>
+            <input type="text" id="name" name="name" placeholder="イベント名" required>
+            <label for="event_edit_password">イベント編集パスワード:</label>
+            <input type="password" id="event_edit_password" name="event_edit_password" placeholder="イベント編集用パスワード" required>
+            <br><br>
+            <button type="button" onclick="submitPasswordFormEvent()">送信</button>
+            <button type="button" onclick="document.getElementById('popup_event').style.display='none'">キャンセル</button>
+        </form>
+    </div>
+</div>
 
     <!-- 回答一覧 -->
     <table border="1">
@@ -198,7 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             if (isset($responsesForUser[$availability['id']])) {
                                 $response = $responsesForUser[$availability['id']]['response'];
                                 if (isset($responsesForUser[$availability['id']])) {
-                                    // $comment = $responsesForUser[$availability['id']]['comment'] ?? 'コメントなし';
+                                    $comment = $responsesForUser[$availability['id']]['comment'];
                                 }
                                 switch ($response) {
                                     case 1:
@@ -231,14 +283,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php
                     // 各ユーザーのコメントを表示
                     if (!empty($responsesForUser)) {
-                        // $comment = $responsesForUser['comment'] ?? null; // 存在しない場合は null を設定
+                        // ユーザーの最初の候補日のコメントだけを取得
+                        $firstResponse = reset($responsesForUser);
+                        $comment = $firstResponse['comment'] ?? null; // 最初の候補日のコメント
                         if (!empty($comment)) {
                             echo htmlspecialchars($comment); // コメントがあればエスケープして表示
                         } else {
                             echo "なし"; // コメントがない場合は「なし」と表示
                         }
                     }
-
                     ?>
                 </td>
             <?php endforeach; ?>
