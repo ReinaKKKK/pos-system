@@ -2,31 +2,28 @@
 
 require_once('/var/www/html/arrange/database/db.php');
 
-// イベントIDを取得
-if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
+// イベントIDと編集パスワードが送信されているか確認
+if (isset($_POST['event_id'], $_POST['event_edit_password'])) {
     $eventId = (int)$_POST['event_id'];
-    $name = $_POST['name'];
-    $EventPassword = $_POST['edit_password'];
+    $eventEditPassword = $_POST['event_edit_password'];
+
     try {
-        // データベースからイベントデータを取得してパスワードを検証
-        $stmt = $pdo->prepare('SELECT id, edit_password FROM events WHERE event_id = :event_id AND name = :name');
-        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // event_id をバインド。プレースホルダに実際の値が置き換えられる
-        $stmt->bindValue(':name', $name, PDO::PARAM_STR); // name をstring型でバインド
+        // イベント情報と関連する日程をデータベースから取得
+        $stmt = $pdo->prepare('
+            SELECT e.id, e.name, e.detail, e.edit_password, a.start_time, a.end_time
+            FROM events e
+            LEFT JOIN availabilities a ON e.id = a.event_id
+            WHERE e.id = :event_id
+        ');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // プレースホルダーに値をバインド
         $stmt->execute(); // クエリ実行
-        $user = $stmt->fetch(PDO::FETCH_ASSOC); // 結果を取得
-        // ユーザーが見つからない、またはパスワードが一致しない場合
-        if (!$user || !password_verify($participantPassword, $user['edit_password'])) {
+        $event = $stmt->fetchAll(PDO::FETCH_ASSOC); // 結果を取得（複数行の場合があるためfetchAllを使用）
+
+        // イベントが見つからない、またはパスワードが一致しない場合
+        if (!$event || $eventEditPassword !== $event[0]['edit_password']) {
             echo '<p>認証エラー: パスワードが正しくありません。</p>';
             exit;
         }
-        // 名前とパスワードがOKなら、特定の参加者の回答を取得
-        $userId = $user['id']; // users テーブルから取得した id が user_id に相当
-        $stmt = $pdo->prepare('
-
-        ');
-        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT); // 特定の user_id をバインド
-        $stmt->execute(); // クエリ実行
-        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC); // 特定の参加者の回答を取得
     } catch (PDOException $e) {
         // データベースエラーの処理
         echo 'データベースエラー: ' . $e->getMessage();
@@ -36,40 +33,114 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
     echo '<p>イベントIDまたはパスワードが無効です。</p>';
     exit;
 }
-//     // 主催者パスワード認証
-//     $stmt = $pdo->prepare('SELECT edit_password FROM events WHERE id = :event_id');
-//     $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-//     $stmt->execute();
-//     $event = $stmt->fetch(PDO::FETCH_ASSOC);
 
-//     if ($event && $password === $event['edit_password']) {
-//         // イベント編集
-//         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//             // 新しい日程追加
-//             if (isset($_POST['start_time']) && isset($_POST['end_time'])) {
-//                 $start_time = $_POST['start_time'];
-//                 $end_time = $_POST['end_time'];
+?>
 
-//                 // 日程を追加
-//                 $stmt = $pdo->prepare('INSERT INTO availabilities (event_id, start_time, end_time) VALUES (:event_id, :start_time, :end_time)');
-//                 $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-//                 $stmt->bindValue(':start_time', $start_time, PDO::PARAM_STR);
-//                 $stmt->bindValue(':end_time', $end_time, PDO::PARAM_STR);
-//                 $stmt->execute();
-//                 echo "新しい日程が追加されました。";
-//             }
-//         } else {
-//             // 日程追加フォーム
-//             echo "<form method='POST'>
-//                     <label for='start_time'>新しい日程:</label>
-//                     <input type='datetime-local' name='start_time' required>
-//                     <input type='datetime-local' name='end_time' required><br>
-//                     <button type='submit'>日程を追加</button>
-//                   </form>";
-//         }
-//     } else {
-//         echo "パスワードが正しくありません。";
-//     }
-// } else {
-//     echo "イベントIDとパスワードが必要です。";
-// }
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント編集/削除</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin: 20px;
+        }
+        .event-details, .date-proposals, .buttons {
+            margin-bottom: 20px;
+        }
+        .event-details label, .date-proposals label {
+            font-weight: bold;
+        }
+        .date-proposals input {
+            margin: 5px;
+        }
+        .buttons button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>イベント編集/削除</h1>
+
+    <!-- イベントタイトルと詳細を動的に表示 -->
+    <p><strong>Event Title:</strong> <?php echo htmlspecialchars($event[0]['name'], ENT_QUOTES, 'UTF-8'); ?></p>
+    <p><strong>Event Memo:</strong> <?php echo htmlspecialchars($event[0]['detail'], ENT_QUOTES, 'UTF-8'); ?></p>
+
+    <!-- 日程提案 -->
+    <div class="date-proposals">
+        <label>日程の提案:</label><br>
+        <?php foreach ($event as $availability) : ?>
+            <div class="date-item">
+                <input type="text" value="<?php echo htmlspecialchars($availability['start_time'], ENT_QUOTES, 'UTF-8'); ?> 〜 <?php echo htmlspecialchars($availability['end_time'], ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                <button class="delete-date">削除</button>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- 新しい日程の追加 -->
+    <div class="add-date">
+        <label>新しい日程を入力:</label><br>
+        <input type="text" id="new-date" placeholder="例: Aug 7(Mon) 19:00〜"><br>
+        <button id="add-date">日程追加</button>
+    </div>
+
+    <!-- イベントアクション -->
+    <div class="buttons">
+        <!-- イベント更新ボタン（submit_response.phpに遷移） -->
+        <form action="submit_response.php" method="POST">
+            <input type="hidden" name="event_id" value="<?php echo $event[0]['id']; ?>">
+            <input type="hidden" name="event_edit_password" value="<?php echo $event[0]['edit_password']; ?>">
+            <button type="submit">変更して更新</button>
+        </form>
+        <!-- 一覧ページに戻るボタン -->
+        <a href="submit_response.php"><button type="button">一覧ページに戻る</button></a>
+    </div>
+</div>
+
+<script>
+    // 日程削除機能
+    document.querySelectorAll('.delete-date').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // 削除ボタンがクリックされた日程を親要素ごと削除
+            this.parentElement.remove();
+        });
+    });
+
+    // 日程追加機能
+    document.getElementById('add-date').addEventListener('click', function() {
+        const newDateInput = document.getElementById('new-date');
+        const newDateValue = newDateInput.value.trim();
+
+        if (newDateValue) {
+            const dateProposals = document.querySelector('.date-proposals');
+            const newDateItem = document.createElement('div');
+            newDateItem.classList.add('date-item');
+
+            // 新しい日程を追加
+            newDateItem.innerHTML = `
+                <input type="text" value="${newDateValue}" readonly>
+                <button class="delete-date">削除</button>
+            `;
+            dateProposals.appendChild(newDateItem);
+
+            // 新しい日程の削除ボタンにイベントリスナーを追加
+            newDateItem.querySelector('.delete-date').addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+
+            // 入力フィールドをクリア
+            newDateInput.value = '';
+        } else {
+            alert('日程を入力してください');
+        }
+    });
+</script>
+
+</body>
+</html>

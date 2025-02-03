@@ -7,10 +7,10 @@
 require_once('/var/www/html/arrange/database/db.php');
 
 // イベントIDと名前、編集パスワードを取得.「isset」はこの変数に値が入っているかどうかを確認するための関数
-if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
+if (isset($_POST['event_id'], $_POST['name'], $_POST['response_edit_password'])) {
     $eventId = (int)$_POST['event_id'];
     $name = $_POST['name'];
-    $participantPassword = $_POST['edit_password'];
+    $participantPassword = $_POST['response_edit_password'];
 
     try {
         // データベースからイベントデータを取得してパスワードを検証
@@ -61,10 +61,10 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['edit_password'])) {
     echo '<p>イベントIDまたはパスワードが無効です。</p>';
     exit;
 }
-// if (headers_sent($file, $line)) {
-//     echo "Headers already sent in $file on line $line";
-//     exit;
-// }
+if (headers_sent($file, $line)) {
+    echo "Headers already sent in $file on line $line";
+    exit;
+}
 
 // var_dump($_SERVER['REQUEST_METHOD'] === 'POST');
 // var_dump(isset($_POST['response']));
@@ -111,8 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
      <!-- 送るデータを正しく隠しフィールドで送信 -->
         <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId); ?>">
         <input type="hidden" name="name" value="<?php echo htmlspecialchars($name); ?>">
-        <input type="hidden" name="edit_password" value="<?php echo htmlspecialchars($_POST['edit_password']); ?>">
-
+        <input type="hidden" name="response_edit_password" value="<?php echo htmlspecialchars($_POST['response_edit_password']); ?>">
 
         <table border="1">
             <tr>

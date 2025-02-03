@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="availabilities_<?php echo $availability['id']; ?>">
                     <?php
                         $startTime = new DateTime($availability['start_time'], new DateTimeZone('Asia/Tokyo'));
-                        $endTime = new DateTime($availability['end_time'], new DateTimeZone('Asia/Ho_Chi_Minh'));
+                        $endTime = new DateTime($availability['end_time'], new DateTimeZone('Asia/Tokyo'));
                         echo '開始: ' . $startTime->format('Y-m-d H:i') . ' - 終了: ' . $endTime->format('Y-m-d H:i');
                     ?>:
                 </label>
