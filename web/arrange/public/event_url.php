@@ -62,6 +62,6 @@ if ($eventId) {
     // 参加者用のURLを作成
     $eventUrl = BASE_URL . "respond.php?event_id=" . urlencode($eventId);
 
-    echo '<p>イベントが作成されました。参加者には以下のURLを送ってください：</p>';
+    echo '<p>イベントが作成されました。保存して参加者には以下のURLを送ってください：</p>';
     echo '<p><a href="' . h($eventUrl) . '">' . h($eventUrl) . '</a></p>';
 }

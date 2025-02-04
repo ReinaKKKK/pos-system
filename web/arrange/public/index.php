@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+
     // バリデーションエラーがあれば終了
     if (!empty($errors)) {
         foreach ($errors as $error) {
@@ -133,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- 日付を表示する部分 -->
         <div id='timeSlotContainer'></div>
-        <button type='button' id='deleteSchedule'>消す</button>
 
         <label>編集パスワード:※イベント内容を変更する際に使用します。</label>
         <input type='password' name='editPassword'><br><br>
@@ -145,26 +145,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="top-wrapper">
     <script>
-document.getElementById('addSlotBtn').addEventListener('click', function() {
-    // 開始時間と終了時間を取得
-    var startTime = document.getElementById('startTime').value;
-    var endTime = document.getElementById('endTime').value;
-    
-    // 時間スロットを生成
-    var timeSlotContainer = document.getElementById('timeSlotContainer');
-    var newSlot = document.createElement('div');
-    newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
+    document.getElementById('addSlotBtn').addEventListener('click', function() {
+        var startTime = document.getElementById('startTime').value;
+        var endTime = document.getElementById('endTime').value;
 
-    // 新しいスロットを表示する
-    timeSlotContainer.appendChild(newSlot);
+        // 既存の時間スロットがあるか確認
+        var timeSlotsInput = document.getElementById('timeSlotsInput');
+        var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
 
-    // 入力した時間スロットをフォームに追加
-    var timeSlotsInput = document.getElementById('timeSlotsInput');
-    var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
-    existingTimeSlots.push({ startTime: startTime, endTime: endTime });
-    timeSlotsInput.value = JSON.stringify(existingTimeSlots);
-});
+        // 既存の時間スロットが空でない場合のみ重複チェックを行う
+    if (existingTimeSlots.length > 0) {
+        var isDuplicate = existingTimeSlots.some(function(slot) {
+            return slot.startTime === startTime && slot.endTime === endTime;
+        });
+
+        if (isDuplicate) {
+            alert('この候補日はすでに使われています。');
+            return; // 重複していた場合は追加しない
+        }
+    }
+
+
+        // 新しい時間スロットを表示
+        var timeSlotContainer = document.getElementById('timeSlotContainer');
+        var newSlot = document.createElement('div');
+        newSlot.classList.add('time-slot');
+        newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
+
+        // 削除ボタンを作成
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = '削除';
+        deleteButton.classList.add('delete-btn');
+
+        // 削除ボタンの動作
+        deleteButton.addEventListener('click', function() {
+            newSlot.remove(); // 候補日を削除
+            // 同じ候補日を timeSlots から削除
+            var index = existingTimeSlots.findIndex(function(slot) {
+                return slot.startTime === startTime && slot.endTime === endTime;
+            });
+            if (index !== -1) {
+                existingTimeSlots.splice(index, 1); // 削除
+                timeSlotsInput.value = JSON.stringify(existingTimeSlots); // 更新
+            }
+        });
+
+        // 新しいスロットと削除ボタンを表示
+        newSlot.appendChild(deleteButton);
+        timeSlotContainer.appendChild(newSlot);
+
+        // 入力した時間スロットをフォームに追加
+        existingTimeSlots.push({ startTime: startTime, endTime: endTime });
+        timeSlotsInput.value = JSON.stringify(existingTimeSlots);
+    });
 </script>
+
 <footer>
       <div class="container">
         <img src="https://itviec.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVlqUFE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--76777d2ebf9ab42c750bffca6eb909302c5107bf/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdCem9MWm05eWJXRjBPZ2wzWldKd09oSnlaWE5wZW1WZmRHOWZabWwwV3dkcEFhb3ciLCJleHAiOm51bGwsInB1ciI6InZhcmlhdGlvbiJ9fQ==--bb0ebae071595ab1791dc0ad640ef70a76504047/Yet.png">

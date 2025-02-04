@@ -3,13 +3,10 @@
 require_once('/var/www/html/arrange/database/db.php');
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php'; // イベントの保存処理
 
+
 // イベントIDを取得
 if (isset($_GET['event_id'])) {
     $eventId = (int)$_GET['event_id'];
-
-    // 参加者編集用パスワード、主催者編集用パスワード
-    // $participantPassword = $_POST['participant_edit_password'] ?? ''; // 参加者のパスワード
-    // $hostPassword = $_POST['host_edit_password'] ?? ''; // 主催者のパスワード
 
     try {
         // イベント名を取得
@@ -17,25 +14,10 @@ if (isset($_GET['event_id'])) {
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
         $event = $stmt->fetch(PDO::FETCH_ASSOC);
-
         if (!$event) {
             echo '<p>指定されたイベントが見つかりません。</p>';
             exit;
         }
-
-        // 参加者認証（edit_passwordが正しい場合）
-        // if ($participantPassword) {
-        //     $stmt = $pdo->prepare('SELECT id FROM responses WHERE event_id = :event_id AND edit_password = :edit_password');
-        //     $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-        //     $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
-        //     $stmt->execute();
-        //     $isParticipantAuthenticated = $stmt->fetchColumn() !== false;
-        // }
-
-        // 主催者認証（edit_passwordが正しい場合）
-        // if ($hostPassword && $hostPassword === $event['edit_password']) {
-        //     $isHostAuthenticated = true;
-        // }
 
         // イベントの日程を取得
         $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id');
@@ -92,7 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':comment', $user_comment);
 
         $stmt->execute();
-
+        // デバッグ用：変更が成功したかどうか
+        if ($stmt->rowCount() > 0) {
+            echo "データベースが更新されました";
+        } else {
+            echo "変更なし";
+        }
+        // POST送信後、リダイレクトすることで最新のデータを表示
         header("Location: submit_response.php"); // 一覧ページへリダイレクト
     } catch (PDOException $e) {
         echo "更新エラー: " . $e->getMessage();
@@ -100,15 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>イベント管理</title>
     <style>
-        /* ポップアップのスタイル */
         .popup {
             display: none;
             position: fixed;
@@ -148,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 参加者用ポップアップを表示
 function showPasswordPopupForParticipant(url, eventId) {
     console.log("showPasswordPopupForParticipant called with: ", url, eventId);
-    document.getElementById('popup').style.display = 'flex'; //表示
+    document.getElementById('popup').style.display = 'flex';
     document.getElementById('editForm').action = url;
     document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
 }
@@ -156,7 +141,7 @@ function showPasswordPopupForParticipant(url, eventId) {
 // 主催者用ポップアップを表示
 function showPasswordPopupForOrganizer(url, eventId) {
     console.log("showPasswordPopupForOrganizer called with: ", url, eventId);
-    document.getElementById('popup_event').style.display = 'flex'; //表示
+    document.getElementById('popup_event').style.display = 'flex';
     document.getElementById('editForm_event').action = url;
     document.getElementById('event_id_field_event').value = eventId; // イベントIDをフォームに設定
 }
