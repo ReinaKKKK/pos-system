@@ -1,9 +1,5 @@
 <?php
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
-
 require_once('/var/www/html/arrange/database/db.php');
 
 // イベントIDと名前、編集パスワードを取得.「isset」はこの変数に値が入っているかどうかを確認するための関数

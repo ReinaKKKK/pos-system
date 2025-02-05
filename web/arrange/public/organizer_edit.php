@@ -1,6 +1,6 @@
 <?php
 require_once('/var/www/html/arrange/database/db.php');
-
+var_dump($_POST);
 // イベントIDと編集パスワードが送信されているか確認
 if (isset($_POST['event_id'], $_POST['event_edit_password'])) {
     $eventId = (int)$_POST['event_id'];
