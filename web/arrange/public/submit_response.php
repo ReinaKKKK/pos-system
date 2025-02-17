@@ -1,8 +1,6 @@
 <?php
 
 require_once('/var/www/html/arrange/database/db.php');
-include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php'; // イベントの保存処理
-
 
 // イベントIDを取得
 if (isset($_GET['event_id'])) {
@@ -181,6 +179,7 @@ function submitPasswordFormEvent() {
     <!-- 編集ボタン（主催者用） -->
     <button onclick="showPasswordPopupForOrganizer('organizer_edit.php', <?php echo $eventId; ?>)">イベントを編集</button>
 
+
 <!-- 参加者用ポップアップ -->
 <div id="popup" class="popup">
     <div class="popup-content">
@@ -283,5 +282,7 @@ function submitPasswordFormEvent() {
         </tr>
         </tbody>
     </table>
+    <a href="index.php">戻る</a>
+
 </body>
 </html>

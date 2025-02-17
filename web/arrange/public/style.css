@@ -1,115 +1,46 @@
-/* ベースのスタイル */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f8f4; /* 背景色に薄い緑色 */
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  width: 1170px;
-  padding: 0 15px;
-  margin: 0 auto;
-}
-.top-wrapper {
-  padding: 180px 0 100px 0;
-  background-size: cover;
-  color: rgb(29, 28, 28);
-  text-align: center;
-}
-
-.top-wrapper h1 {
-  opacity: 0.7;
-  font-size: 45px;
-  letter-spacing: 5px;
-}
-
-.top-wrapper p {
-  opacity: 0.7;
-}
-
-
-/* フォームのスタイル */
-form {
-  width: 60%;
-  margin: 0 auto;
   padding: 20px;
-  background-color: #ffffff; /* フォームの背景は白 */
-  border-radius: 8px; /* 角を丸める */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 軽い影をつける */
 }
 
-/* ラベルのスタイル */
-label {
-  display: block;
-  font-size: 1rem;
-  margin-bottom: 5px;
-  color: #388e3c; /* 緑色のラベル */
+h1 {
+  color: #333;
 }
 
-/* 入力フィールドとテキストエリアのスタイル */
-input[type='text'],
-textarea,
-input[type='datetime-local'],
-input[type='password'] {
-  width: 60%;
-  padding: 10px;
-  border: 1px solid #ccc; /* 薄いグレーのボーダー */
-  border-radius: 4px;
-  margin-bottom: 15px;
-  font-size: 1rem;
-}
-
-/* ボタンのスタイル */
-button {
-  background-color: #388e3c; /* 緑色のボタン */
-  color: white; /* 白い文字 */
-  border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-button:hover {
-  background-color: #2c6e2f; /* ボタンをホバーしたときに色を少し暗く */
-}
-.logo {
-  width: 124px;
-  margin-top: 20px;
-}
-
-.header-left {
-  float: left;
-}
-
-.header-right {
-  float: right;
-  transition: all 0.5s;
-}
-/* 時間スロットを表示する部分のスタイル */
-#timeSlotContainer {
-  padding: 80px 0 100px 0;
-  text-align: top;
-  margin-top: 20px;
+table {
   width: 100%;
-  background-color: #e8f5e9; /* 明るい緑色の背景 */
-  border-radius: 5px;
-  
-  border: 1px solid #388e3c;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-/* hiddenの時間スロット入力のスタイル（目に見えない） */
-#timeSlotsInput {
-  display: none;
+table, th, td {
+  border: 1px solid #ccc;
 }
 
-/* フォームが送信できる状態のボタン */
-#submitFormButton {
-  background-color: #2c6e2f; /* 送信ボタンを少し暗い緑色に */
-  padding: 12px 20px;
+th, td {
+  padding: 10px;
+  text-align: left;
 }
 
-#submitFormButton:hover {
-  background-color: #1b4d1a; /* 送信ボタンをホバーしたときにさらに暗く */
+th {
+  background-color: #f4f4f4;
+}
+
+a {
+  margin-right: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+td a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+td a:hover {
+  text-decoration: underline;
 }

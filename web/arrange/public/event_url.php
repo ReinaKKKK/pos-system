@@ -3,7 +3,7 @@
 // 必要な設定ファイルやライブラリをインクルード
 require '../config/env.php';  // 環境設定ファイル
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php'; // データベース接続
-include $_SERVER['DOCUMENT_ROOT'] . '/arrange/request/event/store.php'; // イベントの保存処理
+
 /**
  *
  * Escapes special characters in a string for use in HTML.

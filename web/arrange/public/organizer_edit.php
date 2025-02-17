@@ -1,181 +1,152 @@
 <?php
-require_once('/var/www/html/arrange/database/db.php');
-var_dump($_POST);
-// イベントIDと編集パスワードが送信されているか確認
-if (isset($_POST['event_id'], $_POST['event_edit_password'])) {
-    $eventId = (int)$_POST['event_id'];
-    $eventEditPassword = $_POST['event_edit_password'];
 
-    try {
-        // イベント情報と関連する日程をデータベースから取得
-        $stmt = $pdo->prepare('
-            SELECT e.id, e.name, e.detail, e.edit_password, a.start_time, a.end_time
-            FROM events e
-            LEFT JOIN availabilities a ON e.id = a.event_id
-            WHERE e.id = :event_id
-        ');
-        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-        $stmt->execute();
-        $event = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// データベース接続
+include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 
-        // イベントが見つからない、またはパスワードが一致しない場合
-        if (!$event || $eventEditPassword !== $event[0]['edit_password']) {
-            echo '<p>認証エラー: パスワードが正しくありません。</p>';
-            exit;
-        }
-    } catch (PDOException $e) {
-        echo 'データベースエラー: ' . $e->getMessage();
-        exit;
-    }
-} else {
-    echo '<p>イベントIDまたはパスワードが無効です。</p>';
+// イベントIDを取得
+$eventId = isset($_GET['event_id']) ? $_GET['event_id'] : null;
+
+if (!$eventId) {
+    echo "イベントIDが無効です。";
     exit;
 }
 
-// POSTデータ処理：イベント内容の更新を送信
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event'])) {
-    try {
-        foreach ($_POST['event'] as $eventId => $eventValue) {
-            // 'EVENTS' テーブルの 'name detail を更新
-            $stmt = $pdo->prepare('UPDATE events SET name = :name WHERE id = :event_id');
-            $stmt->bindValue(':name', $eventValue);
-            $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
-            $stmt->execute();
+// イベント情報を取得
+$stmt = $pdo->prepare("SELECT * FROM events WHERE id = :event_id");
+$stmt->execute(['event_id' => $eventId]);
+$event = $stmt->fetch();
 
-            // 'availabilities' テーブルの 'start time end time' を更新
-            $detail = $_POST['detail'][$responseId] ?? null;
-            $stmt = $pdo->prepare('UPDATE events SET detail = :detail WHERE id = :event_id');
-            $stmt->bindValue(':detail', $detail, $detail !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // $eventIdを使用
-            $stmt->execute();
+// イベントが存在しない場合のエラーハンドリング
+if (!$event) {
+    echo "指定されたイベントが存在しません。";
+    exit;
+}
+
+// フォームが送信された場合の処理
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $eventName = $_POST['name'];
+    $eventDetails = $_POST['details'];
+    $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
+
+    try {
+        // トランザクション開始
+        $pdo->beginTransaction();
+
+        // `events` テーブルのデータを更新
+        $sqlEvents = 'UPDATE events SET name = :name, detail = :detail, updated_at = NOW() WHERE id = :event_id';
+        $stmtEvents = $pdo->prepare($sqlEvents);
+        $stmtEvents->execute([
+            ':name' => $eventName,
+            ':detail' => $eventDetails,
+            ':event_id' => $eventId,
+        ]);
+
+        // `availabilities` テーブルのデータを更新
+        $sqlAvailabilities = 'DELETE FROM availabilities WHERE event_id = :event_id';
+        $stmtAvailabilities = $pdo->prepare($sqlAvailabilities);
+        $stmtAvailabilities->execute([':event_id' => $eventId]);
+
+        // 新しい時間スロットを挿入
+        $sqlAvailabilitiesInsert = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
+                                    VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
+        $stmtAvailabilitiesInsert = $pdo->prepare($sqlAvailabilitiesInsert);
+
+        foreach ($timeSlots as $slot) {
+            $stmtAvailabilitiesInsert->execute([
+                ':event_id' => $eventId,
+                ':start_time' => $slot['startTime'],
+                ':end_time' => $slot['endTime'],
+            ]);
         }
 
-        header('Location: submit_response.php?event_id=' . $eventId);
+        // トランザクションをコミット
+        $pdo->commit();
+
+        // 成功した場合、イベント一覧にリダイレクト
+        header('Location: index.php');
         exit;
     } catch (PDOException $e) {
-        echo "更新エラー: " . htmlspecialchars($e->getMessage());
+        // データベース関連のエラーをキャッチしてロールバック
+        $pdo->rollBack();
+        echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        error_log($e->getMessage());
+    } catch (Exception $e) {
+        // その他の例外をキャッチ
+        echo "エラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        error_log($e->getMessage());
     }
 }
 
-
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>イベント編集/削除</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            margin: 20px;
-        }
-        .event-details, .date-proposals, .buttons {
-            margin-bottom: 20px;
-        }
-        .event-details label, .date-proposals label {
-            font-weight: bold;
-        }
-        .date-proposals input {
-            margin: 5px;
-        }
-        .buttons button {
-            margin-right: 10px;
-        }
-    </style>
+    <title>イベント編集</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>イベント編集</h1>
 
-<div class="container">
-    <h1>イベント編集/削除</h1>
+    <!-- イベント編集フォーム -->
+    <form method="POST">
+        <label for="name">イベント名:</label>
+        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($event['name']); ?>" required><br>
 
-    <!-- イベントタイトルと詳細を動的に表示 -->
-    <form action="submit_response.php" method="GET">
-        <p><strong>Event Title:</strong> <input type="text" name="name" value="<?php echo htmlspecialchars($event[0]['name'], ENT_QUOTES, 'UTF-8'); ?>" /></p>
-        <p><strong>Event Memo:</strong> <textarea name="detail"><?php echo htmlspecialchars($event[0]['detail'], ENT_QUOTES, 'UTF-8'); ?></textarea></p>
+        <label for="details">詳細:</label>
+        <textarea id="details" name="details" required><?php echo htmlspecialchars($event['detail']); ?></textarea><br>
 
-        <!-- 日程提案 -->
-        <div class="date-proposals">
-            <label>日程の提案:</label><br>
-            <?php foreach ($event as $availability) : ?>
-                <div class="date-item">
-                    <span><?php echo htmlspecialchars($availability['start_time'], ENT_QUOTES, 'UTF-8'); ?> 〜 <?php echo htmlspecialchars($availability['end_time'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    <button class="delete-date">削除</button>
-                </div>
-            <?php endforeach; ?>
+        <label>開始時間:</label>
+        <input type='datetime-local' id='startTime' name='startTime' required><br><br>
+
+        <label>終了時間:</label>
+        <input type='datetime-local' id='endTime' name='endTime' required><br><br>
+
+        <button type='button' id='addSlotBtn'>候補日を追加</button>
+
+        <!-- 日付を表示する部分 -->
+        <div id='timeSlotContainer'>
+            <?php
+            // 既存の時間スロットを表示
+            $stmtTimeSlots = $pdo->prepare("SELECT * FROM availabilities WHERE event_id = :event_id");
+            $stmtTimeSlots->execute(['event_id' => $eventId]);
+            $timeSlots = $stmtTimeSlots->fetchAll();
+            foreach ($timeSlots as $slot) {
+                echo "<div class='time-slot'>開始: " . htmlspecialchars($slot['start_time']) . " 終了: " . htmlspecialchars($slot['end_time']) . "</div>";
+            }
+            ?>
         </div>
 
-        <!-- 新しい日程の追加 -->
-        <div class="add-date">
-            <label>新しい日程を入力:</label><br>
-            <label>開始時間:</label>
-            <input type='datetime-local' id='startTime' name='startTime'><br><br>
+        <label>編集パスワード:※イベント内容を変更する際に使用します。</label>
+        <input type='password' name='editPassword'><br><br>
 
-            <label>終了時間:</label>
-            <input type='datetime-local' id='endTime' name='endTime'><br><br>
-
-            <button id="add-date" type="button">日程追加</button>
-        </div>
-
-        <!-- イベントアクション -->
-        <div class="buttons">
-            <input type="hidden" name="event_id" value="<?php echo $event[0]['id']; ?>">
-            <input type="hidden" name="event_edit_password" value="<?php echo $event[0]['edit_password']; ?>">
-            <button type="submit">変更して更新</button>
-        </div>
+        <input type='hidden' id='timeSlotsInput' name='timeSlots'> <!-- 候補日時をここに送信 -->
+        <button type='submit'>イベントを更新</button>
     </form>
 
-    <!-- 一覧ページに戻るボタン -->
-    <a href="submit_response.php"><button type="button">一覧ページに戻る</button></a>
-</div>
-
-<script>
-    // 日程削除機能
-    document.querySelectorAll('.delete-date').forEach(function(button) {
-        button.addEventListener('click', function() {
-            this.parentElement.remove();
-        });
-    });
-
-    // 日程追加機能
-    document.getElementById('add-date').addEventListener('click', function() {
-        const startTimeInput = document.getElementById('startTime');
-        const endTimeInput = document.getElementById('endTime');
-        const startTimeValue = startTimeInput.value.trim();
-        const endTimeValue = endTimeInput.value.trim();
-
-        if (startTimeValue && endTimeValue) {
-            const startFormatted = formatDate(startTimeValue);
-            const endFormatted = formatDate(endTimeValue);
-            const dateProposals = document.querySelector('.date-proposals');
-            const newDateItem = document.createElement('div');
-            newDateItem.classList.add('date-item');
-            newDateItem.innerHTML = `<span>${startFormatted} 〜 ${endFormatted}</span><button class="delete-date">削除</button>`;
-            dateProposals.appendChild(newDateItem);
-            newDateItem.querySelector('.delete-date').addEventListener('click', function() {
-                this.parentElement.remove();
-            });
-            startTimeInput.value = '';
-            endTimeInput.value = '';
-        } else {
-            alert('開始時間と終了時間を入力してください');
-        }
-    });
-
-    // 日付を「yyyy-MM-dd HH:mm:ss」の形式に変換する関数　整理整頓
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-</script>
-
+    <br>
+    <a href="index.php">イベント一覧に戻る</a>
 </body>
 </html>
+<script>
+    document.getElementById('addSlotBtn').addEventListener('click', function() {
+        var startTime = document.getElementById('startTime').value;
+        var endTime = document.getElementById('endTime').value;
+
+        // 既存の時間スロットがあるか確認
+        var timeSlotsInput = document.getElementById('timeSlotsInput');
+        var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
+
+        // 新しい時間スロットを表示
+        var timeSlotContainer = document.getElementById('timeSlotContainer');
+        var newSlot = document.createElement('div');
+        newSlot.classList.add('time-slot');
+        newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
+
+        // 新しいスロットを追加
+        existingTimeSlots.push({ startTime: startTime, endTime: endTime });
+        timeSlotsInput.value = JSON.stringify(existingTimeSlots);
+        timeSlotContainer.appendChild(newSlot);
+    });
+</script>
