@@ -136,13 +136,13 @@ function showPasswordPopupForParticipant(url, eventId) {
     document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
 }
 
-// 主催者用ポップアップを表示
-function showPasswordPopupForOrganizer(url, eventId) {
-    console.log("showPasswordPopupForOrganizer called with: ", url, eventId);
-    document.getElementById('popup_event').style.display = 'flex';
-    document.getElementById('editForm_event').action = url;
-    document.getElementById('event_id_field_event').value = eventId; // イベントIDをフォームに設定
-}
+// // 主催者用ポップアップを表示
+// function showPasswordPopupForOrganizer(url, eventId) {
+//     console.log("showPasswordPopupForOrganizer called with: ", url, eventId);
+//     document.getElementById('popup_event').style.display = 'flex';
+//     document.getElementById('editForm_event').action = url;
+//     document.getElementById('event_id_field_event').value = eventId; // イベントIDをフォームに設定
+// }
 
 // 参加者用パスワード確認後にポップアップを非表示にする
 function submitPasswordForm() {
@@ -155,17 +155,17 @@ function submitPasswordForm() {
     }
 }
 
-// 主催者用パスワード確認後にポップアップを非表示にする
-function submitPasswordFormEvent() {
-    const password = document.getElementById('event_edit_password').value;
+// // 主催者用パスワード確認後にポップアップを非表示にする
+// function submitPasswordFormEvent() {
+//     const password = document.getElementById('event_edit_password').value;
     
-    if (password.trim() !== "") {
-        document.getElementById('popup_event').style.display = 'none';
-        document.getElementById('editForm_event').submit(); // フォーム送信
-    } else {
-        alert("パスワードを入力してください");
-    }
-}
+//     if (password.trim() !== "") {
+//         document.getElementById('popup_event').style.display = 'none';
+//         document.getElementById('editForm_event').submit(); // フォーム送信
+//     } else {
+//         alert("パスワードを入力してください");
+//     }
+// }
 
     
     </script>
@@ -176,8 +176,8 @@ function submitPasswordFormEvent() {
     <!-- 編集ボタン（参加者用） -->
     <button onclick="showPasswordPopupForParticipant('participant_edit.php', <?php echo $eventId; ?>)">回答を編集</button>
 
-    <!-- 編集ボタン（主催者用） -->
-    <button onclick="showPasswordPopupForOrganizer('organizer_edit.php', <?php echo $eventId; ?>)">イベントを編集</button>
+    <!-- 編集ボタン（主催者用）
+    <button onclick="showPasswordPopupForOrganizer('organizer_edit.php', <?php echo $eventId; ?>)">イベントを編集</button> -->
 
 
 <!-- 参加者用ポップアップ -->
@@ -198,21 +198,21 @@ function submitPasswordFormEvent() {
 </div>
 
 <!-- 主催者用ポップアップ -->
-<div id="popup_event" class="popup_event">
-    <div class="popup-content_event">
-        <h2>イベントを編集</h2>
-        <form id="editForm_event" method="POST">
-            <input type="hidden" id="event_id_field_event" name="event_id" value=""> <!-- イベントIDを保持 -->
-            <label for="name">イベント名:</label>
-            <input type="text" id="name" name="name" placeholder="イベント名" required>
-            <label for="event_edit_password">イベント編集パスワード:</label>
-            <input type="password" id="event_edit_password" name="event_edit_password" placeholder="イベント編集用パスワード" required>
-            <br><br>
-            <button type="button" onclick="submitPasswordFormEvent()">送信</button>
-            <button type="button" onclick="document.getElementById('popup_event').style.display='none'">キャンセル</button>
-        </form>
-    </div>
-</div>
+<!-- <div id="popup_event" class="popup_event"> -->
+    <!-- <div class="popup-content_event"> -->
+        <!-- <h2>イベントを編集</h2> -->
+        <!-- <form id="editForm_event" method="POST"> -->
+            <!-- <input type="hidden" id="event_id_field_event" name="event_id" value=""> イベントIDを保持 -->
+            <!-- <label for="name">イベント名:</label> -->
+            <!-- <input type="text" id="name" name="name" placeholder="イベント名" required> -->
+            <!-- <label for="event_edit_password">イベント編集パスワード:</label> -->
+            <!-- <input type="password" id="event_edit_password" name="event_edit_password" placeholder="イベント編集用パスワード" required> -->
+            <!-- <br><br> -->
+            <!-- <button type="button" onclick="submitPasswordFormEvent()">送信</button> -->
+            <!-- <button type="button" onclick="document.getElementById('popup_event').style.display='none'">キャンセル</button> -->
+        <!-- </form> -->
+    <!-- </div> -->
+<!-- </div> -->
 
     <!-- 回答一覧 -->
     <table border="1">

@@ -1,79 +1,89 @@
 <?php
 
-// データベース接続
-include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
+require_once('/var/www/html/arrange/database/db.php');
 
 // イベントIDを取得
-$eventId = isset($_GET['event_id']) ? $_GET['event_id'] : null;
-
-if (!$eventId) {
-    echo "イベントIDが無効です。";
-    exit;
-}
-
-// イベント情報を取得
-$stmt = $pdo->prepare("SELECT * FROM events WHERE id = :event_id");
-$stmt->execute(['event_id' => $eventId]);
-$event = $stmt->fetch();
-
-// イベントが存在しない場合のエラーハンドリング
-if (!$event) {
-    echo "指定されたイベントが存在しません。";
-    exit;
-}
-
-// フォームが送信された場合の処理
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $eventName = $_POST['name'];
-    $eventDetails = $_POST['details'];
-    $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
+if (isset($_GET['event_id'])) {
+    $eventId = (int)$_GET['event_id'];
 
     try {
-        // トランザクション開始
-        $pdo->beginTransaction();
-
-        // `events` テーブルのデータを更新
-        $sqlEvents = 'UPDATE events SET name = :name, detail = :detail, updated_at = NOW() WHERE id = :event_id';
-        $stmtEvents = $pdo->prepare($sqlEvents);
-        $stmtEvents->execute([
-            ':name' => $eventName,
-            ':detail' => $eventDetails,
-            ':event_id' => $eventId,
-        ]);
-
-        // `availabilities` テーブルのデータを更新
-        $sqlAvailabilities = 'DELETE FROM availabilities WHERE event_id = :event_id';
-        $stmtAvailabilities = $pdo->prepare($sqlAvailabilities);
-        $stmtAvailabilities->execute([':event_id' => $eventId]);
-
-        // 新しい時間スロットを挿入
-        $sqlAvailabilitiesInsert = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
-                                    VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
-        $stmtAvailabilitiesInsert = $pdo->prepare($sqlAvailabilitiesInsert);
-
-        foreach ($timeSlots as $slot) {
-            $stmtAvailabilitiesInsert->execute([
-                ':event_id' => $eventId,
-                ':start_time' => $slot['startTime'],
-                ':end_time' => $slot['endTime'],
-            ]);
+        // イベント名を取得
+        $stmt = $pdo->prepare('SELECT name, edit_password FROM events WHERE id = :event_id');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->execute();
+        $event = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$event) {
+            echo '<p>指定されたイベントが見つかりません。</p>';
+            exit;
         }
 
-        // トランザクションをコミット
-        $pdo->commit();
+        // イベントの日程を取得
+        $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->execute();
+        $availabilities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo 'SQLエラー: ' . $e->getMessage();
+        exit;
+    }
+} else {
+    echo '<p>イベントIDが指定されていません。</p>';
+    exit;
+}
 
-        // 成功した場合、イベント一覧にリダイレクト
-        header('Location: index.php');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $eventName = $_POST['event_name'] ?? '';
+    $availabilityIds = $_POST['availability_id'] ?? [];
+    $startTimes = $_POST['start_time'] ?? [];
+    $endTimes = $_POST['end_time'] ?? [];
+    $deleteIds = $_POST['delete_id'] ?? [];
+
+    try {
+        // イベント名の更新
+        if (!empty($eventName)) {
+            $stmt = $pdo->prepare('UPDATE events SET name = :name WHERE id = :event_id');
+            $stmt->bindValue(':name', $eventName);
+            $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+            $stmt->execute();
+        }
+
+        // 日程の更新
+        for ($i = 0; $i < count($availabilityIds); $i++) {
+            $stmt = $pdo->prepare('UPDATE availabilities SET start_time = :start_time, end_time = :end_time WHERE id = :availability_id');
+            $stmt->bindValue(':start_time', $startTimes[$i]);
+            $stmt->bindValue(':end_time', $endTimes[$i]);
+            $stmt->bindValue(':availability_id', $availabilityIds[$i], PDO::PARAM_INT);
+            $stmt->execute();
+        }
+
+       // 新しい日程の追加（INSERT）
+        for ($i = 0; $i < count($startTimes); $i++) {
+            if (empty($availabilityIds[$i])) {  // availability_idが空の場合、新規追加
+                $stmt = $pdo->prepare('
+                    INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
+                    VALUES (:event_id, :start_time, :end_time, NOW(), NOW())
+                ');
+                $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+                $stmt->bindValue(':start_time', $startTimes[$i]);
+                $stmt->bindValue(':end_time', $endTimes[$i]);
+                $stmt->execute();
+            }
+        }
+
+        // 削除対象の日程があれば削除
+        if (!empty($deleteIds)) {
+            $stmt = $pdo->prepare('DELETE FROM availabilities WHERE id IN (' . implode(',', array_fill(0, count($deleteIds), '?')) . ')');
+            foreach ($deleteIds as $index => $deleteId) {
+                $stmt->bindValue($index + 1, $deleteId, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+        }
+
+        // 更新後、リダイレクトして一覧を表示
+        header("Location: index.php");
         exit;
     } catch (PDOException $e) {
-        // データベース関連のエラーをキャッチしてロールバック
-        $pdo->rollBack();
-        echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-        error_log($e->getMessage());
-    } catch (Exception $e) {
-        // その他の例外をキャッチ
-        echo "エラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-        error_log($e->getMessage());
+        echo "更新エラー: " . $e->getMessage();
     }
 }
 
@@ -83,70 +93,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>イベント編集</title>
-    <link rel="stylesheet" href="style.css">
+    <title>イベント管理</title>
+    <script>
+        // 新しい候補を追加する関数
+        document.addEventListener("DOMContentLoaded", function() {
+            const addButton = document.getElementById('addNewAvailability');
+            const availabilityTableBody = document.querySelector('table tbody');
+
+            addButton.addEventListener('click', function() {
+                // 新しい行を作成
+                const newRow = document.createElement('tr');
+
+                // 新しい行の内容
+                newRow.innerHTML = `
+                    <td>新しい日程</td>
+                    <td>
+                        <input type="datetime-local" name="start_time[]" required>
+                    </td>
+                    <td>
+                        <input type="datetime-local" name="end_time[]" required>
+                    </td>
+                    <td>
+                        <input type="checkbox" name="delete_id[]">
+                        <input type="hidden" name="availability_id[]" value="">
+                    </td>
+                `;
+                
+                // 新しい行をテーブルに追加
+                availabilityTableBody.appendChild(newRow);
+            });
+        });
+    </script>
 </head>
 <body>
-    <h1>イベント編集</h1>
+    <h1>イベント編集画面:</h1>
 
-    <!-- イベント編集フォーム -->
-    <form method="POST">
-        <label for="name">イベント名:</label>
-        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($event['name']); ?>" required><br>
-
-        <label for="details">詳細:</label>
-        <textarea id="details" name="details" required><?php echo htmlspecialchars($event['detail']); ?></textarea><br>
-
-        <label>開始時間:</label>
-        <input type='datetime-local' id='startTime' name='startTime' required><br><br>
-
-        <label>終了時間:</label>
-        <input type='datetime-local' id='endTime' name='endTime' required><br><br>
-
-        <button type='button' id='addSlotBtn'>候補日を追加</button>
-
-        <!-- 日付を表示する部分 -->
-        <div id='timeSlotContainer'>
-            <?php
-            // 既存の時間スロットを表示
-            $stmtTimeSlots = $pdo->prepare("SELECT * FROM availabilities WHERE event_id = :event_id");
-            $stmtTimeSlots->execute(['event_id' => $eventId]);
-            $timeSlots = $stmtTimeSlots->fetchAll();
-            foreach ($timeSlots as $slot) {
-                echo "<div class='time-slot'>開始: " . htmlspecialchars($slot['start_time']) . " 終了: " . htmlspecialchars($slot['end_time']) . "</div>";
-            }
-            ?>
-        </div>
-
-        <label>編集パスワード:※イベント内容を変更する際に使用します。</label>
-        <input type='password' name='editPassword'><br><br>
-
-        <input type='hidden' id='timeSlotsInput' name='timeSlots'> <!-- 候補日時をここに送信 -->
-        <button type='submit'>イベントを更新</button>
+    <form method="POST" style="display:inline;">
+        <input type="text" name="event_name" value="<?php echo htmlspecialchars($event['name']); ?>" required>
     </form>
+    
+    <form method="POST">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>日程</th>
+                    <th>開始時間</th>
+                    <th>終了時間</th>
+                    <th>削除</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($availabilities as $availability) : ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($availability['start_time']) . ' - ' . htmlspecialchars($availability['end_time']); ?></td>
+                        <td>
+                            <input type="datetime-local" name="start_time[]" value="<?php echo date('Y-m-d\TH:i', strtotime($availability['start_time'])); ?>" required>
+                        </td>
+                        <td>
+                            <input type="datetime-local" name="end_time[]" value="<?php echo date('Y-m-d\TH:i', strtotime($availability['end_time'])); ?>" required>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="delete_id[]" value="<?php echo $availability['id']; ?>">
+                            <input type="hidden" name="availability_id[]" value="<?php echo $availability['id']; ?>">
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
 
-    <br>
+        <button type="button" id="addNewAvailability">新しい候補を追加</button>
+        <br><br>
+        <button type="submit">更新</button>
+    </form>
     <a href="index.php">イベント一覧に戻る</a>
 </body>
 </html>
-<script>
-    document.getElementById('addSlotBtn').addEventListener('click', function() {
-        var startTime = document.getElementById('startTime').value;
-        var endTime = document.getElementById('endTime').value;
-
-        // 既存の時間スロットがあるか確認
-        var timeSlotsInput = document.getElementById('timeSlotsInput');
-        var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
-
-        // 新しい時間スロットを表示
-        var timeSlotContainer = document.getElementById('timeSlotContainer');
-        var newSlot = document.createElement('div');
-        newSlot.classList.add('time-slot');
-        newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
-
-        // 新しいスロットを追加
-        existingTimeSlots.push({ startTime: startTime, endTime: endTime });
-        timeSlotsInput.value = JSON.stringify(existingTimeSlots);
-        timeSlotContainer.appendChild(newSlot);
-    });
-</script>

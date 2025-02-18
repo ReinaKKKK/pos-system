@@ -138,6 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
     
         <br>
         <input type="submit" value="更新">
+        <input type="submit" value="削除">
     </form>
+    <a href="respond.php">回答一覧に戻る</a>
 </body>
 </html>
