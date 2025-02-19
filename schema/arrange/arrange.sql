@@ -8,8 +8,8 @@ CREATE TABLE availabilities
 (
 	id bigint NOT NULL COMMENT 'id',
 	event_id bigint NOT NULL COMMENT 'event_id',
-	date date NOT NULL COMMENT 'date',
-	time_slot time COMMENT 'time_slot',
+	start_time datetime NOT NULL COMMENT 'start_time',
+	end_time datetime NOT NULL COMMENT 'end_time',
 	created_at timestamp COMMENT 'created_at',
 	updated_at timestamp COMMENT 'updated_at',
 	PRIMARY KEY (id)
@@ -21,7 +21,6 @@ CREATE TABLE events
 (
 	id bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
 	name varchar(255) NOT NULL COMMENT 'name',
-	url varchar(255) NOT NULL COMMENT 'url',
 	edit_password varchar(255) COMMENT 'edit_password',
 	detail text COMMENT 'detail',
 	created_at timestamp COMMENT 'created_at',
@@ -37,7 +36,6 @@ CREATE TABLE responses
 	user_id bigint NOT NULL COMMENT 'user_id',
 	availability_id bigint NOT NULL COMMENT 'availability_id',
 	response tinyint NOT NULL COMMENT 'response',
-	comment text COMMENT 'comment',
 	created_at timestamp COMMENT 'created_at',
 	updated_at timestamp COMMENT 'updated_at',
 	PRIMARY KEY (id)
@@ -50,7 +48,8 @@ CREATE TABLE users
 	id bigint NOT NULL COMMENT 'id',
 	event_id bigint NOT NULL COMMENT 'event_id',
 	name varchar(255) NOT NULL COMMENT 'name',
-	response_id bigint NOT NULL COMMENT 'response_id',
+	edit_password varchar(255) NOT NULL COMMENT 'edit_password',
+	comment text COMMENT 'comment',
 	created_at timestamp COMMENT 'created_at',
 	updated_at timestamp COMMENT 'updated_at',
 	PRIMARY KEY (id)

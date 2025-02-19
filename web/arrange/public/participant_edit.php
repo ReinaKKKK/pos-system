@@ -67,6 +67,24 @@ if (headers_sent($file, $line)) {
 // var_dump($_POST);
 // var_dump(isset($_POST['response_id']));
 
+// POSTデータ処理：ユーザーが削除ボタンを押してデータベースからそのユーザーの回答がまるごと削除される
+if (isset($_POST['delete'])) {
+    try {
+        // ユーザーIDを削除
+        $stmt = $pdo->prepare('DELETE FROM responses WHERE user_id = :user_id');
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $stmt = $pdo->prepare('DELETE FROM users WHERE id = :user_id');
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header('Location: submit_response.php?event_id=' . $eventId);
+        exit;
+    } catch (PDOException $e) {
+        echo '削除エラー: ' . $e->getMessage();
+    }
+}
 
 // POSTデータ処理：ユーザーが更新を送信
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
@@ -92,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
         echo "更新エラー: " . htmlspecialchars($e->getMessage());
     }
 }
+
 
 ?>
 
@@ -133,13 +152,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
         <td>
             <textarea name="comment[<?php echo htmlspecialchars($response['id']); ?>]" rows="4" cols="50"><?php echo isset($response['comment']) ? htmlspecialchars($response['comment']) : ''; ?></textarea>
         </td>
-    </tr>
+            </tr>
         </table>
-    
         <br>
         <input type="submit" value="更新">
-        <input type="submit" value="削除">
+        <input type="submit" name="delete" value="削除" onclick="return confirm('本当に削除しますか？');">
     </form>
-    <a href="respond.php">回答一覧に戻る</a>
+    <a href="submit_response.php?event_id=<?php echo htmlspecialchars($eventId, ENT_QUOTES); ?>" class="button-link">
+    回答一覧に戻る
+</a>
+
+
 </body>
 </html>

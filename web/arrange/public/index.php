@@ -33,7 +33,7 @@ if (isset($_POST['event_edit_password']) && isset($_POST['event_id'])) {
 <head>
     <meta charset="UTF-8">
     <title>イベント一覧</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
     <script>
         // 主催者用ポップアップを表示
         function showPasswordPopupForOrganizer(eventId) {
@@ -67,13 +67,19 @@ if (isset($_POST['event_edit_password']) && isset($_POST['event_id'])) {
                 <th>作成日</th>
                 <th>変更日</th>
                 <th>参加URL</th>
+                <th>イベント編集</th>
+
             </tr>
         </thead>
         <tbody>
             <?php foreach ($events as $event) : ?>
                 <tr>
                     <td>
-                        <a href="javascript:void(0);" onclick="showPasswordPopupForOrganizer(<?php echo $event['id']; ?>)">
+                        <?php
+                        // イベントの参加URLを作成
+                        $eventUrl = "submit_response.php?event_id=" . urlencode($event['id']);
+                        ?>
+                        <a href="<?php echo $eventUrl; ?>" target="_blank">
                             <?php echo htmlspecialchars($event['name']); ?>
                         </a>
                     </td>
@@ -85,6 +91,11 @@ if (isset($_POST['event_edit_password']) && isset($_POST['event_id'])) {
                         $eventUrl = "respond.php?event_id=" . urlencode($event['id']);
                         ?>
                         <a href="<?php echo $eventUrl; ?>" target="_blank">参加ページ</a>
+                    </td>
+                    <td>
+                        <a href="javascript:void(0);" onclick="showPasswordPopupForOrganizer(<?php echo $event['id']; ?>)">
+                           編集
+                        </a>
                     </td>
                 </tr>
             <?php endforeach; ?>
