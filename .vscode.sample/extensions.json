@@ -6,8 +6,8 @@
 	"recommendations": [
 		"shevaua.phpcs",
 		"ecodes.vscode-phpmd",
-		"dbaeumer.vscode-eslint",
-		"SanderRonde.phpstan-vscode"
+		// "dbaeumer.vscode-eslint",
+		// "SanderRonde.phpstan-vscode"
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": [

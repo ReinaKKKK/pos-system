@@ -10,9 +10,9 @@
     "phpmd.rules": "settings/phpmd/ruleset.xml",
     "phpmd.unsafeCommand": "bash ./settings/docker-phpmd.sh",
 
-    "eslint.runtime": "node/bin/node",
-    "eslint.nodePath": "node/node_modules",
-    "eslint.options": { "overrideConfigFile": "node/.eslintrc.json" },
+    // "eslint.runtime": "node/bin/node",
+    // "eslint.nodePath": "node/node_modules",
+    // "eslint.options": { "overrideConfigFile": "node/.eslintrc.json" },
 
     "phpstan.binPath": "./settings/docker-larastan.sh",
     "phpstan.configFile": "./settings/phpstan.neon",

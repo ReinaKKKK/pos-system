@@ -1,5 +1,5 @@
 <?php
-// データベース接続
+
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 
 // フォームが送信された場合の処理
@@ -10,20 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
 
     try {
-        // パスワードをハッシュ化
         $hashedPassword = password_hash($editPassword, PASSWORD_DEFAULT); // ハッシュ化
 
-        // トランザクション開始
         $pdo->beginTransaction();
 
-        // `events` テーブルにデータを挿入
         $sqlEvents = 'INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
                       VALUES (:name, :detail, :edit_password, NOW(), NOW())';
         $stmtEvents = $pdo->prepare($sqlEvents);
         $stmtEvents->execute([
             ':name' => $eventName,
             ':detail' => $eventDetails,
-            ':edit_password' => $hashedPassword, // ハッシュ化されたパスワードを保存
+            ':edit_password' => $hashedPassword,
         ]);
 
         // 挿入されたイベントIDを取得
@@ -45,21 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
 
-        // トランザクションをコミット
         $pdo->commit();
 
-        // イベントURLを表示するページ（index.php）へリダイレクト
         if (!headers_sent()) {
             header("Location: index.php");
             exit;
         } else {
-            // リダイレクト失敗時には手動でアクセスするためのリンクを表示
-            echo "リダイレクトに失敗しました。手動でアクセスしてください。";
-            echo '<a href="event_url.php?event_id=' . htmlspecialchars($eventId, ENT_QUOTES) . '">ここをクリック</a>';
+            echo "リダイレクトに失敗しました。";
+            // echo '<a href="event_url.php?event_id=' . htmlspecialchars($eventId, ENT_QUOTES) . '">ここをクリック</a>';
             exit;
         }
     } catch (PDOException $e) {
-        // データベース関連のエラーをキャッチしてロールバック
         $pdo->rollBack();
         echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         error_log($e->getMessage());

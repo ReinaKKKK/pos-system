@@ -1,6 +1,5 @@
 <?php
 
-// データベース接続
 include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 
 // イベント一覧を取得
@@ -12,12 +11,10 @@ if (isset($_POST['event_edit_password']) && isset($_POST['event_id'])) {
     $inputPassword = $_POST['event_edit_password'];
     $eventId = $_POST['event_id'];
 
-    // イベント情報をデータベースから取得
     $stmt = $pdo->prepare("SELECT * FROM events WHERE id = :event_id");
     $stmt->execute(['event_id' => $eventId]);
     $event = $stmt->fetch();
 
-    // イベントが見つかり、パスワードが一致する場合
     if ($event && password_verify($inputPassword, $event['edit_password'])) {
         // パスワードが正しい場合、イベント編集ページにリダイレクト
         header('Location: organizer_edit.php?event_id=' . $eventId);
@@ -33,7 +30,7 @@ if (isset($_POST['event_edit_password']) && isset($_POST['event_id'])) {
 <head>
     <meta charset="UTF-8">
     <title>イベント一覧</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link rel="stylesheet" href="style.css">
     <script>
         // 主催者用ポップアップを表示
         function showPasswordPopupForOrganizer(eventId) {

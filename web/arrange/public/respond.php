@@ -5,7 +5,6 @@ include $_SERVER['DOCUMENT_ROOT'] . '/arrange/database/db.php';
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// イベントIDをGETから取得
 $eventId = isset($_GET['event_id']) ? htmlspecialchars($_GET['event_id'], ENT_QUOTES, 'UTF-8') : null;
 
 if (!$eventId) {
@@ -13,7 +12,6 @@ if (!$eventId) {
     exit;
 }
 
-// データベースからイベント情報を取得
 try {
     $stmt = $pdo->prepare('SELECT name FROM events WHERE id = :event_id');
     $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
@@ -40,7 +38,6 @@ try {
     exit;
 }
 
-// POSTリクエストで回答を処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($_POST['name']) || empty($_POST['edit_password'])) {
         echo '<p>名前または編集用パスワードが入力されていません。</p>';
@@ -52,13 +49,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
 
     try {
+        // 同じイベント内で同じ編集パスワードが既に存在するか確認
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE event_id = :event_id AND edit_password = :edit_password');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
+        $stmt->execute();
+        $passwordCount = $stmt->fetchColumn();
+
+        if ($passwordCount > 0) {
+            echo '<p>この編集用パスワードはすでに使用されています。他のパスワードを選択してください。</p>';
+            exit;
+        }
         // ユーザーを作成
         $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password,comment) VALUES (:name, :event_id, NOW(), NOW(), :edit_password,:comment)');
         $stmt->execute([
             ':name' => $userName,
             ':event_id' => $eventId,
             ':comment' => $comment,
-            ':edit_password' => password_hash($participantPassword, PASSWORD_DEFAULT),   // パスワードのハッシュ化
+            ':edit_password' => password_hash($participantPassword, PASSWORD_DEFAULT),
         ]);
         $userId = $pdo->lastInsertId();  // 新しく作成したユーザーのIDを取得
 
@@ -79,13 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // usersテーブルにcommentを更新
                 $stmt = $pdo->prepare('UPDATE users SET comment = :comment WHERE id = :user_id');
                 $stmt->execute([
-                    ':comment' => $comment,  // コメント
-                    ':user_id' => $userId,  // usersテーブルのID
+                    ':comment' => $comment,
+                    ':user_id' => $userId,
                 ]);
             }
         }
 
-        // 回答後のリダイレクト
         header('Location: submit_response.php?event_id=' . $eventId);
         exit;
     } catch (PDOException $e) {
@@ -100,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>イベント回答</title>
+    <link rel='stylesheet' href='style.css'>
 </head>
 <body>
     <h1><?php echo htmlspecialchars($event['name'], ENT_QUOTES, 'UTF-8'); ?></h1>
@@ -129,5 +137,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="text" name="edit_password" id="edit_password" required>
         <button type="submit">送信</button>
     </form>
+    <a href="index.php">イベント一覧に戻る</a>
 </body>
 </html>

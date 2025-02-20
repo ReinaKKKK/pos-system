@@ -2,7 +2,6 @@
 
 require_once('/var/www/html/arrange/database/db.php');
 
-// イベントIDと名前、編集パスワードを取得.「isset」はこの変数に値が入っているかどうかを確認するための関数
 if (isset($_POST['event_id'], $_POST['name'], $_POST['response_edit_password'])) {
     $eventId = (int)$_POST['event_id'];
     $name = $_POST['name'];
@@ -45,9 +44,9 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['response_edit_password']))
             WHERE 
                 responses.user_id = :user_id
         ');
-        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT); // 特定の user_id をバインド
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute(); // クエリ実行
-        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC); // 特定の参加者の回答を取得
+        $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         // データベースエラーの処理
         echo 'データベースエラー: ' . $e->getMessage();
@@ -62,12 +61,6 @@ if (headers_sent($file, $line)) {
     exit;
 }
 
-// var_dump($_SERVER['REQUEST_METHOD'] === 'POST');
-// var_dump(isset($_POST['response']));
-// var_dump($_POST);
-// var_dump(isset($_POST['response_id']));
-
-// POSTデータ処理：ユーザーが削除ボタンを押してデータベースからそのユーザーの回答がまるごと削除される
 if (isset($_POST['delete'])) {
     try {
         // ユーザーIDを削除
@@ -86,7 +79,6 @@ if (isset($_POST['delete'])) {
     }
 }
 
-// POSTデータ処理：ユーザーが更新を送信
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
     try {
         foreach ($_POST['response'] as $responseId => $responseValue) {
@@ -119,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
 <head>
     <meta charset="UTF-8">
     <title>参加者の回答編集</title>
+    <link rel='stylesheet' href='style.css'>
 </head>
 <body>
     <h1>回答編集画面</h1>
@@ -160,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset(
     </form>
     <a href="submit_response.php?event_id=<?php echo htmlspecialchars($eventId, ENT_QUOTES); ?>" class="button-link">
     回答一覧に戻る
-</a>
+    </a>
 
 
 </body>

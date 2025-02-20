@@ -2,12 +2,10 @@
 
 require_once('/var/www/html/arrange/database/db.php');
 
-// イベントIDを取得
 if (isset($_GET['event_id'])) {
     $eventId = (int)$_GET['event_id'];
 
     try {
-        // イベント名を取得
         $stmt = $pdo->prepare('SELECT name, edit_password FROM events WHERE id = :event_id');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
@@ -17,7 +15,6 @@ if (isset($_GET['event_id'])) {
             exit;
         }
 
-        // イベントの日程を取得
         $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
@@ -49,7 +46,6 @@ if (isset($_GET['event_id'])) {
     exit;
 }
 
-// 参加者の回答を整理
 $participantsResponses = [];
 foreach ($responses as $response) {
     $userName = $response['name']; // ユーザー名を取得
@@ -72,14 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':comment', $user_comment);
 
         $stmt->execute();
-        // デバッグ用：変更が成功したかどうか
         if ($stmt->rowCount() > 0) {
             echo "データベースが更新されました";
         } else {
             echo "変更なし";
         }
-        // POST送信後、リダイレクトすることで最新のデータを表示
-        header("Location: submit_response.php"); // 一覧ページへリダイレクト
+        header("Location: submit_response.php");
     } catch (PDOException $e) {
         echo "更新エラー: " . $e->getMessage();
     }
@@ -91,7 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>イベント管理</title>
-    <style>
+    <link rel='stylesheet' href='style.css'>
+    <!-- <style>
         .popup {
             display: none;
             position: fixed;
@@ -126,9 +121,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
         }
 
-    </style>
+    </style> -->
     <script>
-// 参加者用ポップアップを表示
+
 function showPasswordPopupForParticipant(url, eventId) {
     console.log("showPasswordPopupForParticipant called with: ", url, eventId);
     document.getElementById('popup').style.display = 'flex';
@@ -136,15 +131,6 @@ function showPasswordPopupForParticipant(url, eventId) {
     document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
 }
 
-// // 主催者用ポップアップを表示
-// function showPasswordPopupForOrganizer(url, eventId) {
-//     console.log("showPasswordPopupForOrganizer called with: ", url, eventId);
-//     document.getElementById('popup_event').style.display = 'flex';
-//     document.getElementById('editForm_event').action = url;
-//     document.getElementById('event_id_field_event').value = eventId; // イベントIDをフォームに設定
-// }
-
-// 参加者用パスワード確認後にポップアップを非表示にする
 function submitPasswordForm() {
     const password = document.getElementById('response_edit_password').value;
     if (password.trim() !== "") {
@@ -154,19 +140,6 @@ function submitPasswordForm() {
         alert("パスワードを入力してください");
     }
 }
-
-// // 主催者用パスワード確認後にポップアップを非表示にする
-// function submitPasswordFormEvent() {
-//     const password = document.getElementById('event_edit_password').value;
-    
-//     if (password.trim() !== "") {
-//         document.getElementById('popup_event').style.display = 'none';
-//         document.getElementById('editForm_event').submit(); // フォーム送信
-//     } else {
-//         alert("パスワードを入力してください");
-//     }
-// }
-
     
     </script>
 </head>
@@ -175,10 +148,6 @@ function submitPasswordForm() {
 
     <!-- 編集ボタン（参加者用） -->
     <button onclick="showPasswordPopupForParticipant('participant_edit.php', <?php echo $eventId; ?>)">回答を編集</button>
-
-    <!-- 編集ボタン（主催者用）
-    <button onclick="showPasswordPopupForOrganizer('organizer_edit.php', <?php echo $eventId; ?>)">イベントを編集</button> -->
-
 
 <!-- 参加者用ポップアップ -->
 <div id="popup" class="popup">
@@ -196,23 +165,6 @@ function submitPasswordForm() {
         </form>
     </div>
 </div>
-
-<!-- 主催者用ポップアップ -->
-<!-- <div id="popup_event" class="popup_event"> -->
-    <!-- <div class="popup-content_event"> -->
-        <!-- <h2>イベントを編集</h2> -->
-        <!-- <form id="editForm_event" method="POST"> -->
-            <!-- <input type="hidden" id="event_id_field_event" name="event_id" value=""> イベントIDを保持 -->
-            <!-- <label for="name">イベント名:</label> -->
-            <!-- <input type="text" id="name" name="name" placeholder="イベント名" required> -->
-            <!-- <label for="event_edit_password">イベント編集パスワード:</label> -->
-            <!-- <input type="password" id="event_edit_password" name="event_edit_password" placeholder="イベント編集用パスワード" required> -->
-            <!-- <br><br> -->
-            <!-- <button type="button" onclick="submitPasswordFormEvent()">送信</button> -->
-            <!-- <button type="button" onclick="document.getElementById('popup_event').style.display='none'">キャンセル</button> -->
-        <!-- </form> -->
-    <!-- </div> -->
-<!-- </div> -->
 
     <!-- 回答一覧 -->
     <table border="1">
@@ -269,11 +221,11 @@ function submitPasswordForm() {
                     if (!empty($responsesForUser)) {
                         // ユーザーの最初の候補日のコメントだけを取得
                         $firstResponse = reset($responsesForUser);
-                        $comment = $firstResponse['comment'] ?? null; // 最初の候補日のコメント
+                        $comment = $firstResponse['comment'] ?? null;
                         if (!empty($comment)) {
-                            echo htmlspecialchars($comment); // コメントがあればエスケープして表示
+                            echo htmlspecialchars($comment);
                         } else {
-                            echo "なし"; // コメントがない場合は「なし」と表示
+                            echo "なし";
                         }
                     }
                     ?>

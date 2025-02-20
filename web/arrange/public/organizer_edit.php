@@ -2,12 +2,10 @@
 
 require_once('/var/www/html/arrange/database/db.php');
 
-// イベントIDを取得
 if (isset($_GET['event_id'])) {
     $eventId = (int)$_GET['event_id'];
 
     try {
-        // イベント名を取得
         $stmt = $pdo->prepare('SELECT name, edit_password FROM events WHERE id = :event_id');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
@@ -17,7 +15,6 @@ if (isset($_GET['event_id'])) {
             exit;
         }
 
-        // イベントの日程を取得
         $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
@@ -29,6 +26,26 @@ if (isset($_GET['event_id'])) {
 } else {
     echo '<p>イベントIDが指定されていません。</p>';
     exit;
+}
+
+if (isset($_POST['delete'])) {
+    try {
+        // イベントに関連する日程を削除
+        $stmt = $pdo->prepare('DELETE FROM availabilities WHERE event_id = :event_id');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // イベントを削除
+        $stmt = $pdo->prepare('DELETE FROM events WHERE id = :event_id');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // 更新後、リダイレクトして一覧を表示
+        header("Location: index.php");
+        exit;
+    } catch (PDOException $e) {
+        echo "削除エラー: " . $e->getMessage();
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -87,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+
 ?>
 
 <!DOCTYPE html>
@@ -94,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>イベント管理</title>
+    <link rel='stylesheet' href='style.css'>
     <script>
         // 新しい候補を追加する関数
         document.addEventListener("DOMContentLoaded", function() {
@@ -164,6 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="button" id="addNewAvailability">新しい候補を追加</button>
         <br><br>
         <button type="submit">更新</button>
+        <input type="submit" name="delete" value="削除" onclick="return confirm('本当に削除しますか？');">
     </form>
     <a href="index.php">イベント一覧に戻る</a>
 </body>

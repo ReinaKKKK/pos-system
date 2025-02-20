@@ -1,0 +1,154 @@
+/* 全体のレイアウト */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9; /* 背景色 */
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #007b7f; /* ターコイズ色 */
+  padding-top: 20px;
+}
+
+/* ボタン */
+button {
+  padding: 10px 20px;
+  background-color: #007b7f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #005f5b; /* ホバー時の色変更 */
+}
+
+a {
+  color: #007b7f;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ポップアップのスタイル */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* 背景を半透明の黒に */
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.popup-content h2 {
+  color: #007b7f;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.popup-content label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1em;
+}
+
+.popup-content input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.popup-content button {
+  padding: 10px 20px;
+  background-color: #007b7f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.popup-content button:hover {
+  background-color: #005f5b;
+}
+
+.popup-content .cancel-btn {
+  background-color: #ccc;
+  color: #333;
+}
+
+.popup-content .cancel-btn:hover {
+  background-color: #aaa;
+}
+
+/* テーブル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #007b7f;
+  color: white;
+}
+
+td {
+  background-color: #fff;
+}
+
+td:hover {
+  background-color: #f0f0f0;
+}
+
+td a {
+  color: #007b7f;
+}
+
+td a:hover {
+  text-decoration: underline;
+}
+
+/* コメント行 */
+tr:last-child td {
+  font-style: italic;
+  color: #555;
+}
+
+/* コメント行 */
+tr:last-child td {
+  font-style: italic;
+  color: #555;
+}
