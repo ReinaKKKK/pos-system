@@ -23,7 +23,6 @@ try {
         exit;
     }
 
-    // 候補日を取得
     $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id ORDER BY start_time ASC');
     $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
     $stmt->execute();
@@ -39,6 +38,7 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 名前とパスワードが入力されているかチェック
     if (empty($_POST['name']) || empty($_POST['edit_password'])) {
         echo '<p>名前または編集用パスワードが入力されていません。</p>';
         exit;
@@ -49,7 +49,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
 
     try {
-        // 同じイベント内で同じ編集パスワードが既に存在するか確認
+        // 同じイベント内で同じ名前がすでに存在するか確認
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE event_id = :event_id AND name = :name');
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
+        $stmt->bindValue(':name', $userName, PDO::PARAM_STR);
+        $stmt->execute();
+        $userCount = $stmt->fetchColumn();
+
+        if ($userCount > 0) {
+            // 同じ名前がすでに存在する場合
+            echo '<p>このイベント内で同じユーザー名がすでに登録されています。他の名前を入力してください。</p>';
+            echo '<button onclick="history.back()">戻る</button>';
+            exit;
+        }
+
+        // 同じ編集パスワードが既に存在するか確認
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE event_id = :event_id AND edit_password = :edit_password');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
@@ -60,8 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo '<p>この編集用パスワードはすでに使用されています。他のパスワードを選択してください。</p>';
             exit;
         }
+
         // ユーザーを作成
-        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password,comment) VALUES (:name, :event_id, NOW(), NOW(), :edit_password,:comment)');
+        $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password, comment) VALUES (:name, :event_id, NOW(), NOW(), :edit_password, :comment)');
         $stmt->execute([
             ':name' => $userName,
             ':event_id' => $eventId,
@@ -114,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="">
         <input type="hidden" name="event_id" value="<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>">
         <label for="name">ユーザー名:</label>
-        <input type="text" name="name" id="name" required>
+        <input type="text" name="name" id="name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8') : ''; ?>" required>
         <?php foreach ($availabilities as $availability) : ?>
             <div>
                 <label for="availabilities_<?php echo $availability['id']; ?>">
@@ -132,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endforeach; ?>
         <label>コメント</label>
-        <textarea name='comment'></textarea><br><br>
+        <textarea name='comment'><?php echo isset($_POST['comment']) ? htmlspecialchars($_POST['comment'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea><br><br>
         <label for="user_id">参加者用編集パスワード:</label>
         <input type="text" name="edit_password" id="edit_password" required>
         <button type="submit">送信</button>
