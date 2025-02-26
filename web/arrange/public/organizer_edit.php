@@ -30,7 +30,6 @@ if (isset($_GET['event_id'])) {
 
 if (isset($_POST['delete'])) {
     try {
-        // イベントに関連する日程を削除
         $stmt = $pdo->prepare('DELETE FROM availabilities WHERE event_id = :event_id');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
@@ -40,7 +39,6 @@ if (isset($_POST['delete'])) {
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
 
-        // 更新後、リダイレクトして一覧を表示
         header("Location: index.php");
         exit;
     } catch (PDOException $e) {
@@ -56,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $deleteIds = $_POST['delete_id'] ?? [];
 
     try {
-        // イベント名の更新
         if (!empty($eventName)) {
             $stmt = $pdo->prepare('UPDATE events SET name = :name WHERE id = :event_id');
             $stmt->bindValue(':name', $eventName);
@@ -103,8 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "更新エラー: " . $e->getMessage();
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -120,10 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const availabilityTableBody = document.querySelector('table tbody');
 
             addButton.addEventListener('click', function() {
-                // 新しい行を作成
                 const newRow = document.createElement('tr');
-
-                // 新しい行の内容
                 newRow.innerHTML = `
                     <td>新しい日程</td>
                     <td>
@@ -137,8 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="hidden" name="availability_id[]" value="">
                     </td>
                 `;
-                
-                // 新しい行をテーブルに追加
                 availabilityTableBody.appendChild(newRow);
             });
         });

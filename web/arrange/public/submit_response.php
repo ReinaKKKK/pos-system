@@ -14,13 +14,11 @@ if (isset($_GET['event_id'])) {
             echo '<p>指定されたイベントが見つかりません。</p>';
             exit;
         }
-
         $stmt = $pdo->prepare('SELECT id, start_time, end_time FROM availabilities WHERE event_id = :event_id');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->execute();
         $availabilities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // 参加者とその回答を取得
         $stmt = $pdo->prepare('
         SELECT 
             users.id AS user_id, 
@@ -28,7 +26,7 @@ if (isset($_GET['event_id'])) {
             responses.availability_id, 
             responses.response, 
             users.comment 
-        FROM responses 
+        FROM responses
         JOIN users ON responses.user_id = users.id 
         WHERE responses.availability_id IN (
             SELECT id FROM availabilities WHERE event_id = :event_id
@@ -45,7 +43,6 @@ if (isset($_GET['event_id'])) {
     echo '<p>イベントIDが指定されていません。</p>';
     exit;
 }
-
 $participantsResponses = [];
 foreach ($responses as $response) {
     $userName = $response['name']; // ユーザー名を取得
@@ -54,7 +51,7 @@ foreach ($responses as $response) {
         'comment' => $response['comment']
     ];
 }
-
+//POST送信したものを受け取れたら
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'] ?? '';
     $user_comment = $_POST['comment'];
@@ -86,56 +83,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>イベント管理</title>
     <link rel='stylesheet' href='style.css'>
-    <!-- <style>
-        .popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .popup-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        /* ポップアップのスタイル */
-        .popup_event {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .popup-content_event {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-        }
-
-    </style> -->
+  
     <script>
 
 function showPasswordPopupForParticipant(url, eventId) {
     console.log("showPasswordPopupForParticipant called with: ", url, eventId);
     document.getElementById('popup').style.display = 'flex';
     document.getElementById('editForm').action = url;
-    document.getElementById('event_id_field').value = eventId; // イベントIDをフォームに設定
+    document.getElementById('event_id_field').value = eventId;
 }
 
 function submitPasswordForm() {
     const password = document.getElementById('response_edit_password').value;
     if (password.trim() !== "") {
         document.getElementById('popup').style.display = 'none';
-        document.getElementById('editForm').submit(); // フォーム送信
+        document.getElementById('editForm').submit();
     } else {
         alert("パスワードを入力してください");
     }
@@ -146,10 +108,8 @@ function submitPasswordForm() {
 <body>
     <h1>イベント: <?php echo htmlspecialchars($event['name']); ?></h1>
 
-    <!-- 編集ボタン（参加者用） -->
     <button onclick="showPasswordPopupForParticipant('participant_edit.php', <?php echo $eventId; ?>)">回答を編集</button>
 
-<!-- 参加者用ポップアップ -->
 <div id="popup" class="popup">
     <div class="popup-content">
         <h2>回答を編集</h2>
@@ -166,7 +126,6 @@ function submitPasswordForm() {
     </div>
 </div>
 
-    <!-- 回答一覧 -->
     <table border="1">
         <thead>
             <tr>
@@ -211,15 +170,12 @@ function submitPasswordForm() {
             
             <?php endforeach; ?>
 
-        <!-- コメント行 -->
         <tr>
-            <td>コメント</td> <!-- コメント列の見出し -->
+            <td>コメント</td>
             <?php foreach ($participantsResponses as $userName => $responsesForUser) : ?>
                 <td>
                     <?php
-                    // 各ユーザーのコメントを表示
                     if (!empty($responsesForUser)) {
-                        // ユーザーの最初の候補日のコメントだけを取得
                         $firstResponse = reset($responsesForUser);
                         $comment = $firstResponse['comment'] ?? null;
                         if (!empty($comment)) {

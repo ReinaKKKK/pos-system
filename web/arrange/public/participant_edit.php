@@ -8,19 +8,16 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['response_edit_password']))
     $participantPassword = $_POST['response_edit_password'];
 
     try {
-        // データベースからイベントデータを取得してパスワードを検証
         $stmt = $pdo->prepare('SELECT id, edit_password FROM users WHERE event_id = :event_id AND name = :name');
-        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT); // event_id をバインド。プレースホルダに実際の値が置き換えられる
+        $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->bindValue(':name', $name, PDO::PARAM_STR); // name をstring型でバインド
         $stmt->execute(); // クエリ実行
-        $user = $stmt->fetch(PDO::FETCH_ASSOC); // 結果を取得
-        // ユーザーが見つからない、またはパスワードが一致しない場合
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$user || !password_verify($participantPassword, $user['edit_password'])) {
             echo '<p>認証エラー: パスワードが正しくありません。</p>';
             exit;
         }
-        // 名前とパスワードがOKなら、特定の参加者の回答を取得
-        $userId = $user['id']; // users テーブルから取得した id が user_id に相当
+        $userId = $user['id'];
         $stmt = $pdo->prepare('
 
             SELECT 
@@ -45,10 +42,9 @@ if (isset($_POST['event_id'], $_POST['name'], $_POST['response_edit_password']))
                 responses.user_id = :user_id
         ');
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->execute(); // クエリ実行
+        $stmt->execute();
         $responses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        // データベースエラーの処理
         echo 'データベースエラー: ' . $e->getMessage();
         exit;
     }
@@ -63,7 +59,6 @@ if (headers_sent($file, $line)) {
 
 if (isset($_POST['delete'])) {
     try {
-        // ユーザーIDを削除
         $stmt = $pdo->prepare('DELETE FROM responses WHERE user_id = :user_id');
         $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
@@ -82,13 +77,11 @@ if (isset($_POST['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['response']) && isset($_POST['response_id'])) {
     try {
         foreach ($_POST['response'] as $responseId => $responseValue) {
-            // 'responses' テーブルの 'response' を更新
             $stmt = $pdo->prepare('UPDATE responses SET response = :response WHERE id = :response_id');
             $stmt->bindValue(':response', $responseValue);
             $stmt->bindValue(':response_id', $responseId, PDO::PARAM_INT);
             $stmt->execute();
 
-            // 'users' テーブルの 'comment' を更新
             $comment = $_POST['comment'][$responseId] ?? null;
             $stmt = $pdo->prepare('UPDATE users SET comment = :comment WHERE id = :user_id');
             $stmt->bindValue(':comment', $comment, $comment !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);

@@ -38,7 +38,6 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 名前とパスワードが入力されているかチェック
     if (empty($_POST['name']) || empty($_POST['edit_password'])) {
         echo '<p>名前または編集用パスワードが入力されていません。</p>';
         exit;
@@ -57,13 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $userCount = $stmt->fetchColumn();
 
         if ($userCount > 0) {
-            // 同じ名前がすでに存在する場合
             echo '<p>このイベント内で同じユーザー名がすでに登録されています。他の名前を入力してください。</p>';
             echo '<button onclick="history.back()">戻る</button>';
             exit;
         }
-
-        // 同じ編集パスワードが既に存在するか確認
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE event_id = :event_id AND edit_password = :edit_password');
         $stmt->bindValue(':event_id', $eventId, PDO::PARAM_INT);
         $stmt->bindValue(':edit_password', $participantPassword, PDO::PARAM_STR);
@@ -74,8 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo '<p>この編集用パスワードはすでに使用されています。他のパスワードを選択してください。</p>';
             exit;
         }
-
-        // ユーザーを作成
         $stmt = $pdo->prepare('INSERT INTO users (name, event_id, created_at, updated_at, edit_password, comment) VALUES (:name, :event_id, NOW(), NOW(), :edit_password, :comment)');
         $stmt->execute([
             ':name' => $userName,
@@ -83,13 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':comment' => $comment,
             ':edit_password' => password_hash($participantPassword, PASSWORD_DEFAULT),
         ]);
-        $userId = $pdo->lastInsertId();  // 新しく作成したユーザーのIDを取得
+        $userId = $pdo->lastInsertId();
 
         // 各回答を保存し、レスポンスIDを取得
         foreach ($availabilities as $availability) {
             $response = $_POST['availabilities'][$availability['id']] ?? null;
             if ($response !== null) {
-                // レスポンスをresponsesテーブルに挿入
                 $stmt = $pdo->prepare('INSERT INTO responses (user_id, availability_id, response, created_at, updated_at)
                                        VALUES (:user_id, :availability_id, :response, NOW(), NOW())');
                 $stmt->execute([
@@ -97,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':availability_id' => $availability['id'],
                     ':response' => $response,
                 ]);
-                $responseId = $pdo->lastInsertId();  // 新しく作成したレスポンスのIDを取得
+                $responseId = $pdo->lastInsertId();
 
                 // usersテーブルにcommentを更新
                 $stmt = $pdo->prepare('UPDATE users SET comment = :comment WHERE id = :user_id');
