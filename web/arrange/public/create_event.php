@@ -8,54 +8,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $editPassword = isset($_POST['editPassword']) ? $_POST['editPassword'] : '';
     $timeSlots = isset($_POST['timeSlots']) ? json_decode($_POST['timeSlots'], true) : [];
 
-    try {
-        $hashedPassword = password_hash($editPassword, PASSWORD_DEFAULT);
+    // バリデーション: 各入力が255文字以下であることを確認
+    if (strlen($eventName) > 255 || strlen($eventDetails) > 255 || strlen($editPassword) > 255) {
+        $error = 'イベント名、詳細、編集パスワードは255文字以内で入力してください。';
+    } else {
+        try {
+            $hashedPassword = password_hash($editPassword, PASSWORD_DEFAULT);
 
-        $pdo->beginTransaction();
+            $pdo->beginTransaction();
 
-        $sqlEvents = 'INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
-                      VALUES (:name, :detail, :edit_password, NOW(), NOW())';
-        $stmtEvents = $pdo->prepare($sqlEvents);
-        $stmtEvents->execute([
-            ':name' => $eventName,
-            ':detail' => $eventDetails,
-            ':edit_password' => $hashedPassword,
-        ]);
-
-        $eventId = $pdo->lastInsertId();
-        if ($eventId === false) {
-            throw new Exception("イベントIDの取得に失敗しました。");
-        }
-
-        $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
-                              VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
-        $stmtAvailabilities = $pdo->prepare($sqlAvailabilities);
-
-        foreach ($timeSlots as $slot) {
-            $stmtAvailabilities->execute([
-                ':event_id' => $eventId,
-                ':start_time' => $slot['startTime'],
-                ':end_time' => $slot['endTime'],
+            $sqlEvents = 'INSERT INTO events (name, detail, edit_password, created_at, updated_at) 
+                        VALUES (:name, :detail, :edit_password, NOW(), NOW())';
+            $stmtEvents = $pdo->prepare($sqlEvents);
+            $stmtEvents->execute([
+                ':name' => $eventName,
+                ':detail' => $eventDetails,
+                ':edit_password' => $hashedPassword,
             ]);
-        }
 
-        $pdo->commit();
+            $eventId = $pdo->lastInsertId();
+            if ($eventId === false) {
+                throw new Exception("イベントIDの取得に失敗しました。");
+            }
 
-        if (!headers_sent()) {
-            header("Location: index.php");
-            exit;
-        } else {
-            echo "リダイレクトに失敗しました。";
-            exit;
+            $sqlAvailabilities = 'INSERT INTO availabilities (event_id, start_time, end_time, created_at, updated_at) 
+                                VALUES (:event_id, :start_time, :end_time, NOW(), NOW())';
+            $stmtAvailabilities = $pdo->prepare($sqlAvailabilities);
+
+            foreach ($timeSlots as $slot) {
+                $stmtAvailabilities->execute([
+                    ':event_id' => $eventId,
+                    ':start_time' => $slot['startTime'],
+                    ':end_time' => $slot['endTime'],
+                ]);
+            }
+
+            $pdo->commit();
+
+            if (!headers_sent()) {
+                header("Location: index.php");
+                exit;
+            } else {
+                echo "リダイレクトに失敗しました。";
+                exit;
+            }
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+            error_log($e->getMessage());
+        } catch (Exception $e) {
+            // その他の例外をキャッチ
+            echo "エラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+            error_log($e->getMessage());
         }
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        echo "データベースエラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-        error_log($e->getMessage());
-    } catch (Exception $e) {
-        // その他の例外をキャッチ
-        echo "エラーが発生しました: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-        error_log($e->getMessage());
     }
 }
 ?>
@@ -101,55 +106,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <br>
     <a href="index.php">イベント一覧に戻る</a>
-</body>
-</html>
-<script>
-    document.getElementById('addSlotBtn').addEventListener('click', function() {
-        var startTime = document.getElementById('startTime').value;
-        var endTime = document.getElementById('endTime').value;
 
-        // 既存の時間スロットがあるか確認
-        var timeSlotsInput = document.getElementById('timeSlotsInput');
-        var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
+    <script>
+        document.getElementById('addSlotBtn').addEventListener('click', function() {
+            var startTime = document.getElementById('startTime').value;
+            var endTime = document.getElementById('endTime').value;
 
-    if (existingTimeSlots.length > 0) {
-        var isDuplicate = existingTimeSlots.some(function(slot) {
-            return slot.startTime === startTime && slot.endTime === endTime;
-        });
+            // 開始時間または終了時間が未入力なら追加しない
+            if (!startTime || !endTime) {
+                    alert('開始時間と終了時間を入力してください。');
+                    return;
+                }
 
-        if (isDuplicate) {
-            alert('この候補日はすでに使われています。');
-            return;
-        }
-    }
+            // 既存の時間スロットがあるか確認
+            var timeSlotsInput = document.getElementById('timeSlotsInput');
+            var existingTimeSlots = timeSlotsInput.value ? JSON.parse(timeSlotsInput.value) : [];
 
-        var timeSlotContainer = document.getElementById('timeSlotContainer');
-        var newSlot = document.createElement('div');
-        newSlot.classList.add('time-slot');
-        newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
-
-
-        var deleteButton = document.createElement('button');
-        deleteButton.textContent = '削除';
-        deleteButton.classList.add('delete-btn');
-
-
-        deleteButton.addEventListener('click', function() {
-            newSlot.remove();
-
-            var index = existingTimeSlots.findIndex(function(slot) {
+            if (existingTimeSlots.length > 0) {
+            var isDuplicate = existingTimeSlots.some(function(slot) {
                 return slot.startTime === startTime && slot.endTime === endTime;
             });
-            if (index !== -1) {
-                existingTimeSlots.splice(index, 1);
-                timeSlotsInput.value = JSON.stringify(existingTimeSlots);
+
+            if (isDuplicate) {
+                alert('この候補日はすでに使われています。');
+                return;
             }
+        }
+
+            var timeSlotContainer = document.getElementById('timeSlotContainer');
+            var newSlot = document.createElement('div');
+            newSlot.classList.add('time-slot');
+            newSlot.textContent = '開始: ' + startTime + ' 終了: ' + endTime;
+
+
+            var deleteButton = document.createElement('button');
+            deleteButton.textContent = '削除';
+            deleteButton.classList.add('delete-btn');
+
+
+            deleteButton.addEventListener('click', function() {
+                newSlot.remove();
+
+                var index = existingTimeSlots.findIndex(function(slot) {
+                    return slot.startTime === startTime && slot.endTime === endTime;
+                });
+                if (index !== -1) {
+                    existingTimeSlots.splice(index, 1);
+                    timeSlotsInput.value = JSON.stringify(existingTimeSlots);
+                }
+            });
+
+            newSlot.appendChild(deleteButton);
+            timeSlotContainer.appendChild(newSlot);
+
+            existingTimeSlots.push({ startTime: startTime, endTime: endTime });
+            timeSlotsInput.value = JSON.stringify(existingTimeSlots);
         });
-
-        newSlot.appendChild(deleteButton);
-        timeSlotContainer.appendChild(newSlot);
-
-        existingTimeSlots.push({ startTime: startTime, endTime: endTime });
-        timeSlotsInput.value = JSON.stringify(existingTimeSlots);
-    });
     </script>
+</body>
+</html>

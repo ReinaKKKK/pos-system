@@ -27,8 +27,7 @@ if (isset($_POST['event_edit_password']) && isset($_POST['event_id'])) { //イ�
     <meta charset="UTF-8">
     <title>イベント一覧</title>
     <link rel="stylesheet" href="style.css">
-
-
+    
     <script>
         function showPasswordPopupForOrganizer(eventId) {//主催者パスワード記入のポップアップ関数
             //関数の内容は
