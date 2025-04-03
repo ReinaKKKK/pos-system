@@ -1,6 +1,7 @@
 <?php
 require_once '../db.php';
 
+// 商品一覧ページ
 // 商品データを取得
 $sql = "SELECT id, name, price, stock FROM products";
 $stmt = $pdo->query($sql);
