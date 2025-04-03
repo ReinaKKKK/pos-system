@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<ruleset name="CUSTUM">
+  <description>The PSR-12 coding standard. + CUSTOM laravel</description>
+  <rule ref="PSR1"/>
+  <rule ref="PSR12">
+    <exclude name="Generic.Files.LineLength"/>
+  </rule>
+  <rule ref="Squiz.Commenting.ClassComment"/>
+  <rule ref="Squiz.Commenting.FunctionComment">
+    <!-- 除外：パラメータコメントが.で終わっていない -->
+    <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
+    <!-- 除外：パラメータコメントがない -->
+    <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
+    <!-- 除外：Type hintがない（string,int,float,bool以外）） -->
+    <exclude name="Squiz.Commenting.FunctionComment.TypeHintMissing" />
+    <!-- 除外：Type hintがない（string,int,float,bool）） -->
+    <exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
+  </rule>
+  <!-- 除外ディレクトリ設定 -->
+  <exclude-pattern>/laravel/bootstrap/</exclude-pattern>
+  <exclude-pattern>/laravel/node_modules/</exclude-pattern>
+  <exclude-pattern>/laravel/public/</exclude-pattern>
+  <exclude-pattern>/laravel/resources/</exclude-pattern>
+  <exclude-pattern>/laravel/storage/</exclude-pattern>
+  <exclude-pattern>/laravel/vendor/</exclude-pattern>
+  <exclude-pattern>/laravel/server.php</exclude-pattern>
+  <exclude-pattern>/laravel/app/Console/Kernel.php</exclude-pattern>
+  <exclude-pattern>/laravel/tests/CreatesApplication.php</exclude-pattern>
+</ruleset>
