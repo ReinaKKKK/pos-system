@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config.php';
+require_once '../helpers.php';
 
 try {
     $stmt = $pdo->query('SELECT * FROM items ORDER BY id DESC');

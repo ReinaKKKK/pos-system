@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../helpers.php';
 
 // 商品IDの取得と検証
 $id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);

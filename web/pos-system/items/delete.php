@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config.php';
+require_once '../helpers.php';
 
 // POSTリクエスト以外は許可しない
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

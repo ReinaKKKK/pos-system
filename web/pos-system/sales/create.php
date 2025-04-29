@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../helpers.php';
 
 // 商品一覧の取得
 try {

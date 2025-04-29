@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once '../helpers.php';
 
 try {
     // 売上情報を商品名と共に取得
@@ -54,6 +55,7 @@ try {
             <div class="action-links">
                 <a href="create.php" class="button">新規売上登録</a>
             </div>
+            <a href="export.php" class="button">CSV ダウンロード</a>
 
             <div class="summary-box">
                 <div class="summary-item">
