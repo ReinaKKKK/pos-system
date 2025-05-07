@@ -178,6 +178,5 @@ class SaleServiceTest extends TestCase
     {
         $this->pdo->exec('DROP TABLE IF EXISTS sales');
         $this->pdo->exec('DROP TABLE IF EXISTS items');
-        $this->pdo = null;
     }
 }

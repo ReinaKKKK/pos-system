@@ -129,6 +129,6 @@ class ItemServiceTest extends TestCase
     protected function tearDown(): void
     {
         $this->pdo->exec('DROP TABLE IF EXISTS items');
-        $this->pdo = null;
+
     }
 }
