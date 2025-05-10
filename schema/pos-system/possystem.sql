@@ -23,14 +23,14 @@ CREATE TABLE sales (
 
 -- ユーザーテーブル
 CREATE TABLE users (
-    id INT NOT NULL AUTO_INCREMENT COMMENT 'ユーザーID',
-    username VARCHAR(50) NOT NULL COMMENT 'ユーザー名（ログイン用）',
-    password VARCHAR(255) NOT NULL COMMENT 'ハッシュ化されたログインパスワード',
-    created_at TIMESTAMP NOT NULL COMMENT '登録日時',
-    updated_at TIMESTAMP NOT NULL COMMENT '更新日時',
-    PRIMARY KEY (id),
-    UNIQUE (username)
-) COMMENT='ユーザー管理テーブル（管理者のみ）';
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
 
 -- 外部キー制約
 ALTER TABLE sales

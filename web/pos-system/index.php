@@ -22,6 +22,7 @@ require_once 'helpers.php';
                     <li><a href="items/create.php">商品登録</a></li>
                     <li><a href="sales/list.php">売上一覧</a></li>
                     <li><a href="sales/create.php">売上登録</a></li>
+                    <li class="logout"><a href="auth.php?action=logout">ログアウト</a></li>
                 </ul>
             </nav>
         </header>
