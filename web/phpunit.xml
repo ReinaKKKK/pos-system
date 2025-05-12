@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="vendor/autoload.php" colors="true">
+  <php>
+    <!-- Selenium Grid のホスト -->
+    <env name="SELENIUM_HUB" value="http://selenium:4444" />
+    <!-- テスト対象アプリのベースURL -->
+    <env name="BASE_URL"    value="http://host.docker.internal:18888/pos-system" />
+  </php>
+
   <testsuites>
     <testsuite name="POS System">
       <directory>pos-system/tests</directory>

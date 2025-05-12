@@ -1,15 +1,18 @@
 {
   "require-dev": {
-    "phpunit/phpunit": "^10.0"
+    "phpunit/phpunit": "^10.5",
+    "php-webdriver/webdriver": "^1.15"
   },
   "autoload": {
     "psr-4": {
+      "PosSystem\\": "pos-system/",
+      "PosSystem\\Services\\": "pos-system/services/",
       "App\\Service\\": "pos-system/services/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\Service\\": "pos-system/tests/"
+      "PosSystem\\Tests\\": "pos-system/tests/"
     }
   }
 }

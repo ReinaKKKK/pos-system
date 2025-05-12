@@ -135,7 +135,6 @@ class ItemService
                 $this->pdo->commit();
             }
             return $result;
-
         } catch (\Exception $e) {
             if ($ownTx) {
                 $this->pdo->rollBack();

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
@@ -7,7 +8,7 @@ require_once __DIR__ . '/helpers.php';
 /**
  * ログイン済みか？
  *
- * @return bool
+ * @return boolean
  * @SuppressWarnings("Superglobals")
  */
 function isLoggedIn(): bool
@@ -57,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             // セッションに保存
             setSession('user_id', (int)$user['id']);
             setSession('username', $user['username']);
-            setFlashMessage('ログインしました。');
+            setFlashMessage('ログインに成功しました');
 
             header('Location: /pos-system/index.php');
             return;
@@ -70,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             header('Location: /pos-system/auth.php');
             return;
         }
-
     } catch (Exception $e) {
         setFlashMessage('エラー: ' . $e->getMessage());
     }

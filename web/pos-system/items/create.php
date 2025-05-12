@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare('INSERT INTO items (name, price, stock) VALUES (?, ?, ?)');
         $stmt->execute([$name, $price, $stock]);
 
-        setFlashMessage('商品を登録しました。');
+        setFlashMessage('登録が完了しました');
         header('Location: list.php');
         exit;
     } catch (Exception $e) {
@@ -76,10 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="stock">在庫数</label>
-                    <input type="number" id="stock" name="stock" required min="0"
-                           value="<?php echo isset($_POST['stock']) ? htmlspecialchars($_POST['stock']) : ''; ?>">
-                </div>
++                    <label for="stock">在庫数</label>
++                    <!-- default value を 0 にしておく -->
++                    <input type="number" id="stock" name="stock" required min="0" value="0">
++                </div>
 
                 <div class="form-group">
                     <button type="submit" class="button">登録</button>

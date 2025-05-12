@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->commit();
 
-        setFlashMessage('売上を登録しました。');
+        setFlashMessage('売上を追加しました');
         header('Location: list.php');
         exit;
     } catch (Exception $e) {

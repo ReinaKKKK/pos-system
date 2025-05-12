@@ -6,8 +6,13 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Tests\\Service\\' => array($baseDir . '/pos-system/tests'),
+    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
+    'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),
+    'PosSystem\\Tests\\' => array($baseDir . '/pos-system/tests'),
+    'PosSystem\\Services\\' => array($baseDir . '/pos-system/services'),
+    'PosSystem\\' => array($baseDir . '/pos-system'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
+    'Facebook\\WebDriver\\' => array($vendorDir . '/php-webdriver/webdriver/lib'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
     'App\\Service\\' => array($baseDir . '/pos-system/services'),
 );

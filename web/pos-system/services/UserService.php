@@ -1,5 +1,8 @@
 <?php
+
 declare(strict_types=1);
+
+namespace PosSystem\Services;
 
 use PDO;
 use RuntimeException;
@@ -9,8 +12,14 @@ use RuntimeException;
  */
 class UserService
 {
+    /** @var PDO データベース接続用 PDO オブジェクト */
     private PDO $pdo;
 
+    /**
+     * コンストラクタ
+     *
+     * @param PDO $pdo データベース接続用 PDO インスタンス
+     */
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
@@ -21,8 +30,8 @@ class UserService
      *
      * @param string $username
      * @param string $password ハッシュ化済みパスワード
-     * @return bool
-     * @throws RuntimeException ユーザー名重複時
+     * @return boolean
+     * @throws RuntimeException .
      */
     public function createUser(string $username, string $password): bool
     {
